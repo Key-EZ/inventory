@@ -5,6 +5,7 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, initial
   const [search, setSearch] = useState(initialSearchQuery);
   const [filterStatus, setFilterStatus] = useState('ทั้งหมด');
   const [filterLocation, setFilterLocation] = useState('ทั้งหมด');
+  const [filterType, setFilterType] = useState('ทั้งหมด');
 
   // Sort states
   const [sortBy, setSortBy] = useState('date-desc'); // date-desc, date-asc, cost-desc, cost-asc, id-asc, bookvalue-desc
@@ -17,6 +18,12 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, initial
   const locations = useMemo(() => {
     const locSet = new Set(assets.map(item => item.usage?.location).filter(Boolean));
     return ['ทั้งหมด', ...Array.from(locSet)];
+  }, [assets]);
+
+  // Extract unique types for filtering
+  const assetTypes = useMemo(() => {
+    const typeSet = new Set(assets.map(item => item.general_info?.asset_type).filter(Boolean));
+    return ['ทั้งหมด', ...Array.from(typeSet)];
   }, [assets]);
 
   // Filtered and sorted assets
@@ -32,7 +39,8 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, initial
         (item.general_info?.brand || '').toLowerCase().includes(q) ||
         (item.general_info?.model || '').toLowerCase().includes(q) ||
         (item.usage?.custodian || '').toLowerCase().includes(q) ||
-        (item.usage?.location || '').toLowerCase().includes(q)
+        (item.usage?.location || '').toLowerCase().includes(q) ||
+        (item.general_info?.asset_type || '').toLowerCase().includes(q)
       );
     }
 
@@ -44,6 +52,11 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, initial
     // 3. Location Filter
     if (filterLocation !== 'ทั้งหมด') {
       result = result.filter(item => item.usage?.location === filterLocation);
+    }
+
+    // 3.5. Type Filter
+    if (filterType !== 'ทั้งหมด') {
+      result = result.filter(item => item.general_info?.asset_type === filterType);
     }
 
     // 4. Sorting
@@ -67,12 +80,12 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, initial
     });
 
     return result;
-  }, [assets, search, filterStatus, filterLocation, sortBy]);
+  }, [assets, search, filterStatus, filterLocation, filterType, sortBy]);
 
   // Reset page when filters change
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [search, filterStatus, filterLocation, sortBy]);
+  }, [search, filterStatus, filterLocation, filterType, sortBy]);
 
   // Pagination math
   const totalItems = processedAssets.length;
@@ -93,6 +106,7 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, initial
     setSearch('');
     setFilterStatus('ทั้งหมด');
     setFilterLocation('ทั้งหมด');
+    setFilterType('ทั้งหมด');
     setSortBy('date-desc');
   };
 
@@ -102,7 +116,7 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, initial
       <div className="layout-card filter-panel-card">
         <div className="filter-panel-header">
           <h3>🔍 ค้นหาและตัวกรองข้อมูล</h3>
-          {(search || filterStatus !== 'ทั้งหมด' || filterLocation !== 'ทั้งหมด' || sortBy !== 'date-desc') && (
+          {(search || filterStatus !== 'ทั้งหมด' || filterLocation !== 'ทั้งหมด' || filterType !== 'ทั้งหมด' || sortBy !== 'date-desc') && (
             <button className="btn-clear-filter" onClick={handleClearFilters}>
               ล้างตัวกรองทั้งหมด
             </button>
@@ -120,6 +134,20 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, initial
               placeholder="รหัส, ชื่อครุภัณฑ์, ยี่ห้อ, ผู้ดูแล..."
               className="filter-input-element"
             />
+          </div>
+
+          {/* Asset Type Select */}
+          <div className="filter-group-item">
+            <label>ประเภทสินทรัพย์</label>
+            <select
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+              className="filter-input-element"
+            >
+              {assetTypes.map(type => (
+                <option key={type} value={type}>{type}</option>
+              ))}
+            </select>
           </div>
 
           {/* Status Select */}
@@ -203,6 +231,9 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, initial
                     <td className="table-cell-name">
                       <div className="item-name-main">{item.general_info?.asset_name}</div>
                       <div className="item-name-sub">
+                        <span style={{ color: 'var(--primary-color)', fontWeight: '600', marginRight: '6px' }}>
+                          [{item.general_info?.asset_type || 'ครุภัณฑ์สำนักงาน'}]
+                        </span>
                         {item.general_info?.brand && <span>ยี่ห้อ: {item.general_info.brand}</span>}
                         {item.general_info?.model && <span> รุ่น: {item.general_info.model}</span>}
                       </div>

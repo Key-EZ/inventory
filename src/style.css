@@ -1456,3 +1456,127 @@ body {
   align-items: center;
   margin-bottom: 24px;
 }
+
+/* --- Settings Page CSS --- */
+.settings-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--element-gap);
+  width: 100%;
+}
+
+.settings-split-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--element-gap);
+}
+
+@media (max-width: 768px) {
+  .settings-split-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.settings-inline-add-form {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.settings-inline-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.settings-list-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  transition: all var(--transition-fast);
+}
+
+.settings-list-row:hover {
+  border-color: var(--primary-color);
+  background-color: var(--bg-secondary);
+}
+
+.settings-item-name {
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.settings-item-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.btn-mini-action {
+  background: none;
+  border: 1px solid var(--border-color);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+  background-color: var(--bg-secondary);
+  transition: all var(--transition-fast);
+}
+
+.btn-mini-action:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.btn-mini-delete {
+  color: var(--status-pending-text);
+}
+
+.btn-mini-delete:hover {
+  background-color: var(--status-pending-bg);
+  border-color: var(--status-pending-text);
+  color: var(--status-pending-text);
+}
+
+.settings-table-wrapper {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.settings-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.settings-table th {
+  padding: 12px 16px;
+  background-color: var(--bg-primary);
+  border-bottom: 2px solid var(--border-color);
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.settings-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.cust-row-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.cust-row-meta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { calculateDepreciation } from '../utils/depreciation';
 
-export default function AssetForm({ asset, onSubmit, onClose }) {
+export default function AssetForm({ asset, custodians = [], brands = [], locations = [], onSubmit, onClose }) {
   const isEdit = !!asset;
 
   // Tab states: 'general', 'source', 'usage', 'financial'
@@ -9,6 +9,7 @@ export default function AssetForm({ asset, onSubmit, onClose }) {
 
   // Form states
   const [assetName, setAssetName] = useState('');
+  const [assetType, setAssetType] = useState('ครุภัณฑ์สำนักงาน');
   const [brand, setBrand] = useState('');
   const [model, setModel] = useState('');
   const [description, setDescription] = useState('');
@@ -31,6 +32,7 @@ export default function AssetForm({ asset, onSubmit, onClose }) {
   useEffect(() => {
     if (asset) {
       setAssetName(asset.general_info?.asset_name || '');
+      setAssetType(asset.general_info?.asset_type || 'ครุภัณฑ์สำนักงาน');
       setBrand(asset.general_info?.brand || '');
       setModel(asset.general_info?.model || '');
       setDescription(asset.general_info?.description || '');
@@ -49,6 +51,7 @@ export default function AssetForm({ asset, onSubmit, onClose }) {
     } else {
       // Clear/Reset for new asset
       setAssetName('');
+      setAssetType('ครุภัณฑ์สำนักงาน');
       setBrand('');
       setModel('');
       setDescription('');
@@ -82,6 +85,7 @@ export default function AssetForm({ asset, onSubmit, onClose }) {
       id: asset?.id || `asset-${Date.now()}`,
       general_info: {
         asset_name: assetName,
+        asset_type: assetType,
         brand,
         model,
         description
@@ -152,25 +156,58 @@ export default function AssetForm({ asset, onSubmit, onClose }) {
           {/* TAB 1: General Info */}
           {activeTab === 'general' && (
             <div className="tab-panel">
-              <div className="form-group">
-                <label>ชื่อทรัพย์สิน *</label>
-                <input
-                  type="text"
-                  value={assetName}
-                  onChange={(e) => setAssetName(e.target.value)}
-                  placeholder="เช่น เครื่องคอมพิวเตอร์พกพา, เครื่องปรับอากาศ"
-                  required
-                />
+              <div className="form-row">
+                <div className="form-group col">
+                  <label>ชื่อทรัพย์สิน *</label>
+                  <input
+                    type="text"
+                    value={assetName}
+                    onChange={(e) => setAssetName(e.target.value)}
+                    placeholder="เช่น เครื่องคอมพิวเตอร์พกพา, เครื่องปรับอากาศ"
+                    required
+                  />
+                </div>
+                <div className="form-group col">
+                  <label>ประเภทสินทรัพย์ *</label>
+                  <select
+                    value={assetType}
+                    onChange={(e) => setAssetType(e.target.value)}
+                    required
+                  >
+                    <option value="ที่ดินที่มีกรรมสิทธิ์">ที่ดินที่มีกรรมสิทธิ์</option>
+                    <option value="อาคารสำนักงาน">อาคารสำนักงาน</option>
+                    <option value="สิ่งปลูกสร้าง">สิ่งปลูกสร้าง</option>
+                    <option value="ครุภัณฑ์สำนักงาน">ครุภัณฑ์สำนักงาน</option>
+                    <option value="ครุภัณฑ์ยานพาหนะและขนส่ง">ครุภัณฑ์ยานพาหนะและขนส่ง</option>
+                    <option value="ครุภัณฑ์ไฟฟ้าและวิทยุ">ครุภัณฑ์ไฟฟ้าและวิทยุ</option>
+                    <option value="ครุภัณฑ์โฆษณาและเผยแพร่">ครุภัณฑ์โฆษณาและเผยแพร่</option>
+                    <option value="ครุภัณฑ์งานบ้านงานครัว">ครุภัณฑ์งานบ้านงานครัว</option>
+                    <option value="ครุภัณฑ์วิทยาศาสตร์และการแพทย์">ครุภัณฑ์วิทยาศาสตร์และการแพทย์</option>
+                    <option value="ครุภัณฑ์กีฬา">ครุภัณฑ์กีฬา</option>
+                    <option value="ครุภัณฑ์คอมพิวเตอร์">ครุภัณฑ์คอมพิวเตอร์</option>
+                    <option value="สินทรัพย์ไม่มีตัวตนอื่น">สินทรัพย์ไม่มีตัวตนอื่น</option>
+                  </select>
+                </div>
               </div>
               <div className="form-row">
                 <div className="form-group col">
-                  <label>ยี่ห้อ</label>
-                  <input
-                    type="text"
-                    value={brand}
-                    onChange={(e) => setBrand(e.target.value)}
-                    placeholder="เช่น Dell, HP, Daikin"
-                  />
+                  <label>ยี่ห้อ *</label>
+                  {brands.length > 0 ? (
+                    <select
+                      value={brand}
+                      onChange={(e) => setBrand(e.target.value)}
+                      required
+                    >
+                      <option value="">-- เลือกยี่ห้อ --</option>
+                      {brands.map(b => (
+                        <option key={b} value={b}>{b}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <div className="read-only-box" style={{ color: 'var(--status-pending-text)' }}>
+                      ⚠️ กรุณาเพิ่มยี่ห้อในหน้าการตั้งค่าก่อน
+                    </div>
+                  )}
                 </div>
                 <div className="form-group col">
                   <label>รุ่น</label>
@@ -274,22 +311,44 @@ export default function AssetForm({ asset, onSubmit, onClose }) {
               </div>
               <div className="form-row">
                 <div className="form-group col">
-                  <label>สถานที่ตั้ง</label>
-                  <input
-                    type="text"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    placeholder="เช่น ห้องกายภาพบำบัด ชั้น 2"
-                  />
+                  <label>สถานที่ตั้ง *</label>
+                  {locations.length > 0 ? (
+                    <select
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                      required
+                    >
+                      <option value="">-- เลือกสถานที่ตั้ง --</option>
+                      {locations.map(loc => (
+                        <option key={loc} value={loc}>{loc}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <div className="read-only-box" style={{ color: 'var(--status-pending-text)' }}>
+                      ⚠️ กรุณาเพิ่มสถานที่ตั้งในหน้าการตั้งค่าก่อน
+                    </div>
+                  )}
                 </div>
                 <div className="form-group col">
-                  <label>ผู้รับผิดชอบดูแล</label>
-                  <input
-                    type="text"
-                    value={custodian}
-                    onChange={(e) => setCustodian(e.target.value)}
-                    placeholder="เช่น นายสมชาย ใจดี"
-                  />
+                  <label>ผู้รับผิดชอบดูแล *</label>
+                  {custodians.length > 0 ? (
+                    <select
+                      value={custodian}
+                      onChange={(e) => setCustodian(e.target.value)}
+                      required
+                    >
+                      <option value="">-- เลือกผู้รับผิดชอบดูแล --</option>
+                      {custodians.map(c => (
+                        <option key={c.id} value={c.name}>
+                          {c.name} ({c.position || '-'} / {c.division || '-'})
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <div className="read-only-box" style={{ color: 'var(--status-pending-text)' }}>
+                      ⚠️ กรุณาเพิ่มผู้รับดูแลในหน้าการตั้งค่าก่อน
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

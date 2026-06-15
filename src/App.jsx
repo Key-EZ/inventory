@@ -4,7 +4,8 @@ import AssetForm from './components/AssetForm';
 import AssetTable from './components/AssetTable';
 import BentoDashboard from './components/BentoDashboard';
 import CenteredLanding from './components/CenteredLanding';
-import { getSeedAssets } from './utils/mockData';
+import SettingsPanel from './components/SettingsPanel';
+import { getSeedAssets, defaultDivisions, defaultDepartments, defaultCustodians, defaultPositions, defaultBrands, defaultLocations } from './utils/mockData';
 
 export default function App() {
   // --- States ---
@@ -15,6 +16,14 @@ export default function App() {
   const [editingAsset, setEditingAsset] = useState(null);
   const [searchQueryFromLanding, setSearchQueryFromLanding] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  
+  // --- Settings States ---
+  const [custodians, setCustodians] = useState([]);
+  const [divisions, setDivisions] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [positions, setPositions] = useState([]);
+  const [brands, setBrands] = useState([]);
+  const [locations, setLocations] = useState([]);
 
   // --- Initial Load ---
   useEffect(() => {
@@ -49,6 +58,84 @@ export default function App() {
     } else {
       setIsDarkMode(false);
       document.documentElement.classList.remove('dark');
+    }
+
+    // 4. Load divisions
+    const savedDivs = localStorage.getItem('inventory_divisions');
+    if (savedDivs) {
+      try {
+        setDivisions(JSON.parse(savedDivs));
+      } catch (e) {
+        setDivisions(defaultDivisions);
+      }
+    } else {
+      setDivisions(defaultDivisions);
+      localStorage.setItem('inventory_divisions', JSON.stringify(defaultDivisions));
+    }
+
+    // 5. Load departments
+    const savedDepts = localStorage.getItem('inventory_departments');
+    if (savedDepts) {
+      try {
+        setDepartments(JSON.parse(savedDepts));
+      } catch (e) {
+        setDepartments(defaultDepartments);
+      }
+    } else {
+      setDepartments(defaultDepartments);
+      localStorage.setItem('inventory_departments', JSON.stringify(defaultDepartments));
+    }
+
+    // 6. Load custodians
+    const savedCusts = localStorage.getItem('inventory_custodians');
+    if (savedCusts) {
+      try {
+        setCustodians(JSON.parse(savedCusts));
+      } catch (e) {
+        setCustodians(defaultCustodians);
+      }
+    } else {
+      setCustodians(defaultCustodians);
+      localStorage.setItem('inventory_custodians', JSON.stringify(defaultCustodians));
+    }
+
+    // 7. Load positions
+    const savedPositions = localStorage.getItem('inventory_positions');
+    if (savedPositions) {
+      try {
+        setPositions(JSON.parse(savedPositions));
+      } catch (e) {
+        setPositions(defaultPositions);
+      }
+    } else {
+      setPositions(defaultPositions);
+      localStorage.setItem('inventory_positions', JSON.stringify(defaultPositions));
+    }
+
+    // 8. Load brands
+    const savedBrands = localStorage.getItem('inventory_brands');
+    if (savedBrands) {
+      try {
+        setBrands(JSON.parse(savedBrands));
+      } catch (e) {
+        setBrands(defaultBrands);
+      }
+    } else {
+      setBrands(defaultBrands);
+      localStorage.setItem('inventory_brands', JSON.stringify(defaultBrands));
+    }
+
+    // 9. Load locations
+    const savedLocations = localStorage.getItem('inventory_locations');
+    if (savedLocations) {
+      try {
+        setLocations(JSON.parse(savedLocations));
+      } catch (e) {
+        setLocations(defaultLocations);
+      }
+    } else {
+      setLocations(defaultLocations);
+      localStorage.setItem('inventory_locations', JSON.stringify(defaultLocations));
     }
   }, []);
 
@@ -119,8 +206,138 @@ export default function App() {
     if (window.confirm('คุณต้องการรีเซ็ตข้อมูลทั้งหมดและดาวน์โหลดข้อมูลครุภัณฑ์ตัวอย่าง 8 รายการกลับมาใช่หรือไม่? (ข้อมูลเดิมของคุณจะถูกแทนที่)')) {
       const seed = getSeedAssets();
       saveAssetsToStateAndStorage(seed);
+      saveDivisions(defaultDivisions);
+      saveDepartments(defaultDepartments);
+      saveCustodians(defaultCustodians);
+      savePositions(defaultPositions);
+      saveBrands(defaultBrands);
+      saveLocations(defaultLocations);
       alert('โหลดข้อมูลตัวอย่างเรียบร้อยแล้ว');
     }
+  };
+
+  // --- Settings CRUD Helpers ---
+  const saveDivisions = (list) => {
+    setDivisions(list);
+    localStorage.setItem('inventory_divisions', JSON.stringify(list));
+  };
+
+  const saveDepartments = (list) => {
+    setDepartments(list);
+    localStorage.setItem('inventory_departments', JSON.stringify(list));
+  };
+
+  const saveCustodians = (list) => {
+    setCustodians(list);
+    localStorage.setItem('inventory_custodians', JSON.stringify(list));
+  };
+
+  const savePositions = (list) => {
+    setPositions(list);
+    localStorage.setItem('inventory_positions', JSON.stringify(list));
+  };
+
+  const saveBrands = (list) => {
+    setBrands(list);
+    localStorage.setItem('inventory_brands', JSON.stringify(list));
+  };
+
+  const saveLocations = (list) => {
+    setLocations(list);
+    localStorage.setItem('inventory_locations', JSON.stringify(list));
+  };
+
+  const handleAddCustodian = (cust) => {
+    saveCustodians([cust, ...custodians]);
+  };
+
+  const handleEditCustodian = (cust) => {
+    const index = custodians.findIndex(c => c.id === cust.id);
+    if (index >= 0) {
+      const updated = [...custodians];
+      updated[index] = cust;
+      saveCustodians(updated);
+    }
+  };
+
+  const handleDeleteCustodian = (id) => {
+    saveCustodians(custodians.filter(c => c.id !== id));
+  };
+
+  const handleAddDivision = (div) => {
+    saveDivisions([...divisions, div]);
+  };
+
+  const handleEditDivision = (oldDiv, newDiv) => {
+    saveDivisions(divisions.map(d => d === oldDiv ? newDiv : d));
+    // Sync custodians
+    saveCustodians(custodians.map(c => c.division === oldDiv ? { ...c, division: newDiv } : c));
+  };
+
+  const handleDeleteDivision = (div) => {
+    saveDivisions(divisions.filter(d => d !== div));
+  };
+
+  const handleAddDepartment = (dept) => {
+    saveDepartments([...departments, dept]);
+  };
+
+  const handleEditDepartment = (oldDept, newDept) => {
+    saveDepartments(departments.map(d => d === oldDept ? newDept : d));
+    // Sync custodians
+    saveCustodians(custodians.map(c => c.department === oldDept ? { ...c, department: newDept } : c));
+  };
+
+  const handleDeleteDepartment = (dept) => {
+    saveDepartments(departments.filter(d => d !== dept));
+  };
+
+  const handleAddPosition = (pos) => {
+    savePositions([...positions, pos]);
+  };
+
+  const handleEditPosition = (oldPos, newPos) => {
+    savePositions(positions.map(p => p === oldPos ? newPos : p));
+    // Sync custodians
+    saveCustodians(custodians.map(c => c.position === oldPos ? { ...c, position: newPos } : c));
+  };
+
+  const handleDeletePosition = (pos) => {
+    savePositions(positions.filter(p => p !== pos));
+  };
+
+  const handleAddBrand = (brnd) => {
+    saveBrands([...brands, brnd]);
+  };
+
+  const handleEditBrand = (oldBrnd, newBrnd) => {
+    saveBrands(brands.map(b => b === oldBrnd ? newBrnd : b));
+    // Sync assets
+    saveAssetsToStateAndStorage(assets.map(a => a.general_info?.brand === oldBrnd ? {
+      ...a,
+      general_info: { ...a.general_info, brand: newBrnd }
+    } : a));
+  };
+
+  const handleDeleteBrand = (brnd) => {
+    saveBrands(brands.filter(b => b !== brnd));
+  };
+
+  const handleAddLocation = (loc) => {
+    saveLocations([...locations, loc]);
+  };
+
+  const handleEditLocation = (oldLoc, newLoc) => {
+    saveLocations(locations.map(l => l === oldLoc ? newLoc : l));
+    // Sync assets
+    saveAssetsToStateAndStorage(assets.map(a => a.usage?.location === oldLoc ? {
+      ...a,
+      usage: { ...a.usage, location: newLoc }
+    } : a));
+  };
+
+  const handleDeleteLocation = (loc) => {
+    saveLocations(locations.filter(l => l !== loc));
   };
 
   // Navigation helper from Centered Landing
@@ -167,6 +384,12 @@ export default function App() {
         >
           🔍 ค้นหา
         </li>
+        <li
+          className={`sidebar-menu-item ${activeLayout === 'settings' ? 'active' : ''}`}
+          onClick={() => handleChangeLayout('settings')}
+        >
+          ⚙️ ตั้งค่าระบบ
+        </li>
 
         <div className="sidebar-menu-divider"></div>
 
@@ -189,7 +412,8 @@ export default function App() {
   const layoutTitles = {
     'sidebar': 'ทะเบียนครุภัณฑ์',
     'bento': 'Dashboard',
-    'centered': 'ค้นหา'
+    'centered': 'ค้นหา',
+    'settings': 'ตั้งค่าระบบครุภัณฑ์'
   };
 
   const headerContent = (
@@ -229,6 +453,13 @@ export default function App() {
             title="Centered Search Page"
           >
             ค้นหา
+          </button>
+          <button
+            className={`layout-toggle-btn ${activeLayout === 'settings' ? 'active' : ''}`}
+            onClick={() => handleChangeLayout('settings')}
+            title="Settings Panel"
+          >
+            ตั้งค่า
           </button>
         </div>
 
@@ -294,12 +525,45 @@ export default function App() {
             onEditAsset={handleOpenEditForm}
           />
         )}
+
+        {activeLayout === 'settings' && (
+          <SettingsPanel
+            assets={assets}
+            custodians={custodians}
+            divisions={divisions}
+            departments={departments}
+            positions={positions}
+            brands={brands}
+            locations={locations}
+            onAddCustodian={handleAddCustodian}
+            onEditCustodian={handleEditCustodian}
+            onDeleteCustodian={handleDeleteCustodian}
+            onAddDivision={handleAddDivision}
+            onEditDivision={handleEditDivision}
+            onDeleteDivision={handleDeleteDivision}
+            onAddDepartment={handleAddDepartment}
+            onEditDepartment={handleEditDepartment}
+            onDeleteDepartment={handleDeleteDepartment}
+            onAddPosition={handleAddPosition}
+            onEditPosition={handleEditPosition}
+            onDeletePosition={handleDeletePosition}
+            onAddBrand={handleAddBrand}
+            onEditBrand={handleEditBrand}
+            onDeleteBrand={handleDeleteBrand}
+            onAddLocation={handleAddLocation}
+            onEditLocation={handleEditLocation}
+            onDeleteLocation={handleDeleteLocation}
+          />
+        )}
       </BaseLayout>
 
       {/* Slide-over Drawer / Modal Form */}
       {isFormOpen && (
         <AssetForm
           asset={editingAsset}
+          custodians={custodians}
+          brands={brands}
+          locations={locations}
           onSubmit={handleSubmitForm}
           onClose={() => setIsFormOpen(false)}
         />
@@ -336,6 +600,12 @@ export default function App() {
                 onClick={() => handleChangeLayout('centered')}
               >
                 🔍 ค้นหา
+              </li>
+              <li
+                className={`sidebar-menu-item ${activeLayout === 'settings' ? 'active' : ''}`}
+                onClick={() => handleChangeLayout('settings')}
+              >
+                ⚙️ ตั้งค่าระบบ
               </li>
 
               <div className="sidebar-menu-divider"></div>
