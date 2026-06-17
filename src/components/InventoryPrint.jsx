@@ -74,11 +74,23 @@ export default function InventoryPrint({ asset, onClose }) {
 
     const formatThaiDateString = (dateStr) => {
         if (!dateStr) return '';
-        const parts = dateStr.split('/');
+        // YYYY-MM-DD
+        const parts = dateStr.split('-');
         if (parts.length === 3) {
-            const day = parseInt(parts[0]) || '';
+            const year = parseInt(parts[0]) || '';
             const monthIdx = parseInt(parts[1]) - 1;
-            const year = parts[2] || '';
+            const day = parseInt(parts[2]) || '';
+            const thaiMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+            const monthName = thaiMonths[monthIdx] || '';
+            const yearBE = year < 2400 ? year + 543 : year;
+            return `${day} ${monthName} ${yearBE}`;
+        }
+        // Fallback to DD/MM/YYYY
+        const slashParts = dateStr.split('/');
+        if (slashParts.length === 3) {
+            const day = parseInt(slashParts[0]) || '';
+            const monthIdx = parseInt(slashParts[1]) - 1;
+            const year = slashParts[2] || '';
             const thaiMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
             const monthName = thaiMonths[monthIdx] || '';
             return `${day} ${monthName} ${year}`;
@@ -97,16 +109,48 @@ export default function InventoryPrint({ asset, onClose }) {
         }
 
         const depList = getYearsDepreciation(asset.unit_price, asset.depreciation_rate_percent || 10);
-        
+
         let displayAcquiredDate = `พ.ศ. 25${yearBE}`;
         let displayYear = `25${yearBE}`;
-        
+
         if (asset.delivery_date) {
             displayAcquiredDate = formatThaiDateString(asset.delivery_date);
-            const dateParts = asset.delivery_date.split('/');
+            const dateParts = asset.delivery_date.split('-');
             if (dateParts.length === 3) {
-                displayYear = dateParts[2];
+                const yr = parseInt(dateParts[0]) || 0;
+                displayYear = yr < 2400 ? String(yr + 543) : String(yr);
+            } else {
+                const slashParts = asset.delivery_date.split('/');
+                if (slashParts.length === 3) {
+                    displayYear = slashParts[2];
+                }
             }
+        }
+
+        // Map custodian history list dynamically
+        const historyRows = [];
+        if (asset.custodian_history && asset.custodian_history.length > 0) {
+            asset.custodian_history.forEach(ch => {
+                historyRows.push({
+                    year: ch.year || "-",
+                    department: ch.budget_owner || "-", // ชื่อส่วนราชการ
+                    user: ch.custodian_name || "-", // ชื่อผู้ดูแล
+                    head: ch.section_head || "-" // ชื่อหัวหน้าส่วน
+                });
+            });
+        }
+
+        if (historyRows.length === 0) {
+            historyRows.push({
+                year: displayYear,
+                department: asset.responsible_department || "-",
+                user: "-",
+                head: "-"
+            });
+        }
+
+        while (historyRows.length < 3) {
+            historyRows.push({ year: "", department: "", user: "", head: "" });
         }
 
         return {
@@ -133,11 +177,7 @@ export default function InventoryPrint({ asset, onClose }) {
             warrantyCompany: asset.warranty_detail || "-",
             warrantyDate: "-",
             depreciation: depList.slice(0, 5),
-            history: [
-                { year: displayYear, department: asset.responsible_department || "-", user: "-", head: "-" },
-                { year: "", department: "", user: "", head: "" },
-                { year: "", department: "", user: "", head: "" },
-            ],
+            history: historyRows.slice(0, 3),
             disposalDate: asset.status === 'จำหน่ายแล้ว' ? 'จำหน่ายแล้ว' : '-',
             disposalMethod: asset.status === 'จำหน่ายแล้ว' ? 'จำหน่าย' : '-',
             disposalDocNo: "-",

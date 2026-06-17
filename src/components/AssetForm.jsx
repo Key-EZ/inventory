@@ -16,17 +16,6 @@ const formatAssetCode = (value) => {
   return truncated;
 };
 
-const formatBEDate = (value) => {
-  const clean = value.replace(/\D/g, '');
-  const truncated = clean.slice(0, 8);
-  if (truncated.length > 4) {
-    return `${truncated.slice(0, 2)}/${truncated.slice(2, 4)}/${truncated.slice(4)}`;
-  } else if (truncated.length > 2) {
-    return `${truncated.slice(0, 2)}/${truncated.slice(2)}`;
-  }
-  return truncated;
-};
-
 export default function AssetForm({
   asset,
   custodians = [],
@@ -498,12 +487,11 @@ export default function AssetForm({
                   />
                 </div>
                 <div className="form-group col">
-                  <label>วันเดือนปี (พ.ศ.) *</label>
+                  <label>วันเดือนปี *</label>
                   <input
-                    type="text"
+                    type="date"
                     value={deliveryDate}
-                    onChange={(e) => setDeliveryDate(formatBEDate(e.target.value))}
-                    placeholder="วว/ดด/พ.ศ. (เช่น 17/06/2569)"
+                    onChange={(e) => setDeliveryDate(e.target.value)}
                     required
                   />
                 </div>
