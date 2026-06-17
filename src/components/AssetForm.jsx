@@ -481,8 +481,18 @@ export default function AssetForm({
                   />
                 </div>
               </div>
+            </div>
+          )}
 
-              <div className="form-row">
+          {/* TAB 2: Custodian History */}
+          {activeTab === 'custodian_history' && (
+            <div className="tab-panel animate-fade-in">
+              <div className="info-alert">
+                <strong>👤 ชื่อผู้ใช้-ดูแล-รับผิดชอบพัสดุ:</strong> บันทึกประวัติเจ้าหน้าที่ผู้ได้รับมอบหมายให้ปกปักรักษา รับผิดชอบดูแล หรือผู้ใช้งานพัสดุ/ครุภัณฑ์ชิ้นนี้
+              </div>
+
+              {/* Main Asset location & department assignment */}
+              <div className="form-row" style={{ marginBottom: '20px' }}>
                 <div className="form-group col">
                   <label>ที่ตั้งพัสดุ / แหล่งเก็บใบส่งของ *</label>
                   <select
@@ -509,15 +519,6 @@ export default function AssetForm({
                     ))}
                   </select>
                 </div>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 2: Custodian History */}
-          {activeTab === 'custodian_history' && (
-            <div className="tab-panel animate-fade-in">
-              <div className="info-alert">
-                <strong>👤 ชื่อผู้ใช้-ดูแล-รับผิดชอบพัสดุ:</strong> บันทึกประวัติเจ้าหน้าที่ผู้ได้รับมอบหมายให้ปกปักรักษา รับผิดชอบดูแล หรือผู้ใช้งานพัสดุ/ครุภัณฑ์ชิ้นนี้
               </div>
 
               {/* Add/Edit Sub-Form */}
