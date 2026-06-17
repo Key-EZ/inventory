@@ -8,7 +8,12 @@ import CenteredLanding from './components/CenteredLanding';
 import SettingsPanel from './components/SettingsPanel';
 import ReportPanel from './components/ReportPanel';
 import InventoryPrint from './components/InventoryPrint';
+import GetRepair from './components/GetRepair';
+import RepairJobs from './components/RepairJobs';
 import { getSeedAssets, defaultDivisions, defaultDepartments, defaultCustodians, defaultPositions, defaultBrands, defaultLocations, defaultLandBuildingCategories, defaultEquipmentCategories, defaultAgencies } from './utils/mockData';
+
+const SEED_DATE_1 = '2026-06-17T08:30:00.000Z';
+const SEED_DATE_2 = '2026-06-16T14:15:00.000Z';
 
 export default function App() {
   // --- States ---
@@ -32,6 +37,7 @@ export default function App() {
   const [landBuildingCategories, setLandBuildingCategories] = useState([]);
   const [equipmentCategories, setEquipmentCategories] = useState([]);
   const [agencies, setAgencies] = useState([]);
+  const [repairRequests, setRepairRequests] = useState([]);
 
   // --- Initial Load ---
   useEffect(() => {
@@ -190,6 +196,64 @@ export default function App() {
       setAgencies(defaultAgencies);
       localStorage.setItem('inventory_agencies', JSON.stringify(defaultAgencies));
     }
+
+    // 14. Load repair requests
+    const savedRequests = localStorage.getItem('inventory_repair_requests');
+    if (savedRequests) {
+      try {
+        setRepairRequests(JSON.parse(savedRequests));
+      } catch (e) {
+        console.error('Error parsing saved repair requests', e);
+        setRepairRequests([]);
+      }
+    } else {
+      // Seed initial requests based on the loaded assets
+      const savedAssets = localStorage.getItem('inventory_assets');
+      let loadedAssets = [];
+      if (savedAssets) {
+        try {
+          loadedAssets = JSON.parse(savedAssets);
+        } catch (err) {
+          console.warn('Failed to parse saved assets on load', err);
+        }
+      }
+      if (loadedAssets.length === 0) {
+        loadedAssets = getSeedAssets();
+      }
+      const dellAsset = loadedAssets.find(a => a.asset_code === '412-67-0001');
+      const toyotaAsset = loadedAssets.find(a => a.asset_code === '312-64-0001');
+      let seedReqs = [];
+      if (dellAsset && toyotaAsset) {
+        seedReqs = [
+          {
+            id: 'repair-seed-1',
+            asset_id: dellAsset.id,
+            request_date: SEED_DATE_1,
+            problem_description: 'แป้นพิมพ์กดยาก ปุ่ม Spacebar และ Enter ไม่ค่อยตอบสนอง',
+            status: 'PENDING',
+            rejection_reason: '',
+            repair_cost: 0,
+            contractor: '',
+            approval_no_date: '',
+            officer_notes: ''
+          },
+          {
+            id: 'repair-seed-2',
+            asset_id: toyotaAsset.id,
+            request_date: SEED_DATE_2,
+            problem_description: 'ระบบเบรกมีเสียงดังผิดปกติเวลาเบรกกระทันหัน คาดว่าผ้าเบรกหมด',
+            status: 'IN_PROGRESS',
+            rejection_reason: '',
+            repair_cost: 0,
+            contractor: '',
+            approval_no_date: '',
+            officer_notes: ''
+          }
+        ];
+      }
+      setRepairRequests(seedReqs);
+      localStorage.setItem('inventory_repair_requests', JSON.stringify(seedReqs));
+    }
   }, []);
 
   // --- Helpers ---
@@ -273,7 +337,130 @@ export default function App() {
       saveLandBuildingCategories(defaultLandBuildingCategories);
       saveEquipmentCategories(defaultEquipmentCategories);
       saveAgencies(defaultAgencies);
+
+      // Reset repair requests as well
+      const dellAsset = seed.find(a => a.asset_code === '412-67-0001');
+      const toyotaAsset = seed.find(a => a.asset_code === '312-64-0001');
+      let seedReqs = [];
+      if (dellAsset && toyotaAsset) {
+        seedReqs = [
+          {
+            id: 'repair-seed-1',
+            asset_id: dellAsset.id,
+            request_date: SEED_DATE_1,
+            problem_description: 'แป้นพิมพ์กดยาก ปุ่ม Spacebar และ Enter ไม่ค่อยตอบสนอง',
+            status: 'PENDING',
+            rejection_reason: '',
+            repair_cost: 0,
+            contractor: '',
+            approval_no_date: '',
+            officer_notes: ''
+          },
+          {
+            id: 'repair-seed-2',
+            asset_id: toyotaAsset.id,
+            request_date: SEED_DATE_2,
+            problem_description: 'ระบบเบรกมีเสียงดังผิดปกติเวลาเบรกกระทันหัน คาดว่าผ้าเบรกหมด',
+            status: 'IN_PROGRESS',
+            rejection_reason: '',
+            repair_cost: 0,
+            contractor: '',
+            approval_no_date: '',
+            officer_notes: ''
+          }
+        ];
+      }
+      setRepairRequests(seedReqs);
+      localStorage.setItem('inventory_repair_requests', JSON.stringify(seedReqs));
+
       alert('โหลดข้อมูลตัวอย่างเรียบร้อยแล้ว');
+    }
+  };
+
+  // --- Repair Operations ---
+  const handleCreateRepairRequest = (assetId, problemDesc) => {
+    const newRequest = {
+      id: `repair-${Date.now()}`,
+      asset_id: assetId,
+      request_date: new Date().toISOString(),
+      problem_description: problemDesc,
+      status: 'PENDING',
+      rejection_reason: '',
+      repair_cost: 0,
+      contractor: '',
+      approval_no_date: '',
+      officer_notes: ''
+    };
+    const updated = [newRequest, ...repairRequests];
+    setRepairRequests(updated);
+    localStorage.setItem('inventory_repair_requests', JSON.stringify(updated));
+  };
+
+  const handleStartRepairJob = (requestId) => {
+    const updated = repairRequests.map(req => {
+      if (req.id === requestId) {
+        return { ...req, status: 'IN_PROGRESS' };
+      }
+      return req;
+    });
+    setRepairRequests(updated);
+    localStorage.setItem('inventory_repair_requests', JSON.stringify(updated));
+  };
+
+  const handleRejectRepairJob = (requestId, reason) => {
+    const updated = repairRequests.map(req => {
+      if (req.id === requestId) {
+        return { ...req, status: 'REJECTED', rejection_reason: reason };
+      }
+      return req;
+    });
+    setRepairRequests(updated);
+    localStorage.setItem('inventory_repair_requests', JSON.stringify(updated));
+  };
+
+  const handleCompleteRepairJob = (requestId, cost, contractor, approvalNoDate, notes) => {
+    let targetRequest = null;
+    const updatedRequests = repairRequests.map(req => {
+      if (req.id === requestId) {
+        targetRequest = {
+          ...req,
+          status: 'COMPLETED',
+          repair_cost: cost,
+          contractor: contractor,
+          approval_no_date: approvalNoDate,
+          officer_notes: notes,
+          completion_date: new Date().toISOString()
+        };
+        return targetRequest;
+      }
+      return req;
+    });
+
+    setRepairRequests(updatedRequests);
+    localStorage.setItem('inventory_repair_requests', JSON.stringify(updatedRequests));
+
+    if (targetRequest) {
+      const assetIndex = assets.findIndex(a => a.id === targetRequest.asset_id);
+      if (assetIndex >= 0) {
+        const updatedAssets = [...assets];
+        const asset = updatedAssets[assetIndex];
+        
+        const newMaintenanceLog = {
+          id: `maint-${Date.now()}`,
+          approval_no_date: approvalNoDate,
+          description: targetRequest.problem_description + (notes ? ` (${notes})` : ''),
+          cost: cost,
+          contractor: contractor
+        };
+
+        const currentMaintenances = asset.maintenances || [];
+        updatedAssets[assetIndex] = {
+          ...asset,
+          maintenances: [...currentMaintenances, newMaintenanceLog]
+        };
+
+        saveAssetsToStateAndStorage(updatedAssets);
+      }
     }
   };
 
@@ -535,6 +722,18 @@ export default function App() {
           📈 รายงาน พ.ด.1-3
         </li>
         <li
+          className={`sidebar-menu-item ${activeLayout === 'get_repair' ? 'active' : ''}`}
+          onClick={() => handleChangeLayout('get_repair')}
+        >
+          🔧 แจ้งซ่อมอุปกรณ์
+        </li>
+        <li
+          className={`sidebar-menu-item ${activeLayout === 'repair_jobs' ? 'active' : ''}`}
+          onClick={() => handleChangeLayout('repair_jobs')}
+        >
+          🛠️ งานซ่อมอุปกรณ์
+        </li>
+        <li
           className={`sidebar-menu-item ${activeLayout === 'settings' ? 'active' : ''}`}
           onClick={() => handleChangeLayout('settings')}
         >
@@ -564,7 +763,9 @@ export default function App() {
     'bento': 'Dashboard',
     'reports': 'รายงานสรุป พ.ด.1-3',
     'centered': 'ค้นหา',
-    'settings': 'ตั้งค่าระบบครุภัณฑ์'
+    'settings': 'ตั้งค่าระบบครุภัณฑ์',
+    'get_repair': 'แจ้งซ่อมอุปกรณ์',
+    'repair_jobs': 'งานซ่อมอุปกรณ์'
   };
 
   const headerContent = (
@@ -604,6 +805,20 @@ export default function App() {
             title="พ.ด. 1, พ.ด. 2, และ พ.ด. 3"
           >
             รายงาน
+          </button>
+          <button
+            className={`layout-toggle-btn ${activeLayout === 'get_repair' ? 'active' : ''}`}
+            onClick={() => handleChangeLayout('get_repair')}
+            title="แจ้งซ่อมอุปกรณ์"
+          >
+            แจ้งซ่อม
+          </button>
+          <button
+            className={`layout-toggle-btn ${activeLayout === 'repair_jobs' ? 'active' : ''}`}
+            onClick={() => handleChangeLayout('repair_jobs')}
+            title="งานซ่อมอุปกรณ์"
+          >
+            งานซ่อม
           </button>
           <button
             className={`layout-toggle-btn ${activeLayout === 'centered' ? 'active' : ''}`}
@@ -737,6 +952,24 @@ export default function App() {
             onDeleteAgency={handleDeleteAgency}
           />
         )}
+
+        {activeLayout === 'get_repair' && (
+          <GetRepair
+            assets={assets}
+            repairRequests={repairRequests}
+            onCreateRepairRequest={handleCreateRepairRequest}
+          />
+        )}
+
+        {activeLayout === 'repair_jobs' && (
+          <RepairJobs
+            assets={assets}
+            repairRequests={repairRequests}
+            onStartRepairJob={handleStartRepairJob}
+            onRejectRepairJob={handleRejectRepairJob}
+            onCompleteRepairJob={handleCompleteRepairJob}
+          />
+        )}
       </BaseLayout>
 
       {/* Slide-over Drawer / Modal Form */}
@@ -799,6 +1032,18 @@ export default function App() {
                 onClick={() => handleChangeLayout('reports')}
               >
                 📈 รายงาน พ.ด.1-3
+              </li>
+              <li
+                className={`sidebar-menu-item ${activeLayout === 'get_repair' ? 'active' : ''}`}
+                onClick={() => handleChangeLayout('get_repair')}
+              >
+                🔧 แจ้งซ่อมอุปกรณ์
+              </li>
+              <li
+                className={`sidebar-menu-item ${activeLayout === 'repair_jobs' ? 'active' : ''}`}
+                onClick={() => handleChangeLayout('repair_jobs')}
+              >
+                🛠️ งานซ่อมอุปกรณ์
               </li>
               <li
                 className={`sidebar-menu-item ${activeLayout === 'settings' ? 'active' : ''}`}

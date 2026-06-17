@@ -2262,5 +2262,20 @@ body {
   }
 }
 
-
-
+/* Repair status badges */
+.ledger-status-badge.repair-status-pending {
+  background-color: var(--status-pending-bg);
+  color: var(--status-pending-text);
+}
+.ledger-status-badge.repair-status-progress {
+  background-color: var(--status-damaged-bg);
+  color: var(--status-damaged-text);
+}
+.ledger-status-badge.repair-status-completed {
+  background-color: var(--status-active-bg);
+  color: var(--status-active-text);
+}
+.ledger-status-badge.repair-status-rejected {
+  background-color: var(--status-disposed-bg);
+  color: var(--status-disposed-text);
+}
