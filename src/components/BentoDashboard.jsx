@@ -1,4 +1,4 @@
-import React from 'react';
+
 
 export default function BentoDashboard({ assets, onAddClick, onResetDemo, onViewDetails }) {
   // 1. Calculations

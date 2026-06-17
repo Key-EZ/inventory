@@ -1580,3 +1580,414 @@ body {
   margin-top: 2px;
 }
 
+/* --- Report Panel Styling --- */
+.report-panel-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--element-gap);
+  width: 100%;
+}
+
+/* 1. Ledger Selector Tabs */
+.report-ledger-tabs {
+  display: flex;
+  gap: 12px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  padding: 10px;
+  border-radius: var(--border-radius);
+}
+
+.ledger-tab-btn {
+  flex: 1;
+  background: none;
+  border: 1px solid transparent;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all var(--transition-fast);
+  color: var(--text-muted);
+}
+
+.ledger-tab-btn:hover {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+/* Theme Tab Buttons Active States */
+.ledger-tab-btn.pd1-btn.active {
+  background-color: rgba(13, 148, 136, 0.1);
+  border-color: #0d9488;
+  color: #0d9488;
+}
+.ledger-tab-btn.pd2-btn.active {
+  background-color: rgba(217, 119, 6, 0.1);
+  border-color: #d97706;
+  color: #d97706;
+}
+.ledger-tab-btn.pd3-btn.active {
+  background-color: rgba(234, 88, 12, 0.1);
+  border-color: #ea580c;
+  color: #ea580c;
+}
+
+/* 2. Stats KPI Cards */
+.report-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--element-gap);
+}
+
+.report-stat-card {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform var(--transition-fast), border-color var(--transition-fast);
+}
+
+.report-stat-card:hover {
+  transform: translateY(-2px);
+}
+
+.report-panel-container.ledger-pd1 .report-stat-card:hover { border-color: #0d9488; }
+.report-panel-container.ledger-pd2 .report-stat-card:hover { border-color: #d97706; }
+.report-panel-container.ledger-pd3 .report-stat-card:hover { border-color: #ea580c; }
+
+.stat-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.stat-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 8px 0;
+}
+
+.stat-unit {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.stat-desc {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* Accents on numbers */
+.card-count .stat-value { color: var(--primary-color); }
+.card-cost .stat-value { color: var(--accent-blue); }
+.card-depreciation .stat-value { color: var(--status-pending-text); }
+.card-bookvalue .stat-value { color: var(--status-active-text); }
+
+/* 3. Filter Section */
+.report-filter-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.report-action-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+  border-top: 1px solid var(--border-color);
+  padding-top: 16px;
+}
+
+.button-secondary {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 10px 20px;
+  border-radius: var(--border-radius);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.button-secondary:hover {
+  background-color: var(--border-color);
+}
+
+.btn-print-report {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ledger-pd1 .btn-print-report { background-color: #0d9488; }
+.ledger-pd1 .btn-print-report:hover { background-color: #0f766e; }
+
+.ledger-pd2 .btn-print-report { background-color: #d97706; }
+.ledger-pd2 .btn-print-report:hover { background-color: #b45309; }
+
+.ledger-pd3 .btn-print-report { background-color: #ea580c; }
+.ledger-pd3 .btn-print-report:hover { background-color: #c2410c; }
+
+/* 4. Report printable sheet */
+.printable-report-sheet {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+
+.print-header-only {
+  display: none; /* Hidden in screen view, only active on paper */
+}
+
+/* Ledger Title Bar */
+.ledger-title-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-radius: 8px 8px 0 0;
+  color: white;
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.pd1-bar { background-color: #0d9488; }
+.pd2-bar { background-color: #d97706; }
+.pd3-bar { background-color: #ea580c; }
+
+.item-count-badge {
+  background-color: rgba(255,255,255,0.2);
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+/* Ledger Tables styling */
+.ledger-table-wrapper {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.ledger-data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.ledger-data-table th {
+  padding: 12px 14px;
+  background-color: var(--bg-primary);
+  border-bottom: 2px solid var(--border-color);
+  color: var(--text-muted);
+  font-weight: 600;
+  text-align: left;
+}
+
+.ledger-data-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+  vertical-align: top;
+}
+
+.ledger-data-table tbody tr:nth-child(even) {
+  background-color: rgba(0, 0, 0, 0.01);
+}
+
+.dark .ledger-data-table tbody tr:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.01);
+}
+
+.ledger-data-table tfoot td {
+  background-color: var(--bg-primary);
+  padding: 14px;
+  border-top: 2px solid var(--border-color);
+}
+
+.empty-ledger-row {
+  text-align: center !important;
+  padding: 40px !important;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.item-title {
+  font-weight: 600;
+}
+
+.item-sub-desc {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* Ledger Status Badges */
+.ledger-status-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.ledger-status-badge.status-ใช้งาน {
+  background-color: var(--status-active-bg);
+  color: var(--status-active-text);
+}
+
+.ledger-status-badge.status-ชำรุด {
+  background-color: var(--status-damaged-bg);
+  color: var(--status-damaged-text);
+}
+
+.ledger-status-badge.status-รอจำหน่าย {
+  background-color: var(--status-pending-bg);
+  color: var(--status-pending-text);
+}
+
+.ledger-status-badge.status-จำหน่ายแล้ว {
+  background-color: var(--status-disposed-bg);
+  color: var(--status-disposed-text);
+}
+
+/* --- A4 Landscape Print Stylesheet --- */
+@media print {
+  /* Set A4 Page in Landscape mode */
+  @page {
+    size: A4 landscape;
+    margin: 10mm 15mm;
+  }
+
+  /* Reset layout and hide elements */
+  body, html {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    font-size: 11pt !important;
+  }
+
+  .sidebar-layout-container {
+    display: block !important;
+  }
+
+  .layout-sidebar, 
+  .layout-header, 
+  .no-print, 
+  .theme-toggle-btn,
+  .report-ledger-tabs,
+  .report-stats-grid,
+  .report-filter-card,
+  .report-action-buttons,
+  .sidebar-menu,
+  .mobile-sidebar-drawer,
+  .mobile-drawer-backdrop {
+    display: none !important;
+  }
+
+  .layout-main-area, 
+  .layout-content, 
+  .printable-report-sheet {
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    width: 100% !important;
+  }
+
+  /* Show government header only on paper */
+  .print-header-only {
+    display: block !important;
+    margin-bottom: 20px;
+    border-bottom: 3px double #000000;
+    padding-bottom: 15px;
+  }
+
+  .print-gov-title {
+    text-align: center;
+  }
+
+  .print-gov-title h2 {
+    font-size: 18pt;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: #000000;
+  }
+
+  .print-subtitle {
+    font-size: 14pt;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #333333;
+  }
+
+  .print-meta-info {
+    font-size: 10pt;
+    color: #555555;
+  }
+
+  /* Style tables for clean printing */
+  .ledger-table-wrapper {
+    border: 1px solid #000000 !important;
+    border-radius: 0 !important;
+  }
+
+  .ledger-title-bar {
+    background-color: #f1f5f9 !important;
+    color: #000000 !important;
+    border-bottom: 1px solid #000000 !important;
+    border-radius: 0 !important;
+    padding: 10px 14px !important;
+  }
+
+  .ledger-data-table {
+    font-size: 10pt !important;
+  }
+
+  .ledger-data-table th {
+    background-color: #f8fafc !important;
+    color: #000000 !important;
+    border-bottom: 2px solid #000000 !important;
+    padding: 8px 10px !important;
+    font-weight: 700 !important;
+  }
+
+  .ledger-data-table td {
+    border-bottom: 1px solid #dddddd !important;
+    padding: 8px 10px !important;
+  }
+
+  .ledger-data-table tfoot td {
+    background-color: #f8fafc !important;
+    border-top: 2px solid #000000 !important;
+    padding: 10px !important;
+    font-weight: 700 !important;
+  }
+
+  .ledger-status-badge {
+    background: none !important;
+    color: #000000 !important;
+    padding: 0 !important;
+    font-weight: normal !important;
+    border: none !important;
+  }
+
+  /* Avoid page break inside rows */
+  .ledger-data-table tr {
+    page-break-inside: avoid;
+  }
+}
+
+

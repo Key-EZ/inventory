@@ -1,5 +1,5 @@
 // layout.jsx - โครงสร้างจัดหน้าแบบคลีน มีความยืดหยุ่นสูงรองรับ Responsive
-import React from 'react';
+
 
 export default function BaseLayout({ children, sidebar, header, activeLayout = 'sidebar', config = {} }) {
   // สไตล์ไดนามิกสำหรับระยะขอบและความโค้งมน

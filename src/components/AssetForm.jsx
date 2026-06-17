@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+/* eslint-disable react-hooks/set-state-in-effect */
+import { useState, useEffect } from 'react';
 import { calculateDepreciation } from '../utils/depreciation';
 
 export default function AssetForm({ asset, custodians = [], brands = [], locations = [], onSubmit, onClose }) {

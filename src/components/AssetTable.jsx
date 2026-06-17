@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+/* eslint-disable react-hooks/set-state-in-effect */
+import { useState, useMemo, useEffect } from 'react';
 
 export default function AssetTable({ assets, onEditAsset, onDeleteAsset, initialSearchQuery = '' }) {
   // Filter & Search states
@@ -83,7 +84,7 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, initial
   }, [assets, search, filterStatus, filterLocation, filterType, sortBy]);
 
   // Reset page when filters change
-  React.useEffect(() => {
+  useEffect(() => {
     setCurrentPage(1);
   }, [search, filterStatus, filterLocation, filterType, sortBy]);
 

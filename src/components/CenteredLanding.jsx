@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 export default function CenteredLanding({ assets, onNavigate, onAddClick, onEditAsset }) {
   const [searchQuery, setSearchQuery] = useState('');
