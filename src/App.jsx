@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+/* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
+import { useState, useEffect } from 'react';
 import BaseLayout from './components/BaseLayout';
 import AssetForm from './components/AssetForm';
 import AssetTable from './components/AssetTable';
 import BentoDashboard from './components/BentoDashboard';
 import CenteredLanding from './components/CenteredLanding';
 import SettingsPanel from './components/SettingsPanel';
+import ReportPanel from './components/ReportPanel';
 import { getSeedAssets, defaultDivisions, defaultDepartments, defaultCustodians, defaultPositions, defaultBrands, defaultLocations } from './utils/mockData';
 
 export default function App() {
@@ -176,7 +178,7 @@ export default function App() {
 
   const handleSubmitForm = (assetData) => {
     const index = assets.findIndex(a => a.id === assetData.id);
-    let updatedAssets = [];
+    let updatedAssets;
 
     if (index >= 0) {
       // Edit
@@ -385,6 +387,12 @@ export default function App() {
           🔍 ค้นหา
         </li>
         <li
+          className={`sidebar-menu-item ${activeLayout === 'reports' ? 'active' : ''}`}
+          onClick={() => handleChangeLayout('reports')}
+        >
+          📈 รายงาน พ.ด.1-3
+        </li>
+        <li
           className={`sidebar-menu-item ${activeLayout === 'settings' ? 'active' : ''}`}
           onClick={() => handleChangeLayout('settings')}
         >
@@ -412,6 +420,7 @@ export default function App() {
   const layoutTitles = {
     'sidebar': 'ทะเบียนครุภัณฑ์',
     'bento': 'Dashboard',
+    'reports': 'รายงานสรุป พ.ด.1-3',
     'centered': 'ค้นหา',
     'settings': 'ตั้งค่าระบบครุภัณฑ์'
   };
@@ -446,6 +455,13 @@ export default function App() {
             title="Bento Analytics Dashboard"
           >
             Dashboard
+          </button>
+          <button
+            className={`layout-toggle-btn ${activeLayout === 'reports' ? 'active' : ''}`}
+            onClick={() => handleChangeLayout('reports')}
+            title="พ.ด. 1, พ.ด. 2, และ พ.ด. 3"
+          >
+            รายงาน
           </button>
           <button
             className={`layout-toggle-btn ${activeLayout === 'centered' ? 'active' : ''}`}
@@ -526,6 +542,14 @@ export default function App() {
           />
         )}
 
+        {activeLayout === 'reports' && (
+          <ReportPanel
+            assets={assets}
+            custodians={custodians}
+            locations={locations}
+          />
+        )}
+
         {activeLayout === 'settings' && (
           <SettingsPanel
             assets={assets}
@@ -600,6 +624,12 @@ export default function App() {
                 onClick={() => handleChangeLayout('centered')}
               >
                 🔍 ค้นหา
+              </li>
+              <li
+                className={`sidebar-menu-item ${activeLayout === 'reports' ? 'active' : ''}`}
+                onClick={() => handleChangeLayout('reports')}
+              >
+                📈 รายงาน พ.ด.1-3
               </li>
               <li
                 className={`sidebar-menu-item ${activeLayout === 'settings' ? 'active' : ''}`}

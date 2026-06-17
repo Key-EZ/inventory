@@ -1,14 +1,15 @@
-import React, { useState, useMemo } from 'react';
+/* eslint-disable react-hooks/set-state-in-effect */
+import { useState, useMemo, useEffect } from 'react';
 
 export default function AssetTable({ assets, onEditAsset, onDeleteAsset, initialSearchQuery = '' }) {
   // Filter & Search states
   const [search, setSearch] = useState(initialSearchQuery);
+  const [filterType, setFilterType] = useState('ทั้งหมด');
   const [filterStatus, setFilterStatus] = useState('ทั้งหมด');
   const [filterLocation, setFilterLocation] = useState('ทั้งหมด');
-  const [filterType, setFilterType] = useState('ทั้งหมด');
 
   // Sort states
-  const [sortBy, setSortBy] = useState('date-desc'); // date-desc, date-asc, cost-desc, cost-asc, id-asc, bookvalue-desc
+  const [sortBy, setSortBy] = useState('code-asc'); // date-desc, date-asc, cost-desc, cost-asc, id-asc, bookvalue-desc, code-asc
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -16,14 +17,8 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, initial
 
   // Extract unique locations for filtering
   const locations = useMemo(() => {
-    const locSet = new Set(assets.map(item => item.usage?.location).filter(Boolean));
+    const locSet = new Set(assets.map(item => item.location).filter(Boolean));
     return ['ทั้งหมด', ...Array.from(locSet)];
-  }, [assets]);
-
-  // Extract unique types for filtering
-  const assetTypes = useMemo(() => {
-    const typeSet = new Set(assets.map(item => item.general_info?.asset_type).filter(Boolean));
-    return ['ทั้งหมด', ...Array.from(typeSet)];
   }, [assets]);
 
   // Filtered and sorted assets
@@ -34,58 +29,66 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, initial
     if (search.trim() !== '') {
       const q = search.toLowerCase();
       result = result.filter(item =>
-        (item.usage?.asset_id || '').toLowerCase().includes(q) ||
-        (item.general_info?.asset_name || '').toLowerCase().includes(q) ||
-        (item.general_info?.brand || '').toLowerCase().includes(q) ||
-        (item.general_info?.model || '').toLowerCase().includes(q) ||
-        (item.usage?.custodian || '').toLowerCase().includes(q) ||
-        (item.usage?.location || '').toLowerCase().includes(q) ||
-        (item.general_info?.asset_type || '').toLowerCase().includes(q)
+        (item.asset_code || '').toLowerCase().includes(q) ||
+        (item.name || '').toLowerCase().includes(q) ||
+        (item.category || '').toLowerCase().includes(q) ||
+        (item.location || '').toLowerCase().includes(q) ||
+        (item.responsible_department || '').toLowerCase().includes(q) ||
+        (item.manufacturer_brand || '').toLowerCase().includes(q) ||
+        (item.chassis_number || '').toLowerCase().includes(q) ||
+        (item.vehicle_registration || '').toLowerCase().includes(q)
       );
     }
 
-    // 2. Status Filter
-    if (filterStatus !== 'ทั้งหมด') {
-      result = result.filter(item => item.usage?.status === filterStatus);
-    }
-
-    // 3. Location Filter
-    if (filterLocation !== 'ทั้งหมด') {
-      result = result.filter(item => item.usage?.location === filterLocation);
-    }
-
-    // 3.5. Type Filter
+    // 2. Type Filter (พ.ด. 1 vs พ.ด. 2)
     if (filterType !== 'ทั้งหมด') {
-      result = result.filter(item => item.general_info?.asset_type === filterType);
+      result = result.filter(item => item.asset_type === filterType);
     }
 
-    // 4. Sorting
+    // 3. Status Filter
+    if (filterStatus !== 'ทั้งหมด') {
+      result = result.filter(item => item.status === filterStatus);
+    }
+
+    // 4. Location Filter
+    if (filterLocation !== 'ทั้งหมด') {
+      result = result.filter(item => item.location === filterLocation);
+    }
+
+    // 5. Sorting
     result.sort((a, b) => {
+      // Helper to parse acquisition year from code XXX-YY-ZZZZ
+      const getYear = (code) => {
+        const parts = String(code || '').split('-');
+        if (parts.length >= 2) return parseInt(parts[1]) || 0;
+        return 0;
+      };
+
       switch (sortBy) {
-        case 'date-desc':
-          return new Date(b.source_and_value?.acquisition_date) - new Date(a.source_and_value?.acquisition_date);
-        case 'date-asc':
-          return new Date(a.source_and_value?.acquisition_date) - new Date(b.source_and_value?.acquisition_date);
+        case 'code-asc':
+          return (a.asset_code || '').localeCompare(b.asset_code || '');
+        case 'year-desc':
+          return getYear(b.asset_code) - getYear(a.asset_code);
+        case 'year-asc':
+          return getYear(a.asset_code) - getYear(b.asset_code);
         case 'cost-desc':
-          return (b.source_and_value?.cost_price || 0) - (a.source_and_value?.cost_price || 0);
+          return (b.unit_price || 0) - (a.unit_price || 0);
         case 'cost-asc':
-          return (a.source_and_value?.cost_price || 0) - (b.source_and_value?.cost_price || 0);
-        case 'id-asc':
-          return (a.usage?.asset_id || '').localeCompare(b.usage?.asset_id || '');
+          return (a.unit_price || 0) - (b.unit_price || 0);
         case 'bookvalue-desc':
-          return (b.financial_status?.book_value || 0) - (a.financial_status?.book_value || 0);
+          return (b.book_value || 0) - (a.book_value || 0);
         default:
           return 0;
       }
     });
 
     return result;
-  }, [assets, search, filterStatus, filterLocation, filterType, sortBy]);
+  }, [assets, search, filterType, filterStatus, filterLocation, sortBy]);
 
   // Reset page when filters change
-  React.useEffect(() => {
+  useEffect(() => {
     setCurrentPage(1);
-  }, [search, filterStatus, filterLocation, filterType, sortBy]);
+  }, [search, filterType, filterStatus, filterLocation, sortBy]);
 
   // Pagination math
   const totalItems = processedAssets.length;
@@ -104,10 +107,10 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, initial
 
   const handleClearFilters = () => {
     setSearch('');
+    setFilterType('ทั้งหมด');
     setFilterStatus('ทั้งหมด');
     setFilterLocation('ทั้งหมด');
-    setFilterType('ทั้งหมด');
-    setSortBy('date-desc');
+    setSortBy('code-asc');
   };
 
   return (
@@ -116,7 +119,7 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, initial
       <div className="layout-card filter-panel-card">
         <div className="filter-panel-header">
           <h3>🔍 ค้นหาและตัวกรองข้อมูล</h3>
-          {(search || filterStatus !== 'ทั้งหมด' || filterLocation !== 'ทั้งหมด' || filterType !== 'ทั้งหมด' || sortBy !== 'date-desc') && (
+          {(search || filterType !== 'ทั้งหมด' || filterStatus !== 'ทั้งหมด' || filterLocation !== 'ทั้งหมด' || sortBy !== 'code-asc') && (
             <button className="btn-clear-filter" onClick={handleClearFilters}>
               ล้างตัวกรองทั้งหมด
             </button>
@@ -131,22 +134,22 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, initial
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="รหัส, ชื่อครุภัณฑ์, ยี่ห้อ, ผู้ดูแล..."
+              placeholder="รหัสพัสดุ, ชื่อ, ยี่ห้อ, ทะเบียน, ที่ตั้ง..."
               className="filter-input-element"
             />
           </div>
 
           {/* Asset Type Select */}
           <div className="filter-group-item">
-            <label>ประเภทสินทรัพย์</label>
+            <label>ประเภททะเบียนทะเบียน</label>
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
               className="filter-input-element"
             >
-              {assetTypes.map(type => (
-                <option key={type} value={type}>{type}</option>
-              ))}
+              <option value="ทั้งหมด">ทั้งหมด (พ.ด.1 และ พ.ด.2)</option>
+              <option value="LAND_BUILDING">ที่ดินและสิ่งก่อสร้าง (พ.ด.1)</option>
+              <option value="EQUIPMENT">ครุภัณฑ์และยานพาหนะ (พ.ด.2)</option>
             </select>
           </div>
 
@@ -159,10 +162,10 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, initial
               className="filter-input-element"
             >
               <option value="ทั้งหมด">ทั้งหมดทุกสถานะ</option>
-              <option value="ใช้งาน">ใช้งาน (Active)</option>
-              <option value="ชำรุด">ชำรุด (Damaged)</option>
-              <option value="รอจำหน่าย">รอจำหน่าย (Pending Disposal)</option>
-              <option value="จำหน่ายแล้ว">จำหน่ายแล้ว (Disposed)</option>
+              <option value="ใช้งาน">ใช้งาน</option>
+              <option value="ชำรุด">ชำรุด</option>
+              <option value="รอจำหน่าย">รอจำหน่าย</option>
+              <option value="จำหน่ายแล้ว">จำหน่ายแล้ว</option>
             </select>
           </div>
 
@@ -174,6 +177,7 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, initial
               onChange={(e) => setFilterLocation(e.target.value)}
               className="filter-input-element"
             >
+              <option value="ทั้งหมด">ทั้งหมดทุกสถานที่</option>
               {locations.map(loc => (
                 <option key={loc} value={loc}>{loc}</option>
               ))}
@@ -188,11 +192,11 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, initial
               onChange={(e) => setSortBy(e.target.value)}
               className="filter-input-element"
             >
-              <option value="date-desc">วันที่ได้มาล่าสุด ➔ เก่าสุด</option>
-              <option value="date-asc">วันที่ได้มาเก่าสุด ➔ ล่าสุด</option>
+              <option value="code-asc">รหัสพัสดุ (น้อย ➔ มาก)</option>
+              <option value="year-desc">ปีที่จัดหา ล่าสุด ➔ เก่าสุด</option>
+              <option value="year-asc">ปีที่จัดหา เก่าสุด ➔ ล่าสุด</option>
               <option value="cost-desc">ราคาทุน สูง ➔ ต่ำ</option>
               <option value="cost-asc">ราคาทุน ต่ำ ➔ สูง</option>
-              <option value="id-asc">รหัสครุภัณฑ์</option>
               <option value="bookvalue-desc">มูลค่าสุทธิ สูง ➔ ต่ำ</option>
             </select>
           </div>
@@ -212,49 +216,56 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, initial
           <table className="data-table">
             <thead>
               <tr>
-                <th>รหัสครุภัณฑ์</th>
-                <th>รายการครุภัณฑ์</th>
-                <th>วันที่ได้มา</th>
-                <th>ราคาทุน (บาท)</th>
-                <th>ค่าเสื่อมสะสม</th>
-                <th>มูลค่าสุทธิ (Book Value)</th>
-                <th>ผู้ดูแล/สถานที่ตั้ง</th>
-                <th>สถานะ</th>
-                <th className="text-center">การจัดการ</th>
+                <th style={{ width: '12%' }}>รหัสพัสดุ</th>
+                <th style={{ width: '25%' }}>รายการทรัพย์สิน / พัสดุ</th>
+                <th style={{ width: '10%' }}>ประเภท</th>
+                <th style={{ width: '12%' }} className="text-right">ราคาทุน (บาท)</th>
+                <th style={{ width: '10%' }} className="text-right">ค่าเสื่อมสะสม</th>
+                <th style={{ width: '11%' }} className="text-right">มูลค่าสุทธิ (Book Value)</th>
+                <th style={{ width: '18%' }}>หน่วยดูแล/สถานที่ตั้ง</th>
+                <th style={{ width: '8%' }}>สถานะ</th>
+                <th style={{ width: '10%' }} className="text-center">การจัดการ</th>
               </tr>
             </thead>
             <tbody>
               {paginatedAssets.length > 0 ? (
                 paginatedAssets.map(item => (
                   <tr key={item.id} className="table-row-hover">
-                    <td className="table-cell-id"><strong>{item.usage?.asset_id}</strong></td>
+                    <td className="table-cell-id"><strong>{item.asset_code}</strong></td>
                     <td className="table-cell-name">
-                      <div className="item-name-main">{item.general_info?.asset_name}</div>
+                      <div className="item-name-main">{item.name}</div>
                       <div className="item-name-sub">
-                        <span style={{ color: 'var(--primary-color)', fontWeight: '600', marginRight: '6px' }}>
-                          [{item.general_info?.asset_type || 'ครุภัณฑ์สำนักงาน'}]
+                        <span style={{
+                          color: item.asset_type === 'LAND_BUILDING' ? 'var(--status-active-text)' : 'var(--primary-color)',
+                          fontWeight: '600',
+                          marginRight: '6px'
+                        }}>
+                          [{item.category || (item.asset_type === 'LAND_BUILDING' ? 'พ.ด.1 ที่ดิน/โรงเรือน' : 'พ.ด.2 ครุภัณฑ์')}]
                         </span>
-                        {item.general_info?.brand && <span>ยี่ห้อ: {item.general_info.brand}</span>}
-                        {item.general_info?.model && <span> รุ่น: {item.general_info.model}</span>}
+                        {item.asset_type === 'LAND_BUILDING' ? (
+                          <span>{item.building_style || 'ที่ดินเปล่า'}</span>
+                        ) : (
+                          <span>{item.manufacturer_brand} {item.serial_number && `(SN: ${item.serial_number})`}</span>
+                        )}
                       </div>
                     </td>
-                    <td>{item.source_and_value?.acquisition_date}</td>
+                    <td>{item.asset_type === 'LAND_BUILDING' ? 'ที่ดิน/อาคาร' : 'ครุภัณฑ์'}</td>
                     <td className="text-right">
-                      {(item.source_and_value?.cost_price || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      {(item.unit_price || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
                     <td className="text-right text-depreciation">
-                      -{(item.financial_status?.accumulated_depreciation || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      -{(item.accumulated_depreciation || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </td>
                     <td className="text-right text-bookvalue">
-                      <strong>{(item.financial_status?.book_value || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
+                      <strong>{(item.book_value || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
                     </td>
                     <td>
-                      <div className="custodian-text">👤 {item.usage?.custodian || 'ไม่ระบุผู้ดูแล'}</div>
-                      <div className="location-text">📍 {item.usage?.location || 'ไม่ระบุสถานที่'}</div>
+                      <div className="custodian-text">🏢 {item.responsible_department || 'ไม่ระบุหน่วยงาน'}</div>
+                      <div className="location-text">📍 {item.location || 'ไม่ระบุสถานที่'}</div>
                     </td>
                     <td>
-                      <span className={`status-badge ${statusBadges[item.usage?.status || 'ใช้งาน']}`}>
-                        {item.usage?.status}
+                      <span className={`status-badge ${statusBadges[item.status || 'ใช้งาน']}`}>
+                        {item.status}
                       </span>
                     </td>
                     <td className="text-center">
@@ -272,7 +283,7 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, initial
               ) : (
                 <tr>
                   <td colSpan="9" className="table-empty-row">
-                    🔍 ไม่พบข้อมูลครุภัณฑ์ที่ตรงกับเงื่อนไขการค้นหา
+                    🔍 ไม่พบข้อมูลพัสดุที่ตรงกับเงื่อนไขการค้นหา
                   </td>
                 </tr>
               )}
