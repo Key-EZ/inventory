@@ -72,6 +72,20 @@ export default function InventoryPrint({ asset, onClose }) {
         });
     };
 
+    const formatThaiDateString = (dateStr) => {
+        if (!dateStr) return '';
+        const parts = dateStr.split('/');
+        if (parts.length === 3) {
+            const day = parseInt(parts[0]) || '';
+            const monthIdx = parseInt(parts[1]) - 1;
+            const year = parts[2] || '';
+            const thaiMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+            const monthName = thaiMonths[monthIdx] || '';
+            return `${day} ${monthName} ${year}`;
+        }
+        return dateStr;
+    };
+
     const getDisplayData = () => {
         if (!asset) return defaultData;
 
@@ -83,6 +97,17 @@ export default function InventoryPrint({ asset, onClose }) {
         }
 
         const depList = getYearsDepreciation(asset.unit_price, asset.depreciation_rate_percent || 10);
+        
+        let displayAcquiredDate = `พ.ศ. 25${yearBE}`;
+        let displayYear = `25${yearBE}`;
+        
+        if (asset.delivery_date) {
+            displayAcquiredDate = formatThaiDateString(asset.delivery_date);
+            const dateParts = asset.delivery_date.split('/');
+            if (dateParts.length === 3) {
+                displayYear = dateParts[2];
+            }
+        }
 
         return {
             category: asset.category || "ครุภัณฑ์",
@@ -93,7 +118,7 @@ export default function InventoryPrint({ asset, onClose }) {
             assetCode: asset.asset_code || "-",
             assetName: asset.name || "-",
             acquiredFrom: asset.acquisition_method || "-",
-            acquiredDate: `พ.ศ. 25${yearBE}`,
+            acquiredDate: displayAcquiredDate,
             budgetSource: asset.budget_owner || "-",
             price: (asset.unit_price || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
             brand: asset.manufacturer_brand || "-",
@@ -109,7 +134,7 @@ export default function InventoryPrint({ asset, onClose }) {
             warrantyDate: "-",
             depreciation: depList.slice(0, 5),
             history: [
-                { year: `25${yearBE}`, department: asset.responsible_department || "-", user: "-", head: "-" },
+                { year: displayYear, department: asset.responsible_department || "-", user: "-", head: "-" },
                 { year: "", department: "", user: "", head: "" },
                 { year: "", department: "", user: "", head: "" },
             ],
