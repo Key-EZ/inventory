@@ -216,9 +216,8 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onPrint
           <table className="data-table">
             <thead>
               <tr>
-                <th style={{ width: '15%' }}>รหัสพัสดุ</th>
-                <th style={{ width: '35%' }}>รายการทรัพย์สิน / พัสดุ</th>
-                <th style={{ width: '12%' }}>ประเภท</th>
+                <th style={{ width: '18%' }}>รหัสพัสดุ</th>
+                <th style={{ width: '44%' }}>รายการทรัพย์สิน / พัสดุ</th>
                 <th style={{ width: '20%' }}>หน่วยดูแล/สถานที่ตั้ง</th>
                 <th style={{ width: '8%' }}>สถานะ</th>
                 <th style={{ width: '10%' }} className="text-center">การจัดการ</th>
@@ -246,7 +245,6 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onPrint
                         )}
                       </div>
                     </td>
-                    <td>{item.asset_type === 'LAND_BUILDING' ? 'ที่ดิน/อาคาร' : 'ครุภัณฑ์'}</td>
                     <td>
                       <div className="custodian-text">🏢 {item.responsible_department || 'ไม่ระบุหน่วยงาน'}</div>
                       <div className="location-text">📍 {item.location || 'ไม่ระบุสถานที่'}</div>
@@ -273,7 +271,7 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onPrint
                 ))
               ) : (
                 <tr>
-                  <td colSpan="6" className="table-empty-row">
+                  <td colSpan="5" className="table-empty-row">
                     🔍 ไม่พบข้อมูลพัสดุที่ตรงกับเงื่อนไขการค้นหา
                   </td>
                 </tr>
