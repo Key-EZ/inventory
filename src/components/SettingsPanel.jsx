@@ -1,4 +1,5 @@
-import { useState } from 'react';
+/* eslint-disable react-hooks/set-state-in-effect */
+import { useState, useEffect } from 'react';
 
 export default function SettingsPanel({
   assets,
@@ -8,6 +9,16 @@ export default function SettingsPanel({
   positions = [],
   brands = [],
   locations = [],
+  landingBadgeText,
+  onSaveLandingBadge,
+  landBuildingCategories = [],
+  equipmentCategories = [],
+  onAddLandCategory,
+  onEditLandCategory,
+  onDeleteLandCategory,
+  onAddEquipmentCategory,
+  onEditEquipmentCategory,
+  onDeleteEquipmentCategory,
   onAddCustodian,
   onEditCustodian,
   onDeleteCustodian,
@@ -25,9 +36,23 @@ export default function SettingsPanel({
   onDeleteBrand,
   onAddLocation,
   onEditLocation,
-  onDeleteLocation
+  onDeleteLocation,
+  agencies = [],
+  onAddAgency,
+  onEditAgency,
+  onDeleteAgency
 }) {
   const [activeTab, setActiveTab] = useState('custodians'); // 'custodians', 'org', 'options'
+  const [landingBadgeInput, setLandingBadgeInput] = useState(landingBadgeText || 'ระบบดิจิทัลบริหารทรัพย์สิน');
+  const [newLandCatInput, setNewLandCatInput] = useState('');
+  const [newEquipCatInput, setNewEquipCatInput] = useState('');
+  const [newAgencyInput, setNewAgencyInput] = useState('');
+
+  useEffect(() => {
+    if (landingBadgeText) {
+      setLandingBadgeInput(landingBadgeText);
+    }
+  }, [landingBadgeText]);
   
   // Custodian Form Modal states
   const [isCustFormOpen, setIsCustFormOpen] = useState(false);
@@ -285,6 +310,44 @@ export default function SettingsPanel({
     }
   };
 
+  const handleAddAgency = (e) => {
+    e.preventDefault();
+    const val = newAgencyInput.trim();
+    if (!val) return;
+    if (agencies.includes(val)) {
+      alert('มีชื่อส่วนราชการนี้อยู่แล้วในระบบ');
+      return;
+    }
+    onAddAgency(val);
+    setNewAgencyInput('');
+  };
+
+  const handleEditAgencyPrompt = (oldVal) => {
+    const newVal = prompt('แก้ไขชื่อส่วนราชการ:', oldVal);
+    if (newVal === null) return;
+    const trimmed = newVal.trim();
+    if (!trimmed) return;
+    if (agencies.includes(trimmed) && trimmed !== oldVal) {
+      alert('มีชื่อส่วนราชการนี้อยู่แล้วในระบบ');
+      return;
+    }
+    onEditAgency(oldVal, trimmed);
+  };
+
+  const handleDeleteAgencyCheck = (agency) => {
+    const inUse = assets.some(a => 
+      a.budget_owner === agency || 
+      (a.custodian_history && a.custodian_history.some(ch => ch.budget_owner === agency))
+    );
+    if (inUse) {
+      alert(`ไม่สามารถลบชื่อส่วนราชการ "${agency}" ได้ เนื่องจากมีประวัติการดูแลหรือข้อมูลพัสดุใช้งานอยู่`);
+      return;
+    }
+    if (window.confirm(`คุณแน่ใจว่าต้องการลบชื่อส่วนราชการ "${agency}" ใช่หรือไม่?`)) {
+      onDeleteAgency(agency);
+    }
+  };
+
   return (
     <div className="settings-container animate-fade-in">
       <div className="flex-center-between">
@@ -321,6 +384,20 @@ export default function SettingsPanel({
           onClick={() => setActiveTab('options')}
         >
           ⚙️ จัดการตัวเลือก (ตำแหน่ง/ยี่ห้อ/สถานที่)
+        </button>
+        <button
+          type="button"
+          className={`tab-btn ${activeTab === 'landing' ? 'active' : ''}`}
+          onClick={() => setActiveTab('landing')}
+        >
+          🏷️ ป้ายชื่อหน้าแรก
+        </button>
+        <button
+          type="button"
+          className={`tab-btn ${activeTab === 'categories' ? 'active' : ''}`}
+          onClick={() => setActiveTab('categories')}
+        >
+          📁 หมวดหมู่ทรัพย์สิน
         </button>
       </div>
 
@@ -584,6 +661,250 @@ export default function SettingsPanel({
                 ))
               ) : (
                 <div className="table-empty-row">ไม่มีข้อมูลสถานที่ตั้ง</div>
+              )}
+            </div>
+          </div>
+
+          {/* Government Agency Column */}
+          <div className="layout-card">
+            <h3>🏛️ รายการส่วนราชการ</h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginBottom: '16px' }}>
+              ตัวเลือกส่วนราชการในการกำหนดผู้ใช้-ดูแล
+            </p>
+
+            <form onSubmit={handleAddAgency} className="settings-inline-add-form">
+              <input
+                type="text"
+                value={newAgencyInput}
+                onChange={(e) => setNewAgencyInput(e.target.value)}
+                placeholder="เช่น กองช่าง, กองการศึกษา"
+                className="filter-input-element"
+              />
+              <button type="submit" className="button-primary" style={{ padding: '8px 16px', whiteSpace: 'nowrap' }}>
+                เพิ่ม
+              </button>
+            </form>
+
+            <div className="settings-inline-list">
+              {agencies.length > 0 ? (
+                agencies.map(agency => (
+                  <div key={agency} className="settings-list-row">
+                    <span className="settings-item-name">{agency}</span>
+                    <div className="settings-item-actions">
+                      <button className="btn-mini-action" onClick={() => handleEditAgencyPrompt(agency)} type="button">
+                        ✏️
+                      </button>
+                      <button className="btn-mini-action btn-mini-delete" onClick={() => handleDeleteAgencyCheck(agency)} type="button">
+                        🗑️
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="table-empty-row">ไม่มีข้อมูลส่วนราชการ</div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tab 4: Landing Badge Configuration */}
+      {activeTab === 'landing' && (
+        <div className="layout-card animate-fade-in" style={{ maxWidth: '600px' }}>
+          <h3>🏷️ ตั้งค่าข้อความ Landing Badge</h3>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '16px' }}>
+            แก้ไขข้อความป้ายชื่อ (Badge) ที่แสดงอยู่ด้านบนสุดของหน้าแรก (Landing Page)
+          </p>
+          
+          <div className="form-group" style={{ marginBottom: '16px' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>ข้อความป้ายชื่อ *</label>
+            <input
+              type="text"
+              value={landingBadgeInput}
+              onChange={(e) => setLandingBadgeInput(e.target.value)}
+              placeholder="เช่น ระบบดิจิทัลบริหารทรัพย์สิน"
+              className="filter-input-element"
+              style={{ width: '100%', padding: '10px' }}
+            />
+          </div>
+          
+          <button
+            onClick={() => {
+              if (!landingBadgeInput.trim()) {
+                alert('กรุณากรอกข้อความป้ายชื่อ');
+                return;
+              }
+              onSaveLandingBadge(landingBadgeInput.trim());
+              alert('บันทึกการตั้งค่าป้ายชื่อเรียบร้อยแล้ว');
+            }}
+            className="button-primary"
+            style={{ padding: '10px 20px' }}
+          >
+            💾 บันทึกการตั้งค่า
+          </button>
+        </div>
+      )}
+
+      {activeTab === 'categories' && (
+        <div className="settings-split-grid animate-fade-in">
+          {/* Land Building Categories */}
+          <div className="layout-card">
+            <h3>📗 หมวดหมู่ พ.ด.1 (ที่ดิน/โรงเรือน)</h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginBottom: '16px' }}>
+              จัดการตัวเลือกหมวดหมู่ย่อยสำหรับที่ดินและสิ่งก่อสร้าง
+            </p>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const val = newLandCatInput.trim();
+                if (!val) return;
+                if (landBuildingCategories.includes(val)) {
+                  alert('มีหมวดหมู่นี้อยู่แล้วในระบบ');
+                  return;
+                }
+                onAddLandCategory(val);
+                setNewLandCatInput('');
+              }}
+              className="settings-inline-add-form"
+            >
+              <input
+                type="text"
+                value={newLandCatInput}
+                onChange={(e) => setNewLandCatInput(e.target.value)}
+                placeholder="เช่น อาคารโรงยิม, ลานจอดรถ"
+                className="filter-input-element"
+              />
+              <button type="submit" className="button-primary" style={{ padding: '8px 16px', whiteSpace: 'nowrap' }}>
+                เพิ่ม
+              </button>
+            </form>
+
+            <div className="settings-inline-list">
+              {landBuildingCategories.length > 0 ? (
+                landBuildingCategories.map(cat => (
+                  <div key={cat} className="settings-list-row">
+                    <span className="settings-item-name">{cat}</span>
+                    <div className="settings-item-actions">
+                      <button
+                        className="btn-mini-action"
+                        onClick={() => {
+                          const newVal = prompt('แก้ไขชื่อหมวดหมู่ พ.ด.1:', cat);
+                          if (newVal === null) return;
+                          const trimmed = newVal.trim();
+                          if (!trimmed) return;
+                          if (landBuildingCategories.includes(trimmed) && trimmed !== cat) {
+                            alert('มีชื่อหมวดหมู่นี้อยู่แล้วในระบบ');
+                            return;
+                          }
+                          onEditLandCategory(cat, trimmed);
+                        }}
+                        type="button"
+                      >
+                        ✏️
+                      </button>
+                      <button
+                        className="btn-mini-action btn-mini-delete"
+                        onClick={() => {
+                          const inUse = assets.some(a => a.category === cat && a.asset_type === 'LAND_BUILDING');
+                          if (inUse) {
+                            alert(`ไม่สามารถลบหมวดหมู่ "${cat}" ได้ เนื่องจากมีทรัพย์สินใช้งานอยู่`);
+                            return;
+                          }
+                          if (window.confirm(`คุณแน่ใจว่าต้องการลบหมวดหมู่ "${cat}" ใช่หรือไม่?`)) {
+                            onDeleteLandCategory(cat);
+                          }
+                        }}
+                        type="button"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="table-empty-row">ไม่มีข้อมูลหมวดหมู่</div>
+              )}
+            </div>
+          </div>
+
+          {/* Equipment Categories */}
+          <div className="layout-card">
+            <h3>📒 หมวดหมู่ พ.ด.2 (ครุภัณฑ์)</h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginBottom: '16px' }}>
+              จัดการตัวเลือกหมวดหมู่ย่อยสำหรับครุภัณฑ์และยานพาหนะ
+            </p>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const val = newEquipCatInput.trim();
+                if (!val) return;
+                if (equipmentCategories.includes(val)) {
+                  alert('มีหมวดหมู่นี้อยู่แล้วในระบบ');
+                  return;
+                }
+                onAddEquipmentCategory(val);
+                setNewEquipCatInput('');
+              }}
+              className="settings-inline-add-form"
+            >
+              <input
+                type="text"
+                value={newEquipCatInput}
+                onChange={(e) => setNewEquipCatInput(e.target.value)}
+                placeholder="เช่น ครุภัณฑ์งานสนาม, สินทรัพย์ดิจิทัล"
+                className="filter-input-element"
+              />
+              <button type="submit" className="button-primary" style={{ padding: '8px 16px', whiteSpace: 'nowrap' }}>
+                เพิ่ม
+              </button>
+            </form>
+
+            <div className="settings-inline-list">
+              {equipmentCategories.length > 0 ? (
+                equipmentCategories.map(cat => (
+                  <div key={cat} className="settings-list-row">
+                    <span className="settings-item-name">{cat}</span>
+                    <div className="settings-item-actions">
+                      <button
+                        className="btn-mini-action"
+                        onClick={() => {
+                          const newVal = prompt('แก้ไขชื่อหมวดหมู่ พ.ด.2:', cat);
+                          if (newVal === null) return;
+                          const trimmed = newVal.trim();
+                          if (!trimmed) return;
+                          if (equipmentCategories.includes(trimmed) && trimmed !== cat) {
+                            alert('มีชื่อหมวดหมู่นี้อยู่แล้วในระบบ');
+                            return;
+                          }
+                          onEditEquipmentCategory(cat, trimmed);
+                        }}
+                        type="button"
+                      >
+                        ✏️
+                      </button>
+                      <button
+                        className="btn-mini-action btn-mini-delete"
+                        onClick={() => {
+                          const inUse = assets.some(a => a.category === cat && a.asset_type === 'EQUIPMENT');
+                          if (inUse) {
+                            alert(`ไม่สามารถลบหมวดหมู่ "${cat}" ได้ เนื่องจากมีครุภัณฑ์ใช้งานอยู่`);
+                            return;
+                          }
+                          if (window.confirm(`คุณแน่ใจว่าต้องการลบหมวดหมู่ "${cat}" ใช่หรือไม่?`)) {
+                            onDeleteEquipmentCategory(cat);
+                          }
+                        }}
+                        type="button"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="table-empty-row">ไม่มีข้อมูลหมวดหมู่</div>
               )}
             </div>
           </div>

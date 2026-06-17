@@ -3,25 +3,31 @@ import { useState, useEffect } from 'react';
 import { calculateDepreciation } from '../utils/depreciation';
 import { defaultDepartments } from '../utils/mockData';
 
-const LAND_BUILDING_CATEGORIES = [
-  'ที่ดินที่มีกรรมสิทธิ์',
-  'อาคารสำนักงาน',
-  'สิ่งปลูกสร้าง'
-];
 
-const EQUIPMENT_CATEGORIES = [
-  'ครุภัณฑ์สำนักงาน',
-  'ครุภัณฑ์คอมพิวเตอร์',
-  'ครุภัณฑ์ยานพาหนะและขนส่ง',
-  'ครุภัณฑ์ไฟฟ้าและวิทยุ',
-  'ครุภัณฑ์โฆษณาและเผยแพร่',
-  'ครุภัณฑ์งานบ้านงานครัว',
-  'ครุภัณฑ์วิทยาศาสตร์และการแพทย์',
-  'ครุภัณฑ์กีฬา',
-  'สินทรัพย์ไม่มีตัวตนอื่น'
-];
 
-export default function AssetForm({ asset, brands = [], locations = [], onSubmit, onClose }) {
+const formatAssetCode = (value) => {
+  const clean = value.replace(/\D/g, '');
+  const truncated = clean.slice(0, 9);
+  if (truncated.length > 5) {
+    return `${truncated.slice(0, 3)}-${truncated.slice(3, 5)}-${truncated.slice(5)}`;
+  } else if (truncated.length > 3) {
+    return `${truncated.slice(0, 3)}-${truncated.slice(3)}`;
+  }
+  return truncated;
+};
+
+export default function AssetForm({
+  asset,
+  custodians = [],
+  brands = [],
+  locations = [],
+  landBuildingCategories = [],
+  equipmentCategories = [],
+  agencies = [],
+  positions = [],
+  onSubmit,
+  onClose
+}) {
   const isEdit = !!asset;
 
   // Tabs: 'general', 'spec', 'financial', 'maintenances'
@@ -35,6 +41,7 @@ export default function AssetForm({ asset, brands = [], locations = [], onSubmit
   const [location, setLocation] = useState('');
   const [acquisitionMethod, setAcquisitionMethod] = useState('ซื้อ');
   const [approvalDocument, setApprovalDocument] = useState('');
+  const [deliveryDate, setDeliveryDate] = useState('');
   const [unitPrice, setUnitPrice] = useState(0);
   const [budgetOwner, setBudgetOwner] = useState('');
   const [responsibleDepartment, setResponsibleDepartment] = useState('');
@@ -69,6 +76,14 @@ export default function AssetForm({ asset, brands = [], locations = [], onSubmit
   const [maintContractor, setMaintContractor] = useState('');
   const [editingMaintId, setEditingMaintId] = useState(null);
 
+  // Custodian History CRUD states
+  const [custodianHistory, setCustodianHistory] = useState([]);
+  const [custHistoryYear, setCustHistoryYear] = useState('');
+  const [custHistoryBudgetOwner, setCustHistoryBudgetOwner] = useState('');
+  const [custHistoryCustodian, setCustHistoryCustodian] = useState('');
+  const [custHistorySectionHead, setCustHistorySectionHead] = useState('');
+  const [editingCustHistoryId, setEditingCustHistoryId] = useState(null);
+
   // Initialize form
   useEffect(() => {
     if (asset) {
@@ -79,6 +94,7 @@ export default function AssetForm({ asset, brands = [], locations = [], onSubmit
       setLocation(asset.location || '');
       setAcquisitionMethod(asset.acquisition_method || 'ซื้อ');
       setApprovalDocument(asset.approval_document || '');
+      setDeliveryDate(asset.delivery_date || '');
       setUnitPrice(asset.unit_price || 0);
       setBudgetOwner(asset.budget_owner || '');
       setResponsibleDepartment(asset.responsible_department || '');
@@ -97,15 +113,17 @@ export default function AssetForm({ asset, brands = [], locations = [], onSubmit
 
       setStatus(asset.status || 'ใช้งาน');
       setMaintenances(asset.maintenances || []);
+      setCustodianHistory(asset.custodian_history || []);
     } else {
       // Clear/Reset for new asset
       setAssetType('EQUIPMENT');
-      setCategory('ครุภัณฑ์สำนักงาน');
+      setCategory(equipmentCategories[0] || '');
       setAssetCode('');
       setName('');
       setLocation('');
       setAcquisitionMethod('ซื้อ');
       setApprovalDocument('');
+      setDeliveryDate('');
       setUnitPrice(0);
       setBudgetOwner('');
       setResponsibleDepartment('');
@@ -121,7 +139,9 @@ export default function AssetForm({ asset, brands = [], locations = [], onSubmit
       setWarrantyDetail('');
       setStatus('ใช้งาน');
       setMaintenances([]);
+      setCustodianHistory([]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [asset]);
 
   // Recalculate depreciation live when price or code changes
@@ -189,6 +209,63 @@ export default function AssetForm({ asset, brands = [], locations = [], onSubmit
     }
   };
 
+  // --- Custodian History Operations ---
+  const handleAddOrEditCustodianHistory = () => {
+    if (!custHistoryYear.trim() || !custHistoryBudgetOwner.trim() || !custHistorySectionHead.trim()) {
+      alert('กรุณากรอกข้อมูลผู้ใช้-ดูแล-รับผิดชอบพัสดุให้ครบถ้วน');
+      return;
+    }
+
+    if (editingCustHistoryId) {
+      // Edit
+      setCustodianHistory(custodianHistory.map(ch => ch.id === editingCustHistoryId ? {
+        id: editingCustHistoryId,
+        year: custHistoryYear.trim(),
+        budget_owner: custHistoryBudgetOwner.trim(),
+        custodian_name: custHistoryCustodian ? custHistoryCustodian.trim() : '',
+        section_head: custHistorySectionHead.trim()
+      } : ch));
+      setEditingCustHistoryId(null);
+    } else {
+      // Add new
+      const newCustHist = {
+        id: `custhist-${Date.now()}`,
+        year: custHistoryYear.trim(),
+        budget_owner: custHistoryBudgetOwner.trim(),
+        custodian_name: custHistoryCustodian ? custHistoryCustodian.trim() : '',
+        section_head: custHistorySectionHead.trim()
+      };
+      setCustodianHistory([...custodianHistory, newCustHist]);
+    }
+
+    // Reset entry inputs
+    setCustHistoryYear('');
+    setCustHistoryBudgetOwner('');
+    setCustHistoryCustodian('');
+    setCustHistorySectionHead('');
+  };
+
+  const handleEditCustHistoryClick = (item) => {
+    setEditingCustHistoryId(item.id);
+    setCustHistoryYear(item.year || '');
+    setCustHistoryBudgetOwner(item.budget_owner || '');
+    setCustHistoryCustodian(item.custodian_name || '');
+    setCustHistorySectionHead(item.section_head || '');
+  };
+
+  const handleDeleteCustHistoryClick = (id) => {
+    if (window.confirm('คุณแน่ใจว่าต้องการลบประวัติผู้รับผิดชอบดูแลพัสดุรายการนี้ใช่หรือไม่?')) {
+      setCustodianHistory(custodianHistory.filter(ch => ch.id !== id));
+      if (editingCustHistoryId === id) {
+        setEditingCustHistoryId(null);
+        setCustHistoryYear('');
+        setCustHistoryBudgetOwner('');
+        setCustHistoryCustodian('');
+        setCustHistorySectionHead('');
+      }
+    }
+  };
+
   // Submit Handler
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -205,6 +282,17 @@ export default function AssetForm({ asset, brands = [], locations = [], onSubmit
       }
     }
 
+    // Determine overall budget_owner from the latest custodian history entry, if any
+    let finalBudgetOwner = budgetOwner || '';
+    if (custodianHistory.length > 0) {
+      const sorted = [...custodianHistory].sort((a, b) => {
+        const yA = parseInt(a.year) || 0;
+        const yB = parseInt(b.year) || 0;
+        return yB - yA;
+      });
+      finalBudgetOwner = sorted[0]?.budget_owner || '';
+    }
+
     const payload = {
       id: asset?.id || `asset-${Date.now()}`,
       asset_type: assetType,
@@ -214,8 +302,9 @@ export default function AssetForm({ asset, brands = [], locations = [], onSubmit
       location,
       acquisition_method: acquisitionMethod,
       approval_document: approvalDocument,
+      delivery_date: deliveryDate,
       unit_price: parseFloat(unitPrice) || 0,
-      budget_owner: budgetOwner,
+      budget_owner: finalBudgetOwner,
       responsible_department: responsibleDepartment,
       status,
 
@@ -239,7 +328,10 @@ export default function AssetForm({ asset, brands = [], locations = [], onSubmit
       book_value: bookValue,
 
       // Maintenances sub-table list
-      maintenances: maintenances
+      maintenances: maintenances,
+
+      // Custodian history list
+      custodian_history: custodianHistory
     };
 
     onSubmit(payload);
@@ -264,24 +356,31 @@ export default function AssetForm({ asset, brands = [], locations = [], onSubmit
           </button>
           <button
             type="button"
+            className={`tab-btn ${activeTab === 'custodian_history' ? 'active' : ''}`}
+            onClick={() => setActiveTab('custodian_history')}
+          >
+            2. ผู้รับผิดชอบพัสดุ ({custodianHistory.length})
+          </button>
+          <button
+            type="button"
             className={`tab-btn ${activeTab === 'spec' ? 'active' : ''}`}
             onClick={() => setActiveTab('spec')}
           >
-            2. รายละเอียดเฉพาะ ({assetType === 'LAND_BUILDING' ? 'พ.ด.1' : 'พ.ด.2'})
+            3. รายละเอียดเฉพาะ ({assetType === 'LAND_BUILDING' ? 'พ.ด.1' : 'พ.ด.2'})
           </button>
           <button
             type="button"
             className={`tab-btn ${activeTab === 'financial' ? 'active' : ''}`}
             onClick={() => setActiveTab('financial')}
           >
-            3. ค่าเสื่อมราคา
+            4. ค่าเสื่อมราคา
           </button>
           <button
             type="button"
             className={`tab-btn ${activeTab === 'maintenances' ? 'active' : ''}`}
             onClick={() => setActiveTab('maintenances')}
           >
-            4. ประวัติซ่อมบำรุง ({maintenances.length})
+            5. ประวัติซ่อมบำรุง ({maintenances.length})
           </button>
         </div>
 
@@ -297,12 +396,12 @@ export default function AssetForm({ asset, brands = [], locations = [], onSubmit
                     onChange={(e) => {
                       const newType = e.target.value;
                       setAssetType(newType);
-                      setCategory(newType === 'LAND_BUILDING' ? 'ที่ดินที่มีกรรมสิทธิ์' : 'ครุภัณฑ์สำนักงาน');
+                      setCategory(newType === 'LAND_BUILDING' ? (landBuildingCategories[0] || '') : (equipmentCategories[0] || ''));
                     }}
                     required
                   >
-                    <option value="EQUIPMENT">ทะเบียนครุภัณฑ์ (พ.ด.2)</option>
-                    <option value="LAND_BUILDING">ทะเบียนที่ดินและสิ่งก่อสร้าง (พ.ด.1)</option>
+                    <option value="EQUIPMENT">ครุภัณฑ์</option>
+                    <option value="LAND_BUILDING">ที่ดินและสิ่งก่อสร้าง</option>
                   </select>
                 </div>
                 <div className="form-group col">
@@ -313,7 +412,7 @@ export default function AssetForm({ asset, brands = [], locations = [], onSubmit
                     required
                   >
                     <option value="">-- เลือกหมวดหมู่ --</option>
-                    {(assetType === 'LAND_BUILDING' ? LAND_BUILDING_CATEGORIES : EQUIPMENT_CATEGORIES).map(cat => (
+                    {(assetType === 'LAND_BUILDING' ? landBuildingCategories : equipmentCategories).map(cat => (
                       <option key={cat} value={cat}>{cat}</option>
                     ))}
                   </select>
@@ -323,7 +422,7 @@ export default function AssetForm({ asset, brands = [], locations = [], onSubmit
                   <input
                     type="text"
                     value={assetCode}
-                    onChange={(e) => setAssetCode(e.target.value)}
+                    onChange={(e) => setAssetCode(formatAssetCode(e.target.value))}
                     placeholder="000-00-0000"
                     required
                   />
@@ -337,7 +436,7 @@ export default function AssetForm({ asset, brands = [], locations = [], onSubmit
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="เช่น โครงการก่อสร้างถนนคอนกรีต, รถยนต์เอนกประสงค์, กล้องวงจรปิด"
+                    placeholder="เช่น รถยนต์เอนกประสงค์, กล้องวงจรปิด"
                     required
                   />
                 </div>
@@ -349,20 +448,6 @@ export default function AssetForm({ asset, brands = [], locations = [], onSubmit
                     <option value="รอจำหน่าย">รอจำหน่าย</option>
                     <option value="จำหน่ายแล้ว">จำหน่ายแล้ว</option>
                   </select>
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group col">
-                  <label>ราคาต่อหน่วย (บาท) *</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={unitPrice}
-                    onChange={(e) => setUnitPrice(parseFloat(e.target.value) || 0)}
-                    required
-                  />
                 </div>
                 <div className="form-group col">
                   <label>ลักษณะที่ได้กรรมสิทธิ์ *</label>
@@ -381,7 +466,50 @@ export default function AssetForm({ asset, brands = [], locations = [], onSubmit
 
               <div className="form-row">
                 <div className="form-group col">
-                  <label>ที่ตั้งพัสดุ / แหล่งเก็บใบส่งของ *</label>
+                  <label>ราคาต่อหน่วย (บาท) *</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={unitPrice}
+                    onChange={(e) => setUnitPrice(parseFloat(e.target.value) || 0)}
+                    required
+                  />
+                </div>
+                <div className="form-group col">
+                  <label>ใบส่งของ *</label>
+                  <input
+                    type="text"
+                    value={approvalDocument}
+                    onChange={(e) => setApprovalDocument(e.target.value)}
+                    placeholder="เช่น เลขที่ใบส่งของ หรือ PO"
+                    required
+                  />
+                </div>
+                <div className="form-group col">
+                  <label>วันเดือนปี *</label>
+                  <input
+                    type="date"
+                    value={deliveryDate}
+                    onChange={(e) => setDeliveryDate(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 2: Custodian History */}
+          {activeTab === 'custodian_history' && (
+            <div className="tab-panel animate-fade-in">
+              <div className="info-alert">
+                <strong>👤 ชื่อผู้ใช้-ดูแล-รับผิดชอบพัสดุ:</strong> บันทึกประวัติเจ้าหน้าที่ผู้ได้รับมอบหมายให้ปกปักรักษา รับผิดชอบดูแล หรือผู้ใช้งานพัสดุ/ครุภัณฑ์ชิ้นนี้
+              </div>
+
+              {/* Main Asset location & department assignment */}
+              <div className="form-row" style={{ marginBottom: '20px' }}>
+                <div className="form-group col">
+                  <label>ที่ตั้งพัสดุ*</label>
                   <select
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
@@ -394,7 +522,7 @@ export default function AssetForm({ asset, brands = [], locations = [], onSubmit
                   </select>
                 </div>
                 <div className="form-group col">
-                  <label>ส่วนราชการที่รับดูแลรับผิดชอบ *</label>
+                  <label>ส่วนราชการเจ้าของพัสดุ *</label>
                   <select
                     value={responsibleDepartment}
                     onChange={(e) => setResponsibleDepartment(e.target.value)}
@@ -408,31 +536,154 @@ export default function AssetForm({ asset, brands = [], locations = [], onSubmit
                 </div>
               </div>
 
-              <div className="form-row">
-                <div className="form-group col">
-                  <label>เจ้าของงบประมาณ</label>
-                  <input
-                    type="text"
-                    value={budgetOwner}
-                    onChange={(e) => setBudgetOwner(e.target.value)}
-                    placeholder="เช่น งบประมาณประจำปี, เทศบาลจังหวัด"
-                  />
+              {/* Add/Edit Sub-Form */}
+              <div className="maint-entry-box">
+                <h4>{editingCustHistoryId ? '✏️ แก้ไขข้อมูลผู้รับผิดชอบ' : '➕ เพิ่มผู้รับผิดชอบดูแล'}</h4>
+                <div className="maint-form-grid">
+                  <div className="form-group">
+                    <label>ปี พ.ศ. *</label>
+                    <input
+                      type="text"
+                      value={custHistoryYear}
+                      onChange={(e) => setCustHistoryYear(e.target.value)}
+                      placeholder="เช่น 2569"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>ชื่อส่วนราชการ *</label>
+                    {agencies.length > 0 ? (
+                      <select
+                        value={custHistoryBudgetOwner}
+                        onChange={(e) => setCustHistoryBudgetOwner(e.target.value)}
+                        required
+                      >
+                        <option value="">-- เลือกส่วนราชการ --</option>
+                        {agencies.map(agency => (
+                          <option key={agency} value={agency}>{agency}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <select disabled value="">
+                        <option value="">-- ไม่มีข้อมูลส่วนราชการในระบบ --</option>
+                      </select>
+                    )}
+                  </div>
+                  <div className="form-group">
+                    <label>ชื่อผู้รับผิดชอบดูแล</label>
+                    {custodians.length > 0 ? (
+                      <select
+                        value={custHistoryCustodian}
+                        onChange={(e) => setCustHistoryCustodian(e.target.value)}
+                      >
+                        <option value="">-- เลือกผู้รับผิดชอบดูแล (ถ้ามี) --</option>
+                        {custodians.map(c => (
+                          <option key={c.id} value={c.name}>{c.name} ({c.position || '-'})</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <select disabled value="">
+                        <option value="">-- ไม่มีข้อมูลรายชื่อผู้ดูแลในระบบ --</option>
+                      </select>
+                    )}
+                  </div>
+                  <div className="form-group">
+                    <label>ชื่อหัวหน้าส่วน *</label>
+                    {positions.length > 0 ? (
+                      <select
+                        value={custHistorySectionHead}
+                        onChange={(e) => setCustHistorySectionHead(e.target.value)}
+                        required
+                      >
+                        <option value="">-- เลือกตำแหน่งหัวหน้าส่วน --</option>
+                        {positions.map(pos => (
+                          <option key={pos} value={pos}>{pos}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <select disabled value="">
+                        <option value="">-- ไม่มีข้อมูลรายชื่อตำแหน่งในระบบ --</option>
+                      </select>
+                    )}
+                  </div>
                 </div>
-                <div className="form-group col">
-                  <label>เลขที่/วันเดือนปี หนังสืออนุมัติ *</label>
-                  <input
-                    type="text"
-                    value={approvalDocument}
-                    onChange={(e) => setApprovalDocument(e.target.value)}
-                    placeholder="เช่น PO-67123 ลงวันที่ 10 ธ.ค. 2567"
-                    required
-                  />
-                </div>
+                <button
+                  type="button"
+                  className="button-primary maint-add-btn"
+                  onClick={handleAddOrEditCustodianHistory}
+                >
+                  {editingCustHistoryId ? 'บันทึกการแก้ไข' : 'บันทึกรายการเพิ่ม'}
+                </button>
+                {editingCustHistoryId && (
+                  <button
+                    type="button"
+                    className="button-secondary maint-cancel-btn"
+                    onClick={() => {
+                      setEditingCustHistoryId(null);
+                      setCustHistoryYear('');
+                      setCustHistoryBudgetOwner('');
+                      setCustHistoryCustodian('');
+                      setCustHistorySectionHead('');
+                    }}
+                  >
+                    ยกเลิกแก้ไข
+                  </button>
+                )}
+              </div>
+
+              {/* Custodian History Table */}
+              <div className="maint-table-container">
+                <table className="maint-log-table">
+                  <thead>
+                    <tr>
+                      <th style={{ width: '8%' }}>ครั้งที่</th>
+                      <th style={{ width: '12%' }}>ปี พ.ศ.</th>
+                      <th style={{ width: '25%' }}>ชื่อส่วนราชการ</th>
+                      <th style={{ width: '25%' }}>ชื่อผู้รับผิดชอบดูแล</th>
+                      <th style={{ width: '20%' }}>ชื่อหัวหน้าส่วน</th>
+                      <th style={{ width: '10%' }} className="text-center">จัดการ</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {custodianHistory.length > 0 ? (
+                      custodianHistory.map((item, idx) => (
+                        <tr key={item.id}>
+                          <td className="text-center">{idx + 1}</td>
+                          <td className="text-center">{item.year}</td>
+                          <td>{item.budget_owner}</td>
+                          <td>{item.custodian_name || '-'}</td>
+                          <td>{item.section_head}</td>
+                          <td className="text-center">
+                            <div className="maint-row-actions">
+                              <span
+                                className="action-maint-edit"
+                                onClick={() => handleEditCustHistoryClick(item)}
+                                title="แก้ไขรายการ"
+                              >
+                                ✏️
+                              </span>
+                              <span
+                                className="action-maint-delete"
+                                onClick={() => handleDeleteCustHistoryClick(item.id)}
+                                title="ลบรายการ"
+                              >
+                                🗑️
+                              </span>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="6" className="text-center text-muted py-8 font-italic">ยังไม่มีรายการผู้รับผิดชอบดูแลสำหรับทรัพย์สินนี้</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
               </div>
             </div>
           )}
 
-          {/* TAB 2: Specific Fields */}
+          {/* TAB 3: Specific Fields */}
           {activeTab === 'spec' && (
             <div className="tab-panel">
               {assetType === 'LAND_BUILDING' ? (
@@ -726,7 +977,8 @@ export default function AssetForm({ asset, brands = [], locations = [], onSubmit
                   className="btn-prev"
                   type="button"
                   onClick={() => {
-                    if (activeTab === 'spec') setActiveTab('general');
+                    if (activeTab === 'custodian_history') setActiveTab('general');
+                    if (activeTab === 'spec') setActiveTab('custodian_history');
                     if (activeTab === 'financial') setActiveTab('spec');
                     if (activeTab === 'maintenances') setActiveTab('financial');
                   }}
@@ -739,7 +991,8 @@ export default function AssetForm({ asset, brands = [], locations = [], onSubmit
                   className="btn-next-tab button-primary"
                   type="button"
                   onClick={() => {
-                    if (activeTab === 'general') setActiveTab('spec');
+                    if (activeTab === 'general') setActiveTab('custodian_history');
+                    else if (activeTab === 'custodian_history') setActiveTab('spec');
                     else if (activeTab === 'spec') setActiveTab('financial');
                     else if (activeTab === 'financial') setActiveTab('maintenances');
                   }}

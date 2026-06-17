@@ -7,7 +7,8 @@ import BentoDashboard from './components/BentoDashboard';
 import CenteredLanding from './components/CenteredLanding';
 import SettingsPanel from './components/SettingsPanel';
 import ReportPanel from './components/ReportPanel';
-import { getSeedAssets, defaultDivisions, defaultDepartments, defaultCustodians, defaultPositions, defaultBrands, defaultLocations } from './utils/mockData';
+import InventoryPrint from './components/InventoryPrint';
+import { getSeedAssets, defaultDivisions, defaultDepartments, defaultCustodians, defaultPositions, defaultBrands, defaultLocations, defaultLandBuildingCategories, defaultEquipmentCategories, defaultAgencies } from './utils/mockData';
 
 export default function App() {
   // --- States ---
@@ -16,6 +17,7 @@ export default function App() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingAsset, setEditingAsset] = useState(null);
+  const [printingAsset, setPrintingAsset] = useState(null);
   const [searchQueryFromLanding, setSearchQueryFromLanding] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
@@ -26,6 +28,10 @@ export default function App() {
   const [positions, setPositions] = useState([]);
   const [brands, setBrands] = useState([]);
   const [locations, setLocations] = useState([]);
+  const [landingBadgeText, setLandingBadgeText] = useState('ระบบดิจิทัลบริหารทรัพย์สิน');
+  const [landBuildingCategories, setLandBuildingCategories] = useState([]);
+  const [equipmentCategories, setEquipmentCategories] = useState([]);
+  const [agencies, setAgencies] = useState([]);
 
   // --- Initial Load ---
   useEffect(() => {
@@ -139,6 +145,51 @@ export default function App() {
       setLocations(defaultLocations);
       localStorage.setItem('inventory_locations', JSON.stringify(defaultLocations));
     }
+
+    // 10. Load landing badge
+    const savedBadge = localStorage.getItem('inventory_landing_badge');
+    if (savedBadge) {
+      setLandingBadgeText(savedBadge);
+    }
+
+    // 11. Load land/building categories
+    const savedLandCats = localStorage.getItem('inventory_land_building_categories');
+    if (savedLandCats) {
+      try {
+        setLandBuildingCategories(JSON.parse(savedLandCats));
+      } catch (e) {
+        setLandBuildingCategories(defaultLandBuildingCategories);
+      }
+    } else {
+      setLandBuildingCategories(defaultLandBuildingCategories);
+      localStorage.setItem('inventory_land_building_categories', JSON.stringify(defaultLandBuildingCategories));
+    }
+
+    // 12. Load equipment categories
+    const savedEquipCats = localStorage.getItem('inventory_equipment_categories');
+    if (savedEquipCats) {
+      try {
+        setEquipmentCategories(JSON.parse(savedEquipCats));
+      } catch (e) {
+        setEquipmentCategories(defaultEquipmentCategories);
+      }
+    } else {
+      setEquipmentCategories(defaultEquipmentCategories);
+      localStorage.setItem('inventory_equipment_categories', JSON.stringify(defaultEquipmentCategories));
+    }
+
+    // 13. Load government agencies
+    const savedAgencies = localStorage.getItem('inventory_agencies');
+    if (savedAgencies) {
+      try {
+        setAgencies(JSON.parse(savedAgencies));
+      } catch (e) {
+        setAgencies(defaultAgencies);
+      }
+    } else {
+      setAgencies(defaultAgencies);
+      localStorage.setItem('inventory_agencies', JSON.stringify(defaultAgencies));
+    }
   }, []);
 
   // --- Helpers ---
@@ -163,6 +214,11 @@ export default function App() {
     setActiveLayout(layout);
     localStorage.setItem('inventory_layout', layout);
     setIsMobileMenuOpen(false);
+  };
+
+  const handleSaveLandingBadge = (newText) => {
+    setLandingBadgeText(newText);
+    localStorage.setItem('inventory_landing_badge', newText);
   };
 
   // --- CRUD Operations ---
@@ -214,6 +270,9 @@ export default function App() {
       savePositions(defaultPositions);
       saveBrands(defaultBrands);
       saveLocations(defaultLocations);
+      saveLandBuildingCategories(defaultLandBuildingCategories);
+      saveEquipmentCategories(defaultEquipmentCategories);
+      saveAgencies(defaultAgencies);
       alert('โหลดข้อมูลตัวอย่างเรียบร้อยแล้ว');
     }
   };
@@ -247,6 +306,21 @@ export default function App() {
   const saveLocations = (list) => {
     setLocations(list);
     localStorage.setItem('inventory_locations', JSON.stringify(list));
+  };
+
+  const saveLandBuildingCategories = (list) => {
+    setLandBuildingCategories(list);
+    localStorage.setItem('inventory_land_building_categories', JSON.stringify(list));
+  };
+
+  const saveEquipmentCategories = (list) => {
+    setEquipmentCategories(list);
+    localStorage.setItem('inventory_equipment_categories', JSON.stringify(list));
+  };
+
+  const saveAgencies = (list) => {
+    setAgencies(list);
+    localStorage.setItem('inventory_agencies', JSON.stringify(list));
   };
 
   const handleAddCustodian = (cust) => {
@@ -340,6 +414,74 @@ export default function App() {
 
   const handleDeleteLocation = (loc) => {
     saveLocations(locations.filter(l => l !== loc));
+  };
+
+  const handleAddLandCategory = (cat) => {
+    saveLandBuildingCategories([...landBuildingCategories, cat]);
+  };
+
+  const handleEditLandCategory = (oldCat, newCat) => {
+    saveLandBuildingCategories(landBuildingCategories.map(c => c === oldCat ? newCat : c));
+    // Sync assets
+    saveAssetsToStateAndStorage(assets.map(a => 
+      (a.asset_type === 'LAND_BUILDING' && a.category === oldCat) 
+        ? { ...a, category: newCat } 
+        : a
+    ));
+  };
+
+  const handleDeleteLandCategory = (cat) => {
+    saveLandBuildingCategories(landBuildingCategories.filter(c => c !== cat));
+  };
+
+  const handleAddEquipmentCategory = (cat) => {
+    saveEquipmentCategories([...equipmentCategories, cat]);
+  };
+
+  const handleEditEquipmentCategory = (oldCat, newCat) => {
+    saveEquipmentCategories(equipmentCategories.map(c => c === oldCat ? newCat : c));
+    // Sync assets
+    saveAssetsToStateAndStorage(assets.map(a => 
+      (a.asset_type === 'EQUIPMENT' && a.category === oldCat) 
+        ? { ...a, category: newCat } 
+        : a
+    ));
+  };
+
+  const handleDeleteEquipmentCategory = (cat) => {
+    saveEquipmentCategories(equipmentCategories.filter(c => c !== cat));
+  };
+
+  const handleAddAgency = (agency) => {
+    saveAgencies([...agencies, agency]);
+  };
+
+  const handleEditAgency = (oldAgency, newAgency) => {
+    saveAgencies(agencies.map(a => a === oldAgency ? newAgency : a));
+    // Sync assets' custodian history entries and flat budget_owner
+    saveAssetsToStateAndStorage(assets.map(a => {
+      let changed = false;
+      let updatedHistory = a.custodian_history;
+      if (a.custodian_history && a.custodian_history.length > 0) {
+        updatedHistory = a.custodian_history.map(ch => {
+          if (ch.budget_owner === oldAgency) {
+            changed = true;
+            return { ...ch, budget_owner: newAgency };
+          }
+          return ch;
+        });
+      }
+      let finalBudgetOwner = a.budget_owner;
+      if (a.budget_owner === oldAgency) {
+        changed = true;
+        finalBudgetOwner = newAgency;
+      }
+      return changed ? { ...a, budget_owner: finalBudgetOwner, custodian_history: updatedHistory } : a;
+    }));
+  };
+
+  const handleDeleteAgency = (agency) => {
+    saveAgencies(agencies.filter(a => a !== agency));
   };
 
   // Navigation helper from Centered Landing
@@ -515,10 +657,11 @@ export default function App() {
                 ➕ ลงทะเบียนครุภัณฑ์ใหม่
               </button>
             </div>
-            <AssetTable
+             <AssetTable
               assets={assets}
               onEditAsset={handleOpenEditForm}
               onDeleteAsset={handleDeleteAsset}
+              onPrintAsset={(item) => setPrintingAsset(item)}
               initialSearchQuery={searchQueryFromLanding}
             />
           </div>
@@ -539,6 +682,7 @@ export default function App() {
             onNavigate={handleNavigateFromLanding}
             onAddClick={handleOpenAddForm}
             onEditAsset={handleOpenEditForm}
+            landingBadgeText={landingBadgeText}
           />
         )}
 
@@ -559,6 +703,16 @@ export default function App() {
             positions={positions}
             brands={brands}
             locations={locations}
+            landingBadgeText={landingBadgeText}
+            onSaveLandingBadge={handleSaveLandingBadge}
+            landBuildingCategories={landBuildingCategories}
+            equipmentCategories={equipmentCategories}
+            onAddLandCategory={handleAddLandCategory}
+            onEditLandCategory={handleEditLandCategory}
+            onDeleteLandCategory={handleDeleteLandCategory}
+            onAddEquipmentCategory={handleAddEquipmentCategory}
+            onEditEquipmentCategory={handleEditEquipmentCategory}
+            onDeleteEquipmentCategory={handleDeleteEquipmentCategory}
             onAddCustodian={handleAddCustodian}
             onEditCustodian={handleEditCustodian}
             onDeleteCustodian={handleDeleteCustodian}
@@ -577,6 +731,10 @@ export default function App() {
             onAddLocation={handleAddLocation}
             onEditLocation={handleEditLocation}
             onDeleteLocation={handleDeleteLocation}
+            agencies={agencies}
+            onAddAgency={handleAddAgency}
+            onEditAgency={handleEditAgency}
+            onDeleteAgency={handleDeleteAgency}
           />
         )}
       </BaseLayout>
@@ -588,8 +746,19 @@ export default function App() {
           custodians={custodians}
           brands={brands}
           locations={locations}
+          landBuildingCategories={landBuildingCategories}
+          equipmentCategories={equipmentCategories}
+          agencies={agencies}
+          positions={positions}
           onSubmit={handleSubmitForm}
           onClose={() => setIsFormOpen(false)}
+        />
+      )}
+
+      {printingAsset && (
+        <InventoryPrint
+          asset={printingAsset}
+          onClose={() => setPrintingAsset(null)}
         />
       )}
 

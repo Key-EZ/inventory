@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useState, useMemo, useEffect } from 'react';
 
-export default function AssetTable({ assets, onEditAsset, onDeleteAsset, initialSearchQuery = '' }) {
+export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onPrintAsset, initialSearchQuery = '' }) {
   // Filter & Search states
   const [search, setSearch] = useState(initialSearchQuery);
   const [filterType, setFilterType] = useState('ทั้งหมด');
@@ -270,6 +270,9 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, initial
                     </td>
                     <td className="text-center">
                       <div className="table-actions">
+                        <button className="btn-table-print" onClick={() => onPrintAsset && onPrintAsset(item)} title="พิมพ์เอกสาร">
+                          🖨️ พิมพ์
+                        </button>
                         <button className="btn-table-edit" onClick={() => onEditAsset(item)} title="แก้ไขข้อมูล">
                           ✏️ แก้ไข
                         </button>
