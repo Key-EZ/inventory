@@ -24,6 +24,7 @@ export default function AssetForm({
   landBuildingCategories = [],
   equipmentCategories = [],
   agencies = [],
+  positions = [],
   onSubmit,
   onClose
 }) {
@@ -574,12 +575,22 @@ export default function AssetForm({
                   </div>
                   <div className="form-group">
                     <label>ชื่อหัวหน้าส่วน *</label>
-                    <input
-                      type="text"
-                      value={custHistorySectionHead}
-                      onChange={(e) => setCustHistorySectionHead(e.target.value)}
-                      placeholder="เช่น ผู้อำนวยการกองช่าง"
-                    />
+                    {positions.length > 0 ? (
+                      <select
+                        value={custHistorySectionHead}
+                        onChange={(e) => setCustHistorySectionHead(e.target.value)}
+                        required
+                      >
+                        <option value="">-- เลือกตำแหน่งหัวหน้าส่วน --</option>
+                        {positions.map(pos => (
+                          <option key={pos} value={pos}>{pos}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <select disabled value="">
+                        <option value="">-- ไม่มีข้อมูลรายชื่อตำแหน่งในระบบ --</option>
+                      </select>
+                    )}
                   </div>
                 </div>
                 <button

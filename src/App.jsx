@@ -749,6 +749,7 @@ export default function App() {
           landBuildingCategories={landBuildingCategories}
           equipmentCategories={equipmentCategories}
           agencies={agencies}
+          positions={positions}
           onSubmit={handleSubmitForm}
           onClose={() => setIsFormOpen(false)}
         />
