@@ -206,7 +206,7 @@ export default function AssetForm({
 
   // --- Custodian History Operations ---
   const handleAddOrEditCustodianHistory = () => {
-    if (!custHistoryYear.trim() || !custHistoryBudgetOwner.trim() || !custHistoryCustodian.trim() || !custHistorySectionHead.trim()) {
+    if (!custHistoryYear.trim() || !custHistoryBudgetOwner.trim() || !custHistorySectionHead.trim()) {
       alert('กรุณากรอกข้อมูลผู้ใช้-ดูแล-รับผิดชอบพัสดุให้ครบถ้วน');
       return;
     }
@@ -217,7 +217,7 @@ export default function AssetForm({
         id: editingCustHistoryId,
         year: custHistoryYear.trim(),
         budget_owner: custHistoryBudgetOwner.trim(),
-        custodian_name: custHistoryCustodian.trim(),
+        custodian_name: custHistoryCustodian ? custHistoryCustodian.trim() : '',
         section_head: custHistorySectionHead.trim()
       } : ch));
       setEditingCustHistoryId(null);
@@ -227,7 +227,7 @@ export default function AssetForm({
         id: `custhist-${Date.now()}`,
         year: custHistoryYear.trim(),
         budget_owner: custHistoryBudgetOwner.trim(),
-        custodian_name: custHistoryCustodian.trim(),
+        custodian_name: custHistoryCustodian ? custHistoryCustodian.trim() : '',
         section_head: custHistorySectionHead.trim()
       };
       setCustodianHistory([...custodianHistory, newCustHist]);
@@ -494,7 +494,7 @@ export default function AssetForm({
               {/* Main Asset location & department assignment */}
               <div className="form-row" style={{ marginBottom: '20px' }}>
                 <div className="form-group col">
-                  <label>ที่ตั้งพัสดุ / แหล่งเก็บใบส่งของ *</label>
+                  <label>ที่ตั้งพัสดุ*</label>
                   <select
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
@@ -507,7 +507,7 @@ export default function AssetForm({
                   </select>
                 </div>
                 <div className="form-group col">
-                  <label>ส่วนราชการที่รับดูแลรับผิดชอบ *</label>
+                  <label>ส่วนราชการเจ้าของพัสดุ *</label>
                   <select
                     value={responsibleDepartment}
                     onChange={(e) => setResponsibleDepartment(e.target.value)}
@@ -544,22 +544,21 @@ export default function AssetForm({
                     />
                   </div>
                   <div className="form-group">
-                    <label>ชื่อผู้รับผิดชอบดูแล *</label>
+                    <label>ชื่อผู้รับผิดชอบดูแล</label>
                     {custodians.length > 0 ? (
                       <select
                         value={custHistoryCustodian}
                         onChange={(e) => setCustHistoryCustodian(e.target.value)}
-                        required
                       >
-                        <option value="">-- เลือกผู้รับผิดชอบดูแล --</option>
+                        <option value="">-- เลือกผู้รับผิดชอบดูแล (ถ้ามี) --</option>
                         {custodians.map(c => (
                           <option key={c.id} value={c.name}>{c.name} ({c.position || '-'})</option>
                         ))}
                       </select>
                     ) : (
-                      <div className="read-only-box" style={{ color: 'var(--status-pending-text)', padding: '8px 12px', border: '1px dashed var(--border-color)', borderRadius: '6px' }}>
-                        ⚠️ กรุณาไปเพิ่มข้อมูลผู้รับผิดชอบดูแลในหน้าการตั้งค่าก่อน
-                      </div>
+                      <select disabled value="">
+                        <option value="">-- ไม่มีข้อมูลรายชื่อผู้ดูแลในระบบ --</option>
+                      </select>
                     )}
                   </div>
                   <div className="form-group">
@@ -576,7 +575,6 @@ export default function AssetForm({
                   type="button"
                   className="button-primary maint-add-btn"
                   onClick={handleAddOrEditCustodianHistory}
-                  disabled={custodians.length === 0}
                 >
                   {editingCustHistoryId ? 'บันทึกการแก้ไข' : 'บันทึกรายการเพิ่ม'}
                 </button>
@@ -617,7 +615,7 @@ export default function AssetForm({
                           <td className="text-center">{idx + 1}</td>
                           <td className="text-center">{item.year}</td>
                           <td>{item.budget_owner}</td>
-                          <td>{item.custodian_name}</td>
+                          <td>{item.custodian_name || '-'}</td>
                           <td>{item.section_head}</td>
                           <td className="text-center">
                             <div className="maint-row-actions">
