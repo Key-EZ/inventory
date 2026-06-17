@@ -18,6 +18,7 @@ const formatAssetCode = (value) => {
 
 export default function AssetForm({
   asset,
+  custodians = [],
   brands = [],
   locations = [],
   landBuildingCategories = [],
@@ -72,6 +73,14 @@ export default function AssetForm({
   const [maintContractor, setMaintContractor] = useState('');
   const [editingMaintId, setEditingMaintId] = useState(null);
 
+  // Custodian History CRUD states
+  const [custodianHistory, setCustodianHistory] = useState([]);
+  const [custHistoryYear, setCustHistoryYear] = useState('');
+  const [custHistoryBudgetOwner, setCustHistoryBudgetOwner] = useState('');
+  const [custHistoryCustodian, setCustHistoryCustodian] = useState('');
+  const [custHistorySectionHead, setCustHistorySectionHead] = useState('');
+  const [editingCustHistoryId, setEditingCustHistoryId] = useState(null);
+
   // Initialize form
   useEffect(() => {
     if (asset) {
@@ -100,6 +109,7 @@ export default function AssetForm({
 
       setStatus(asset.status || 'ใช้งาน');
       setMaintenances(asset.maintenances || []);
+      setCustodianHistory(asset.custodian_history || []);
     } else {
       // Clear/Reset for new asset
       setAssetType('EQUIPMENT');
@@ -124,6 +134,7 @@ export default function AssetForm({
       setWarrantyDetail('');
       setStatus('ใช้งาน');
       setMaintenances([]);
+      setCustodianHistory([]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [asset]);
@@ -193,6 +204,63 @@ export default function AssetForm({
     }
   };
 
+  // --- Custodian History Operations ---
+  const handleAddOrEditCustodianHistory = () => {
+    if (!custHistoryYear.trim() || !custHistoryBudgetOwner.trim() || !custHistoryCustodian.trim() || !custHistorySectionHead.trim()) {
+      alert('กรุณากรอกข้อมูลผู้ใช้-ดูแล-รับผิดชอบพัสดุให้ครบถ้วน');
+      return;
+    }
+
+    if (editingCustHistoryId) {
+      // Edit
+      setCustodianHistory(custodianHistory.map(ch => ch.id === editingCustHistoryId ? {
+        id: editingCustHistoryId,
+        year: custHistoryYear.trim(),
+        budget_owner: custHistoryBudgetOwner.trim(),
+        custodian_name: custHistoryCustodian.trim(),
+        section_head: custHistorySectionHead.trim()
+      } : ch));
+      setEditingCustHistoryId(null);
+    } else {
+      // Add new
+      const newCustHist = {
+        id: `custhist-${Date.now()}`,
+        year: custHistoryYear.trim(),
+        budget_owner: custHistoryBudgetOwner.trim(),
+        custodian_name: custHistoryCustodian.trim(),
+        section_head: custHistorySectionHead.trim()
+      };
+      setCustodianHistory([...custodianHistory, newCustHist]);
+    }
+
+    // Reset entry inputs
+    setCustHistoryYear('');
+    setCustHistoryBudgetOwner('');
+    setCustHistoryCustodian('');
+    setCustHistorySectionHead('');
+  };
+
+  const handleEditCustHistoryClick = (item) => {
+    setEditingCustHistoryId(item.id);
+    setCustHistoryYear(item.year || '');
+    setCustHistoryBudgetOwner(item.budget_owner || '');
+    setCustHistoryCustodian(item.custodian_name || '');
+    setCustHistorySectionHead(item.section_head || '');
+  };
+
+  const handleDeleteCustHistoryClick = (id) => {
+    if (window.confirm('คุณแน่ใจว่าต้องการลบประวัติผู้รับผิดชอบดูแลพัสดุรายการนี้ใช่หรือไม่?')) {
+      setCustodianHistory(custodianHistory.filter(ch => ch.id !== id));
+      if (editingCustHistoryId === id) {
+        setEditingCustHistoryId(null);
+        setCustHistoryYear('');
+        setCustHistoryBudgetOwner('');
+        setCustHistoryCustodian('');
+        setCustHistorySectionHead('');
+      }
+    }
+  };
+
   // Submit Handler
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -243,7 +311,10 @@ export default function AssetForm({
       book_value: bookValue,
 
       // Maintenances sub-table list
-      maintenances: maintenances
+      maintenances: maintenances,
+
+      // Custodian history list
+      custodian_history: custodianHistory
     };
 
     onSubmit(payload);
@@ -268,24 +339,31 @@ export default function AssetForm({
           </button>
           <button
             type="button"
+            className={`tab-btn ${activeTab === 'custodian_history' ? 'active' : ''}`}
+            onClick={() => setActiveTab('custodian_history')}
+          >
+            2. ชื่อผู้ใช้-ดูแล-รับผิดชอบพัสดุ ({custodianHistory.length})
+          </button>
+          <button
+            type="button"
             className={`tab-btn ${activeTab === 'spec' ? 'active' : ''}`}
             onClick={() => setActiveTab('spec')}
           >
-            2. รายละเอียดเฉพาะ ({assetType === 'LAND_BUILDING' ? 'พ.ด.1' : 'พ.ด.2'})
+            3. รายละเอียดเฉพาะ ({assetType === 'LAND_BUILDING' ? 'พ.ด.1' : 'พ.ด.2'})
           </button>
           <button
             type="button"
             className={`tab-btn ${activeTab === 'financial' ? 'active' : ''}`}
             onClick={() => setActiveTab('financial')}
           >
-            3. ค่าเสื่อมราคา
+            4. ค่าเสื่อมราคา
           </button>
           <button
             type="button"
             className={`tab-btn ${activeTab === 'maintenances' ? 'active' : ''}`}
             onClick={() => setActiveTab('maintenances')}
           >
-            4. ประวัติซ่อมบำรุง ({maintenances.length})
+            5. ประวัติซ่อมบำรุง ({maintenances.length})
           </button>
         </div>
 
@@ -354,6 +432,19 @@ export default function AssetForm({
                     <option value="จำหน่ายแล้ว">จำหน่ายแล้ว</option>
                   </select>
                 </div>
+                <div className="form-group col">
+                  <label>ลักษณะที่ได้กรรมสิทธิ์ *</label>
+                  <select
+                    value={acquisitionMethod}
+                    onChange={(e) => setAcquisitionMethod(e.target.value)}
+                    required
+                  >
+                    <option value="ซื้อ">ซื้อ</option>
+                    <option value="จ้าง">จ้าง</option>
+                    <option value="รับโอน">รับโอน</option>
+                    <option value="บริจาค">บริจาค</option>
+                  </select>
+                </div>
               </div>
 
               <div className="form-row">
@@ -368,19 +459,7 @@ export default function AssetForm({
                     required
                   />
                 </div>
-                <div className="form-group col">
-                  <label>ลักษณะที่ได้กรรมสิทธิ์ *</label>
-                  <select
-                    value={acquisitionMethod}
-                    onChange={(e) => setAcquisitionMethod(e.target.value)}
-                    required
-                  >
-                    <option value="ซื้อ">ซื้อ</option>
-                    <option value="จ้าง">จ้าง</option>
-                    <option value="รับโอน">รับโอน</option>
-                    <option value="บริจาค">บริจาค</option>
-                  </select>
-                </div>
+
               </div>
 
               <div className="form-row">
@@ -436,7 +515,154 @@ export default function AssetForm({
             </div>
           )}
 
-          {/* TAB 2: Specific Fields */}
+          {/* TAB 2: Custodian History */}
+          {activeTab === 'custodian_history' && (
+            <div className="tab-panel animate-fade-in">
+              <div className="info-alert">
+                <strong>👤 ชื่อผู้ใช้-ดูแล-รับผิดชอบพัสดุ:</strong> บันทึกประวัติเจ้าหน้าที่ผู้ได้รับมอบหมายให้ปกปักรักษา รับผิดชอบดูแล หรือผู้ใช้งานพัสดุ/ครุภัณฑ์ชิ้นนี้
+              </div>
+
+              {/* Add/Edit Sub-Form */}
+              <div className="maint-entry-box">
+                <h4>{editingCustHistoryId ? '✏️ แก้ไขข้อมูลผู้รับผิดชอบ' : '➕ เพิ่มผู้รับผิดชอบดูแล'}</h4>
+                <div className="maint-form-grid">
+                  <div className="form-group">
+                    <label>ปี พ.ศ. *</label>
+                    <input
+                      type="text"
+                      value={custHistoryYear}
+                      onChange={(e) => setCustHistoryYear(e.target.value)}
+                      placeholder="เช่น 2569"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>เจ้าของงบประมาณ *</label>
+                    <input
+                      type="text"
+                      value={custHistoryBudgetOwner}
+                      onChange={(e) => setCustHistoryBudgetOwner(e.target.value)}
+                      placeholder="เช่น งบดำเนินงานปกติ"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>ชื่อผู้รับผิดชอบดูแล *</label>
+                    {custodians.length > 0 ? (
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <select
+                          value={custHistoryCustodian}
+                          onChange={(e) => setCustHistoryCustodian(e.target.value)}
+                          style={{ flex: 1 }}
+                        >
+                          <option value="">-- เลือกจากผู้รับผิดชอบดูแล --</option>
+                          {custodians.map(c => (
+                            <option key={c.id} value={c.name}>{c.name} ({c.position})</option>
+                          ))}
+                        </select>
+                        <input
+                          type="text"
+                          value={custHistoryCustodian}
+                          onChange={(e) => setCustHistoryCustodian(e.target.value)}
+                          placeholder="หรือระบุชื่อเอง"
+                          style={{ width: '40%' }}
+                        />
+                      </div>
+                    ) : (
+                      <input
+                        type="text"
+                        value={custHistoryCustodian}
+                        onChange={(e) => setCustHistoryCustodian(e.target.value)}
+                        placeholder="เช่น นายสมเกียรติ ใจซื่อ"
+                      />
+                    )}
+                  </div>
+                  <div className="form-group">
+                    <label>ชื่อหัวหน้าส่วน *</label>
+                    <input
+                      type="text"
+                      value={custHistorySectionHead}
+                      onChange={(e) => setCustHistorySectionHead(e.target.value)}
+                      placeholder="เช่น ผู้อำนวยการกองช่าง"
+                    />
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="button-primary maint-add-btn"
+                  onClick={handleAddOrEditCustodianHistory}
+                >
+                  {editingCustHistoryId ? 'บันทึกการแก้ไข' : 'บันทึกรายการเพิ่ม'}
+                </button>
+                {editingCustHistoryId && (
+                  <button
+                    type="button"
+                    className="button-secondary maint-cancel-btn"
+                    onClick={() => {
+                      setEditingCustHistoryId(null);
+                      setCustHistoryYear('');
+                      setCustHistoryBudgetOwner('');
+                      setCustHistoryCustodian('');
+                      setCustHistorySectionHead('');
+                    }}
+                  >
+                    ยกเลิกแก้ไข
+                  </button>
+                )}
+              </div>
+
+              {/* Custodian History Table */}
+              <div className="maint-table-container">
+                <table className="maint-log-table">
+                  <thead>
+                    <tr>
+                      <th style={{ width: '8%' }}>ครั้งที่</th>
+                      <th style={{ width: '12%' }}>ปี พ.ศ.</th>
+                      <th style={{ width: '25%' }}>เจ้าของงบประมาณ</th>
+                      <th style={{ width: '25%' }}>ชื่อผู้รับผิดชอบดูแล</th>
+                      <th style={{ width: '20%' }}>ชื่อหัวหน้าส่วน</th>
+                      <th style={{ width: '10%' }} className="text-center">จัดการ</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {custodianHistory.length > 0 ? (
+                      custodianHistory.map((item, idx) => (
+                        <tr key={item.id}>
+                          <td className="text-center">{idx + 1}</td>
+                          <td className="text-center">{item.year}</td>
+                          <td>{item.budget_owner}</td>
+                          <td>{item.custodian_name}</td>
+                          <td>{item.section_head}</td>
+                          <td className="text-center">
+                            <div className="maint-row-actions">
+                              <span
+                                className="action-maint-edit"
+                                onClick={() => handleEditCustHistoryClick(item)}
+                                title="แก้ไขรายการ"
+                              >
+                                ✏️
+                              </span>
+                              <span
+                                className="action-maint-delete"
+                                onClick={() => handleDeleteCustHistoryClick(item.id)}
+                                title="ลบรายการ"
+                              >
+                                🗑️
+                              </span>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="6" className="text-center text-muted py-8 font-italic">ยังไม่มีรายการผู้รับผิดชอบดูแลสำหรับทรัพย์สินนี้</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: Specific Fields */}
           {activeTab === 'spec' && (
             <div className="tab-panel">
               {assetType === 'LAND_BUILDING' ? (
@@ -730,7 +956,8 @@ export default function AssetForm({
                   className="btn-prev"
                   type="button"
                   onClick={() => {
-                    if (activeTab === 'spec') setActiveTab('general');
+                    if (activeTab === 'custodian_history') setActiveTab('general');
+                    if (activeTab === 'spec') setActiveTab('custodian_history');
                     if (activeTab === 'financial') setActiveTab('spec');
                     if (activeTab === 'maintenances') setActiveTab('financial');
                   }}
@@ -743,7 +970,8 @@ export default function AssetForm({
                   className="btn-next-tab button-primary"
                   type="button"
                   onClick={() => {
-                    if (activeTab === 'general') setActiveTab('spec');
+                    if (activeTab === 'general') setActiveTab('custodian_history');
+                    else if (activeTab === 'custodian_history') setActiveTab('spec');
                     else if (activeTab === 'spec') setActiveTab('financial');
                     else if (activeTab === 'financial') setActiveTab('maintenances');
                   }}
