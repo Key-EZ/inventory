@@ -113,7 +113,7 @@ export default function CenteredLanding({ assets, onNavigate, onAddClick, onEdit
           className="button-primary landing-action-btn"
           onClick={onAddClick}
         >
-          ➕ ลงทะเบียนจัดหาพัสดุใหม่
+          ➕ ลงทะเบียนพัสดุ
         </button>
         <button
           className="landing-action-btn btn-secondary-outline"

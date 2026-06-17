@@ -3,23 +3,7 @@ import { useState, useEffect } from 'react';
 import { calculateDepreciation } from '../utils/depreciation';
 import { defaultDepartments } from '../utils/mockData';
 
-const LAND_BUILDING_CATEGORIES = [
-  'ที่ดินที่มีกรรมสิทธิ์',
-  'อาคารสำนักงาน',
-  'สิ่งปลูกสร้าง'
-];
 
-const EQUIPMENT_CATEGORIES = [
-  'ครุภัณฑ์สำนักงาน',
-  'ครุภัณฑ์คอมพิวเตอร์',
-  'ครุภัณฑ์ยานพาหนะและขนส่ง',
-  'ครุภัณฑ์ไฟฟ้าและวิทยุ',
-  'ครุภัณฑ์โฆษณาและเผยแพร่',
-  'ครุภัณฑ์งานบ้านงานครัว',
-  'ครุภัณฑ์วิทยาศาสตร์และการแพทย์',
-  'ครุภัณฑ์กีฬา',
-  'สินทรัพย์ไม่มีตัวตนอื่น'
-];
 
 const formatAssetCode = (value) => {
   const clean = value.replace(/\D/g, '');
@@ -32,7 +16,15 @@ const formatAssetCode = (value) => {
   return truncated;
 };
 
-export default function AssetForm({ asset, brands = [], locations = [], onSubmit, onClose }) {
+export default function AssetForm({
+  asset,
+  brands = [],
+  locations = [],
+  landBuildingCategories = [],
+  equipmentCategories = [],
+  onSubmit,
+  onClose
+}) {
   const isEdit = !!asset;
 
   // Tabs: 'general', 'spec', 'financial', 'maintenances'
@@ -111,7 +103,7 @@ export default function AssetForm({ asset, brands = [], locations = [], onSubmit
     } else {
       // Clear/Reset for new asset
       setAssetType('EQUIPMENT');
-      setCategory('ครุภัณฑ์สำนักงาน');
+      setCategory(equipmentCategories[0] || '');
       setAssetCode('');
       setName('');
       setLocation('');
@@ -133,6 +125,7 @@ export default function AssetForm({ asset, brands = [], locations = [], onSubmit
       setStatus('ใช้งาน');
       setMaintenances([]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [asset]);
 
   // Recalculate depreciation live when price or code changes
@@ -308,7 +301,7 @@ export default function AssetForm({ asset, brands = [], locations = [], onSubmit
                     onChange={(e) => {
                       const newType = e.target.value;
                       setAssetType(newType);
-                      setCategory(newType === 'LAND_BUILDING' ? 'ที่ดินที่มีกรรมสิทธิ์' : 'ครุภัณฑ์สำนักงาน');
+                      setCategory(newType === 'LAND_BUILDING' ? (landBuildingCategories[0] || '') : (equipmentCategories[0] || ''));
                     }}
                     required
                   >
@@ -324,7 +317,7 @@ export default function AssetForm({ asset, brands = [], locations = [], onSubmit
                     required
                   >
                     <option value="">-- เลือกหมวดหมู่ --</option>
-                    {(assetType === 'LAND_BUILDING' ? LAND_BUILDING_CATEGORIES : EQUIPMENT_CATEGORIES).map(cat => (
+                    {(assetType === 'LAND_BUILDING' ? landBuildingCategories : equipmentCategories).map(cat => (
                       <option key={cat} value={cat}>{cat}</option>
                     ))}
                   </select>
@@ -348,7 +341,7 @@ export default function AssetForm({ asset, brands = [], locations = [], onSubmit
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="เช่น โครงการก่อสร้างถนนคอนกรีต, รถยนต์เอนกประสงค์, กล้องวงจรปิด"
+                    placeholder="เช่น รถยนต์เอนกประสงค์, กล้องวงจรปิด"
                     required
                   />
                 </div>

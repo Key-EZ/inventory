@@ -8,7 +8,7 @@ import CenteredLanding from './components/CenteredLanding';
 import SettingsPanel from './components/SettingsPanel';
 import ReportPanel from './components/ReportPanel';
 import InventoryPrint from './components/InventoryPrint';
-import { getSeedAssets, defaultDivisions, defaultDepartments, defaultCustodians, defaultPositions, defaultBrands, defaultLocations } from './utils/mockData';
+import { getSeedAssets, defaultDivisions, defaultDepartments, defaultCustodians, defaultPositions, defaultBrands, defaultLocations, defaultLandBuildingCategories, defaultEquipmentCategories } from './utils/mockData';
 
 export default function App() {
   // --- States ---
@@ -29,6 +29,8 @@ export default function App() {
   const [brands, setBrands] = useState([]);
   const [locations, setLocations] = useState([]);
   const [landingBadgeText, setLandingBadgeText] = useState('ระบบดิจิทัลบริหารทรัพย์สิน');
+  const [landBuildingCategories, setLandBuildingCategories] = useState([]);
+  const [equipmentCategories, setEquipmentCategories] = useState([]);
 
   // --- Initial Load ---
   useEffect(() => {
@@ -148,6 +150,32 @@ export default function App() {
     if (savedBadge) {
       setLandingBadgeText(savedBadge);
     }
+
+    // 11. Load land/building categories
+    const savedLandCats = localStorage.getItem('inventory_land_building_categories');
+    if (savedLandCats) {
+      try {
+        setLandBuildingCategories(JSON.parse(savedLandCats));
+      } catch (e) {
+        setLandBuildingCategories(defaultLandBuildingCategories);
+      }
+    } else {
+      setLandBuildingCategories(defaultLandBuildingCategories);
+      localStorage.setItem('inventory_land_building_categories', JSON.stringify(defaultLandBuildingCategories));
+    }
+
+    // 12. Load equipment categories
+    const savedEquipCats = localStorage.getItem('inventory_equipment_categories');
+    if (savedEquipCats) {
+      try {
+        setEquipmentCategories(JSON.parse(savedEquipCats));
+      } catch (e) {
+        setEquipmentCategories(defaultEquipmentCategories);
+      }
+    } else {
+      setEquipmentCategories(defaultEquipmentCategories);
+      localStorage.setItem('inventory_equipment_categories', JSON.stringify(defaultEquipmentCategories));
+    }
   }, []);
 
   // --- Helpers ---
@@ -228,6 +256,8 @@ export default function App() {
       savePositions(defaultPositions);
       saveBrands(defaultBrands);
       saveLocations(defaultLocations);
+      saveLandBuildingCategories(defaultLandBuildingCategories);
+      saveEquipmentCategories(defaultEquipmentCategories);
       alert('โหลดข้อมูลตัวอย่างเรียบร้อยแล้ว');
     }
   };
@@ -261,6 +291,16 @@ export default function App() {
   const saveLocations = (list) => {
     setLocations(list);
     localStorage.setItem('inventory_locations', JSON.stringify(list));
+  };
+
+  const saveLandBuildingCategories = (list) => {
+    setLandBuildingCategories(list);
+    localStorage.setItem('inventory_land_building_categories', JSON.stringify(list));
+  };
+
+  const saveEquipmentCategories = (list) => {
+    setEquipmentCategories(list);
+    localStorage.setItem('inventory_equipment_categories', JSON.stringify(list));
   };
 
   const handleAddCustodian = (cust) => {
@@ -354,6 +394,42 @@ export default function App() {
 
   const handleDeleteLocation = (loc) => {
     saveLocations(locations.filter(l => l !== loc));
+  };
+
+  const handleAddLandCategory = (cat) => {
+    saveLandBuildingCategories([...landBuildingCategories, cat]);
+  };
+
+  const handleEditLandCategory = (oldCat, newCat) => {
+    saveLandBuildingCategories(landBuildingCategories.map(c => c === oldCat ? newCat : c));
+    // Sync assets
+    saveAssetsToStateAndStorage(assets.map(a => 
+      (a.asset_type === 'LAND_BUILDING' && a.category === oldCat) 
+        ? { ...a, category: newCat } 
+        : a
+    ));
+  };
+
+  const handleDeleteLandCategory = (cat) => {
+    saveLandBuildingCategories(landBuildingCategories.filter(c => c !== cat));
+  };
+
+  const handleAddEquipmentCategory = (cat) => {
+    saveEquipmentCategories([...equipmentCategories, cat]);
+  };
+
+  const handleEditEquipmentCategory = (oldCat, newCat) => {
+    saveEquipmentCategories(equipmentCategories.map(c => c === oldCat ? newCat : c));
+    // Sync assets
+    saveAssetsToStateAndStorage(assets.map(a => 
+      (a.asset_type === 'EQUIPMENT' && a.category === oldCat) 
+        ? { ...a, category: newCat } 
+        : a
+    ));
+  };
+
+  const handleDeleteEquipmentCategory = (cat) => {
+    saveEquipmentCategories(equipmentCategories.filter(c => c !== cat));
   };
 
   // Navigation helper from Centered Landing
@@ -577,6 +653,14 @@ export default function App() {
             locations={locations}
             landingBadgeText={landingBadgeText}
             onSaveLandingBadge={handleSaveLandingBadge}
+            landBuildingCategories={landBuildingCategories}
+            equipmentCategories={equipmentCategories}
+            onAddLandCategory={handleAddLandCategory}
+            onEditLandCategory={handleEditLandCategory}
+            onDeleteLandCategory={handleDeleteLandCategory}
+            onAddEquipmentCategory={handleAddEquipmentCategory}
+            onEditEquipmentCategory={handleEditEquipmentCategory}
+            onDeleteEquipmentCategory={handleDeleteEquipmentCategory}
             onAddCustodian={handleAddCustodian}
             onEditCustodian={handleEditCustodian}
             onDeleteCustodian={handleDeleteCustodian}
@@ -606,6 +690,8 @@ export default function App() {
           custodians={custodians}
           brands={brands}
           locations={locations}
+          landBuildingCategories={landBuildingCategories}
+          equipmentCategories={equipmentCategories}
           onSubmit={handleSubmitForm}
           onClose={() => setIsFormOpen(false)}
         />
