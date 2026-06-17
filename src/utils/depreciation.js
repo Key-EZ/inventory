@@ -1,51 +1,83 @@
 /**
- * Calculates straight-line depreciation for an asset.
+ * Calculates straight-line depreciation for an asset based on code-parsed acquisition year and price.
  * 
- * @param {string} acquisitionDateStr - Date in YYYY-MM-DD format
- * @param {number} costPrice - Original price of the asset
- * @param {number} depreciationRatePercent - Annual depreciation rate (e.g. 20%)
+ * @param {string} assetCode - Code in XXX-YY-ZZZZ format
+ * @param {number} unitPrice - Price per unit
  * @param {string} [asOfDateStr] - Target date for calculation (default is today)
- * @returns {Object} { accumulatedDepreciation, bookValue }
+ * @returns {Object} { accumulatedDepreciation, bookValue, depreciationRatePercent }
  */
-export function calculateDepreciation(acquisitionDateStr, costPrice, depreciationRatePercent, asOfDateStr) {
-  const cost = parseFloat(costPrice) || 0;
-  const rate = parseFloat(depreciationRatePercent) || 0;
-  
-  if (cost <= 0) {
-    return { accumulatedDepreciation: 0, bookValue: 0 };
+export function calculateDepreciation(assetCode, unitPrice, asOfDateStr) {
+  const price = parseFloat(unitPrice) || 0;
+  if (price <= 0) {
+    return { accumulatedDepreciation: 0, bookValue: 0, depreciationRatePercent: 0 };
   }
 
-  const acquisitionDate = new Date(acquisitionDateStr);
+  const code = String(assetCode || '');
+  const parts = code.split('-');
+  
+  let categoryCode = '311';
+  let acquisitionYearBE = 67;
+  
+  if (parts.length >= 2) {
+    categoryCode = parts[0].trim();
+    acquisitionYearBE = parseInt(parts[1].trim()) || 67;
+  } else {
+    const match = code.match(/^(\d{3})(\d{2})/);
+    if (match) {
+      categoryCode = match[1];
+      acquisitionYearBE = parseInt(match[2]) || 67;
+    }
+  }
+
+  // Determine depreciation rate by local gov standard prefix codes
+  let rate = 10; // Default 10%
+  if (categoryCode === '101') {
+    rate = 0;   // Land (ที่ดิน) has 0% depreciation
+  } else if (categoryCode === '102' || categoryCode === '103') {
+    rate = 5;   // Buildings / Structures 5%
+  } else if (categoryCode === '412') {
+    rate = 20;  // Computer hardware 20%
+  } else if (categoryCode === '312') {
+    rate = 20;  // Vehicles 20%
+  } else if (categoryCode === '313') {
+    rate = 20;  // Electrical/Radio 20%
+  }
+
+  if (rate === 0) {
+    return { accumulatedDepreciation: 0, bookValue: price, depreciationRatePercent: 0 };
+  }
+
+  // Calculate year in CE (BE - 543)
+  const fullBE = 2500 + acquisitionYearBE;
+  const ceYear = fullBE - 543;
+
+  // Assume acquisition date is Jan 1st of the year
+  const acquisitionDate = new Date(`${ceYear}-01-01`);
   const targetDate = asOfDateStr ? new Date(asOfDateStr) : new Date();
 
-  // If acquisition date is invalid or in the future
   if (isNaN(acquisitionDate.getTime()) || acquisitionDate > targetDate) {
-    return { accumulatedDepreciation: 0, bookValue: cost };
+    return { accumulatedDepreciation: 0, bookValue: price, depreciationRatePercent: rate };
   }
 
-  // Calculate time difference in days
   const diffTime = Math.abs(targetDate - acquisitionDate);
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   
-  // Straight-line formula (using 365 days a year)
-  const annualDepreciation = cost * (rate / 100);
+  const annualDepreciation = price * (rate / 100);
   const dailyDepreciation = annualDepreciation / 365;
   
   let accumulatedDepreciation = dailyDepreciation * diffDays;
   
-  // Standard accounting rule in Thailand: Salvage value is usually 1 Baht minimum, 
-  // so accumulated depreciation cannot reduce book value below 1 Baht unless disposed.
-  const maxDepreciation = cost - 1; 
+  const maxDepreciation = price - 1; 
   if (accumulatedDepreciation > maxDepreciation) {
     accumulatedDepreciation = maxDepreciation;
   }
 
-  // Round to 2 decimal places
   accumulatedDepreciation = Math.round(accumulatedDepreciation * 100) / 100;
-  const bookValue = Math.max(1, Math.round((cost - accumulatedDepreciation) * 100) / 100);
+  const bookValue = Math.max(1, Math.round((price - accumulatedDepreciation) * 100) / 100);
 
   return {
     accumulatedDepreciation,
-    bookValue
+    bookValue,
+    depreciationRatePercent: rate
   };
 }

@@ -1990,4 +1990,266 @@ body {
   }
 }
 
+/* --- Maintenance Form Tab Styling --- */
+.maint-entry-box {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  padding: 16px;
+  border-radius: var(--border-radius);
+  margin-bottom: 20px;
+}
+
+.maint-entry-box h4 {
+  margin-bottom: 12px;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.maint-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.maint-add-btn {
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  border-radius: 6px;
+}
+
+.maint-cancel-btn {
+  margin-left: 8px;
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  border-radius: 6px;
+}
+
+.maint-table-container {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.maint-log-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.maint-log-table th {
+  background-color: var(--bg-primary);
+  padding: 10px 12px;
+  color: var(--text-muted);
+  border-bottom: 2px solid var(--border-color);
+  font-weight: 600;
+  text-align: left;
+}
+
+.maint-log-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+.maint-row-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.action-maint-edit, .action-maint-delete {
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.action-maint-edit:hover, .action-maint-delete:hover {
+  opacity: 0.7;
+}
+
+/* --- Official Card Print Layout Styling --- */
+.print-only-cards-section {
+  display: none; /* Hidden on screen by default */
+}
+
+.official-card-wrapper {
+  background-color: var(--bg-secondary);
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+}
+
+.theme-pd1-border { border-color: #0d9488 !important; }
+.theme-pd2-border { border-color: #d97706 !important; }
+
+.official-card-header {
+  padding: 14px 20px;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.bg-pd1-header { background-color: #0d9488; }
+.bg-pd2-header { background-color: #d97706; }
+
+.official-card-header h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.card-header-right {
+  font-size: 0.9rem;
+}
+
+.official-card-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-collapse: collapse;
+}
+
+.grid-cell {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+  border-right: 1px solid var(--border-color);
+}
+
+.grid-cell:nth-child(4n) {
+  border-right: none;
+}
+
+.grid-cell.span-2 {
+  grid-column: span 2;
+}
+
+.grid-cell.span-3 {
+  grid-column: span 3;
+}
+
+.grid-cell.span-4 {
+  grid-column: span 4;
+}
+
+.card-cell-label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.card-cell-val {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.card-cell-val.text-lg {
+  font-size: 1.1rem;
+}
+
+.bg-light-row {
+  background-color: var(--bg-primary);
+}
+
+.official-card-grid-inner {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 6px;
+}
+
+/* Card Maintenance Table for Page 2 */
+.card-maint-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.card-maint-table th {
+  background-color: var(--bg-primary);
+  padding: 10px 14px;
+  color: var(--text-muted);
+  border-bottom: 2px solid var(--border-color);
+  font-weight: 600;
+  text-align: left;
+}
+
+.card-maint-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+  height: 38px; /* Force consistent blank row height for printing */
+}
+
+/* Page Break utilities */
+.page-break-before-always {
+  page-break-before: always;
+}
+
+/* --- media print overrides for cards --- */
+@media print {
+  .ledger-table-wrapper {
+    display: none !important; /* Hide summary tables in print */
+  }
+
+  .print-only-cards-section {
+    display: block !important; /* Show cards instead */
+  }
+
+  .print-card-page-break {
+    page-break-after: always;
+  }
+
+  .official-card-wrapper {
+    border: 1px solid #000000 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    margin-bottom: 0 !important;
+  }
+
+  .official-card-header {
+    background-color: #f1f5f9 !important;
+    color: #000000 !important;
+    border-bottom: 1px solid #000000 !important;
+    border-radius: 0 !important;
+    padding: 10px 14px !important;
+  }
+
+  .grid-cell {
+    border-bottom: 1px solid #000000 !important;
+    border-right: 1px solid #000000 !important;
+    padding: 8px 12px !important;
+  }
+
+  .grid-cell:nth-child(4n) {
+    border-right: none !important;
+  }
+
+  .card-maint-table {
+    border: 1px solid #000000 !important;
+  }
+
+  .card-maint-table th {
+    background-color: #f8fafc !important;
+    color: #000000 !important;
+    border-bottom: 1px solid #000000 !important;
+    padding: 8px 12px !important;
+  }
+
+  .card-maint-table td {
+    border-bottom: 1px solid #000000 !important;
+    padding: 8px 12px !important;
+  }
+
+  /* Color resets for print */
+  .cost-color, .text-depreciation, .text-bookvalue {
+    color: #000000 !important;
+  }
+}
+
+
 
