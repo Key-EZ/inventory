@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export default function CenteredLanding({ assets, onNavigate, onAddClick, onEditAsset }) {
+export default function CenteredLanding({ assets, onNavigate, onAddClick, onEditAsset, landingBadgeText }) {
   const [searchQuery, setSearchQuery] = useState('');
 
   const totalCount = assets.length;
@@ -23,8 +23,8 @@ export default function CenteredLanding({ assets, onNavigate, onAddClick, onEdit
     <div className="landing-layout-wrapper">
       {/* App Hero Branding */}
       <div className="landing-hero animate-fade-in">
-        <div className="landing-badge">ระบบดิจิทัลบริหารทรัพย์สิน</div>
-        <h1 className="landing-title">ระบบทะเบียนพัสดุ พ.ด.1 และ พ.ด.2</h1>
+        <div className="landing-badge">{landingBadgeText || 'ระบบดิจิทัลบริหารทรัพย์สิน'}</div>
+        <h1 className="landing-title">ระบบทะเบียนพัสดุ</h1>
         <p className="landing-subtitle">
           จัดการบันทึกทะเบียน ควบคุมบัญชี และประเมินค่าเสื่อมราคาทรัพย์สินตามหลักเกณฑ์ราชการ
         </p>
@@ -83,8 +83,8 @@ export default function CenteredLanding({ assets, onNavigate, onAddClick, onEdit
                       <span className="result-id-badge">{asset.asset_code}</span>
                       <span className="result-name-text">{asset.name}</span>
                       <span className="result-brand-model">
-                        {asset.asset_type === 'LAND_BUILDING' 
-                          ? (asset.document_of_title || 'โฉนด') 
+                        {asset.asset_type === 'LAND_BUILDING'
+                          ? (asset.document_of_title || 'โฉนด')
                           : `${asset.manufacturer_brand || ''} ${asset.serial_number || ''}`}
                       </span>
                     </div>

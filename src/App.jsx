@@ -28,6 +28,7 @@ export default function App() {
   const [positions, setPositions] = useState([]);
   const [brands, setBrands] = useState([]);
   const [locations, setLocations] = useState([]);
+  const [landingBadgeText, setLandingBadgeText] = useState('ระบบดิจิทัลบริหารทรัพย์สิน');
 
   // --- Initial Load ---
   useEffect(() => {
@@ -141,6 +142,12 @@ export default function App() {
       setLocations(defaultLocations);
       localStorage.setItem('inventory_locations', JSON.stringify(defaultLocations));
     }
+
+    // 10. Load landing badge
+    const savedBadge = localStorage.getItem('inventory_landing_badge');
+    if (savedBadge) {
+      setLandingBadgeText(savedBadge);
+    }
   }, []);
 
   // --- Helpers ---
@@ -165,6 +172,11 @@ export default function App() {
     setActiveLayout(layout);
     localStorage.setItem('inventory_layout', layout);
     setIsMobileMenuOpen(false);
+  };
+
+  const handleSaveLandingBadge = (newText) => {
+    setLandingBadgeText(newText);
+    localStorage.setItem('inventory_landing_badge', newText);
   };
 
   // --- CRUD Operations ---
@@ -542,6 +554,7 @@ export default function App() {
             onNavigate={handleNavigateFromLanding}
             onAddClick={handleOpenAddForm}
             onEditAsset={handleOpenEditForm}
+            landingBadgeText={landingBadgeText}
           />
         )}
 
@@ -562,6 +575,8 @@ export default function App() {
             positions={positions}
             brands={brands}
             locations={locations}
+            landingBadgeText={landingBadgeText}
+            onSaveLandingBadge={handleSaveLandingBadge}
             onAddCustodian={handleAddCustodian}
             onEditCustodian={handleEditCustodian}
             onDeleteCustodian={handleDeleteCustodian}

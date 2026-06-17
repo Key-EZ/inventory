@@ -1,4 +1,5 @@
-import { useState } from 'react';
+/* eslint-disable react-hooks/set-state-in-effect */
+import { useState, useEffect } from 'react';
 
 export default function SettingsPanel({
   assets,
@@ -8,6 +9,8 @@ export default function SettingsPanel({
   positions = [],
   brands = [],
   locations = [],
+  landingBadgeText,
+  onSaveLandingBadge,
   onAddCustodian,
   onEditCustodian,
   onDeleteCustodian,
@@ -28,6 +31,13 @@ export default function SettingsPanel({
   onDeleteLocation
 }) {
   const [activeTab, setActiveTab] = useState('custodians'); // 'custodians', 'org', 'options'
+  const [landingBadgeInput, setLandingBadgeInput] = useState(landingBadgeText || 'ระบบดิจิทัลบริหารทรัพย์สิน');
+
+  useEffect(() => {
+    if (landingBadgeText) {
+      setLandingBadgeInput(landingBadgeText);
+    }
+  }, [landingBadgeText]);
   
   // Custodian Form Modal states
   const [isCustFormOpen, setIsCustFormOpen] = useState(false);
@@ -322,6 +332,13 @@ export default function SettingsPanel({
         >
           ⚙️ จัดการตัวเลือก (ตำแหน่ง/ยี่ห้อ/สถานที่)
         </button>
+        <button
+          type="button"
+          className={`tab-btn ${activeTab === 'landing' ? 'active' : ''}`}
+          onClick={() => setActiveTab('landing')}
+        >
+          🏷️ ป้ายชื่อหน้าแรก
+        </button>
       </div>
 
       {/* Tab 1: Custodians list */}
@@ -587,6 +604,43 @@ export default function SettingsPanel({
               )}
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Tab 4: Landing Badge Configuration */}
+      {activeTab === 'landing' && (
+        <div className="layout-card animate-fade-in" style={{ maxWidth: '600px' }}>
+          <h3>🏷️ ตั้งค่าข้อความ Landing Badge</h3>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '16px' }}>
+            แก้ไขข้อความป้ายชื่อ (Badge) ที่แสดงอยู่ด้านบนสุดของหน้าแรก (Landing Page)
+          </p>
+          
+          <div className="form-group" style={{ marginBottom: '16px' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>ข้อความป้ายชื่อ *</label>
+            <input
+              type="text"
+              value={landingBadgeInput}
+              onChange={(e) => setLandingBadgeInput(e.target.value)}
+              placeholder="เช่น ระบบดิจิทัลบริหารทรัพย์สิน"
+              className="filter-input-element"
+              style={{ width: '100%', padding: '10px' }}
+            />
+          </div>
+          
+          <button
+            onClick={() => {
+              if (!landingBadgeInput.trim()) {
+                alert('กรุณากรอกข้อความป้ายชื่อ');
+                return;
+              }
+              onSaveLandingBadge(landingBadgeInput.trim());
+              alert('บันทึกการตั้งค่าป้ายชื่อเรียบร้อยแล้ว');
+            }}
+            className="button-primary"
+            style={{ padding: '10px 20px' }}
+          >
+            💾 บันทึกการตั้งค่า
+          </button>
         </div>
       )}
 
