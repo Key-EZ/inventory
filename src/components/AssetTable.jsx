@@ -4,7 +4,6 @@ import { useState, useMemo, useEffect } from 'react';
 export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onPrintAsset, initialSearchQuery = '' }) {
   // Filter & Search states
   const [search, setSearch] = useState(initialSearchQuery);
-  const [filterType, setFilterType] = useState('ทั้งหมด');
   const [filterStatus, setFilterStatus] = useState('ทั้งหมด');
   const [filterLocation, setFilterLocation] = useState('ทั้งหมด');
 
@@ -40,17 +39,12 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onPrint
       );
     }
 
-    // 2. Type Filter (พ.ด. 1 vs พ.ด. 2)
-    if (filterType !== 'ทั้งหมด') {
-      result = result.filter(item => item.asset_type === filterType);
-    }
-
-    // 3. Status Filter
+    // 2. Status Filter
     if (filterStatus !== 'ทั้งหมด') {
       result = result.filter(item => item.status === filterStatus);
     }
 
-    // 4. Location Filter
+    // 3. Location Filter
     if (filterLocation !== 'ทั้งหมด') {
       result = result.filter(item => item.location === filterLocation);
     }
@@ -83,12 +77,12 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onPrint
     });
 
     return result;
-  }, [assets, search, filterType, filterStatus, filterLocation, sortBy]);
+  }, [assets, search, filterStatus, filterLocation, sortBy]);
 
   // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, filterType, filterStatus, filterLocation, sortBy]);
+  }, [search, filterStatus, filterLocation, sortBy]);
 
   // Pagination math
   const totalItems = processedAssets.length;
@@ -107,7 +101,6 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onPrint
 
   const handleClearFilters = () => {
     setSearch('');
-    setFilterType('ทั้งหมด');
     setFilterStatus('ทั้งหมด');
     setFilterLocation('ทั้งหมด');
     setSortBy('code-asc');
@@ -119,7 +112,7 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onPrint
       <div className="layout-card filter-panel-card">
         <div className="filter-panel-header">
           <h3>🔍 ค้นหาและตัวกรองข้อมูล</h3>
-          {(search || filterType !== 'ทั้งหมด' || filterStatus !== 'ทั้งหมด' || filterLocation !== 'ทั้งหมด' || sortBy !== 'code-asc') && (
+          {(search || filterStatus !== 'ทั้งหมด' || filterLocation !== 'ทั้งหมด' || sortBy !== 'code-asc') && (
             <button className="btn-clear-filter" onClick={handleClearFilters}>
               ล้างตัวกรองทั้งหมด
             </button>
@@ -137,20 +130,6 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onPrint
               placeholder="รหัสพัสดุ, ชื่อ, ยี่ห้อ, ทะเบียน, ที่ตั้ง..."
               className="filter-input-element"
             />
-          </div>
-
-          {/* Asset Type Select */}
-          <div className="filter-group-item">
-            <label>ประเภททะเบียนทะเบียน</label>
-            <select
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-              className="filter-input-element"
-            >
-              <option value="ทั้งหมด">ทั้งหมด (พ.ด.1 และ พ.ด.2)</option>
-              <option value="LAND_BUILDING">ที่ดินและสิ่งก่อสร้าง (พ.ด.1)</option>
-              <option value="EQUIPMENT">ครุภัณฑ์และยานพาหนะ (พ.ด.2)</option>
-            </select>
           </div>
 
           {/* Status Select */}
