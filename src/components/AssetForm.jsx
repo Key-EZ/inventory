@@ -41,6 +41,7 @@ export default function AssetForm({
   const [location, setLocation] = useState('');
   const [acquisitionMethod, setAcquisitionMethod] = useState('ซื้อ');
   const [approvalDocument, setApprovalDocument] = useState('');
+  const [deliveryDate, setDeliveryDate] = useState('');
   const [unitPrice, setUnitPrice] = useState(0);
   const [budgetOwner, setBudgetOwner] = useState('');
   const [responsibleDepartment, setResponsibleDepartment] = useState('');
@@ -93,6 +94,7 @@ export default function AssetForm({
       setLocation(asset.location || '');
       setAcquisitionMethod(asset.acquisition_method || 'ซื้อ');
       setApprovalDocument(asset.approval_document || '');
+      setDeliveryDate(asset.delivery_date || '');
       setUnitPrice(asset.unit_price || 0);
       setBudgetOwner(asset.budget_owner || '');
       setResponsibleDepartment(asset.responsible_department || '');
@@ -121,6 +123,7 @@ export default function AssetForm({
       setLocation('');
       setAcquisitionMethod('ซื้อ');
       setApprovalDocument('');
+      setDeliveryDate('');
       setUnitPrice(0);
       setBudgetOwner('');
       setResponsibleDepartment('');
@@ -299,6 +302,7 @@ export default function AssetForm({
       location,
       acquisition_method: acquisitionMethod,
       approval_document: approvalDocument,
+      delivery_date: deliveryDate,
       unit_price: parseFloat(unitPrice) || 0,
       budget_owner: finalBudgetOwner,
       responsible_department: responsibleDepartment,
@@ -355,7 +359,7 @@ export default function AssetForm({
             className={`tab-btn ${activeTab === 'custodian_history' ? 'active' : ''}`}
             onClick={() => setActiveTab('custodian_history')}
           >
-            2. ชื่อผู้ใช้-ดูแล-รับผิดชอบพัสดุ ({custodianHistory.length})
+            2. ผู้รับผิดชอบพัสดุ ({custodianHistory.length})
           </button>
           <button
             type="button"
@@ -473,12 +477,21 @@ export default function AssetForm({
                   />
                 </div>
                 <div className="form-group col">
-                  <label>เลขที่/วันเดือนปี หนังสืออนุมัติ *</label>
+                  <label>ใบส่งของ *</label>
                   <input
                     type="text"
                     value={approvalDocument}
                     onChange={(e) => setApprovalDocument(e.target.value)}
-                    placeholder="เช่น PO-67123 ลงวันที่ 10 ธ.ค. 2567"
+                    placeholder="เช่น เลขที่ใบส่งของ หรือ PO"
+                    required
+                  />
+                </div>
+                <div className="form-group col">
+                  <label>วันเดือนปี *</label>
+                  <input
+                    type="date"
+                    value={deliveryDate}
+                    onChange={(e) => setDeliveryDate(e.target.value)}
                     required
                   />
                 </div>
