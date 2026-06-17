@@ -204,8 +204,8 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onPrint
       </div>
 
       {/* Main Table Grid */}
-      <div className="layout-card table-data-card">
-        <div className="table-data-header">
+      <div className="layout-card table-data-card animate-fade-in" style={{ padding: '20px' }}>
+        <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
           <div className="results-indicator">
             พบครุภัณฑ์ทั้งหมด <strong>{totalItems}</strong> รายการ
             {totalItems !== assets.length && ` (จากข้อมูลหลัก ${assets.length} รายการ)`}
