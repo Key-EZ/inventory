@@ -33,7 +33,7 @@ export default function CenteredLanding({ assets, onNavigate, onAddClick, onEdit
       {/* Primary Landing Metrics */}
       <div className="landing-stats-grid">
         <div className="layout-card landing-stat-card">
-          <span className="stat-card-title">พัสดุลงทะเบียนทั้งหมด</span>
+          <span className="stat-card-title">พัสดุทั้งหมด</span>
           <span className="stat-card-value">{totalCount} รายการ</span>
         </div>
         <div className="layout-card landing-stat-card">

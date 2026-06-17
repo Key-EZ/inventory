@@ -21,6 +21,17 @@ const EQUIPMENT_CATEGORIES = [
   'สินทรัพย์ไม่มีตัวตนอื่น'
 ];
 
+const formatAssetCode = (value) => {
+  const clean = value.replace(/\D/g, '');
+  const truncated = clean.slice(0, 9);
+  if (truncated.length > 5) {
+    return `${truncated.slice(0, 3)}-${truncated.slice(3, 5)}-${truncated.slice(5)}`;
+  } else if (truncated.length > 3) {
+    return `${truncated.slice(0, 3)}-${truncated.slice(3)}`;
+  }
+  return truncated;
+};
+
 export default function AssetForm({ asset, brands = [], locations = [], onSubmit, onClose }) {
   const isEdit = !!asset;
 
@@ -301,8 +312,8 @@ export default function AssetForm({ asset, brands = [], locations = [], onSubmit
                     }}
                     required
                   >
-                    <option value="EQUIPMENT">ทะเบียนครุภัณฑ์ (พ.ด.2)</option>
-                    <option value="LAND_BUILDING">ทะเบียนที่ดินและสิ่งก่อสร้าง (พ.ด.1)</option>
+                    <option value="EQUIPMENT">ครุภัณฑ์</option>
+                    <option value="LAND_BUILDING">ที่ดินและสิ่งก่อสร้าง</option>
                   </select>
                 </div>
                 <div className="form-group col">
@@ -323,7 +334,7 @@ export default function AssetForm({ asset, brands = [], locations = [], onSubmit
                   <input
                     type="text"
                     value={assetCode}
-                    onChange={(e) => setAssetCode(e.target.value)}
+                    onChange={(e) => setAssetCode(formatAssetCode(e.target.value))}
                     placeholder="000-00-0000"
                     required
                   />

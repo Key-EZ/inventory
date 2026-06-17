@@ -1,5 +1,3 @@
-import "./InventoryPrint.css";
-
 export default function InventoryPrint({ asset, onClose }) {
     // Fallback data if no asset is passed
     const defaultData = {
