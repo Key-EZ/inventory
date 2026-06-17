@@ -1286,7 +1286,7 @@ body {
   justify-content: center;
 }
 
-.btn-table-edit, .btn-table-delete {
+.btn-table-edit, .btn-table-delete, .btn-table-print {
   background: none;
   border: 1px solid var(--border-color);
   padding: 6px 12px;
@@ -1296,6 +1296,17 @@ body {
   cursor: pointer;
   transition: all var(--transition-fast);
   white-space: nowrap;
+}
+
+.btn-table-print {
+  color: #0d9488;
+  background-color: var(--bg-secondary);
+}
+
+.btn-table-print:hover {
+  background-color: #0d9488;
+  color: white;
+  border-color: #0d9488;
 }
 
 .btn-table-edit {

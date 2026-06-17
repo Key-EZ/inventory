@@ -7,6 +7,7 @@ import BentoDashboard from './components/BentoDashboard';
 import CenteredLanding from './components/CenteredLanding';
 import SettingsPanel from './components/SettingsPanel';
 import ReportPanel from './components/ReportPanel';
+import InventoryPrint from './components/InventoryPrint';
 import { getSeedAssets, defaultDivisions, defaultDepartments, defaultCustodians, defaultPositions, defaultBrands, defaultLocations } from './utils/mockData';
 
 export default function App() {
@@ -16,6 +17,7 @@ export default function App() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingAsset, setEditingAsset] = useState(null);
+  const [printingAsset, setPrintingAsset] = useState(null);
   const [searchQueryFromLanding, setSearchQueryFromLanding] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
@@ -515,10 +517,11 @@ export default function App() {
                 ➕ ลงทะเบียนครุภัณฑ์ใหม่
               </button>
             </div>
-            <AssetTable
+             <AssetTable
               assets={assets}
               onEditAsset={handleOpenEditForm}
               onDeleteAsset={handleDeleteAsset}
+              onPrintAsset={(item) => setPrintingAsset(item)}
               initialSearchQuery={searchQueryFromLanding}
             />
           </div>
@@ -590,6 +593,13 @@ export default function App() {
           locations={locations}
           onSubmit={handleSubmitForm}
           onClose={() => setIsFormOpen(false)}
+        />
+      )}
+
+      {printingAsset && (
+        <InventoryPrint
+          asset={printingAsset}
+          onClose={() => setPrintingAsset(null)}
         />
       )}
 
