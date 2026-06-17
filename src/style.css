@@ -1865,6 +1865,11 @@ body {
   color: var(--status-damaged-text);
 }
 
+.ledger-status-badge.status-กำลังซ่อม {
+  background-color: var(--status-damaged-bg);
+  color: var(--status-damaged-text);
+}
+
 .ledger-status-badge.status-รอจำหน่าย {
   background-color: var(--status-pending-bg);
   color: var(--status-pending-text);

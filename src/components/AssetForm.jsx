@@ -445,6 +445,7 @@ export default function AssetForm({
                   <select value={status} onChange={(e) => setStatus(e.target.value)}>
                     <option value="ใช้งาน">ใช้งาน</option>
                     <option value="ชำรุด">ชำรุด</option>
+                    <option value="กำลังซ่อม">กำลังซ่อม</option>
                     <option value="รอจำหน่าย">รอจำหน่าย</option>
                     <option value="จำหน่ายแล้ว">จำหน่ายแล้ว</option>
                   </select>

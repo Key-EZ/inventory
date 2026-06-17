@@ -394,17 +394,43 @@ export default function App() {
     const updated = [newRequest, ...repairRequests];
     setRepairRequests(updated);
     localStorage.setItem('inventory_repair_requests', JSON.stringify(updated));
+
+    // Automatically sync asset status to 'ชำรุด'
+    const assetIndex = assets.findIndex(a => a.id === assetId);
+    if (assetIndex >= 0) {
+      const updatedAssets = [...assets];
+      updatedAssets[assetIndex] = {
+        ...updatedAssets[assetIndex],
+        status: 'ชำรุด'
+      };
+      saveAssetsToStateAndStorage(updatedAssets);
+    }
   };
 
   const handleStartRepairJob = (requestId) => {
+    let targetAssetId = null;
     const updated = repairRequests.map(req => {
       if (req.id === requestId) {
+        targetAssetId = req.asset_id;
         return { ...req, status: 'IN_PROGRESS' };
       }
       return req;
     });
     setRepairRequests(updated);
     localStorage.setItem('inventory_repair_requests', JSON.stringify(updated));
+
+    // Automatically sync asset status to 'กำลังซ่อม'
+    if (targetAssetId) {
+      const assetIndex = assets.findIndex(a => a.id === targetAssetId);
+      if (assetIndex >= 0) {
+        const updatedAssets = [...assets];
+        updatedAssets[assetIndex] = {
+          ...updatedAssets[assetIndex],
+          status: 'กำลังซ่อม'
+        };
+        saveAssetsToStateAndStorage(updatedAssets);
+      }
+    }
   };
 
   const handleRejectRepairJob = (requestId, reason) => {
@@ -456,6 +482,7 @@ export default function App() {
         const currentMaintenances = asset.maintenances || [];
         updatedAssets[assetIndex] = {
           ...asset,
+          status: 'ใช้งาน', // Reset status to active upon completion
           maintenances: [...currentMaintenances, newMaintenanceLog]
         };
 
