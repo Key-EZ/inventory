@@ -4,6 +4,7 @@ const initialAssetsRaw = [
   // --- พ.ด. 1 (LAND_BUILDING) ---
   {
     asset_type: "LAND_BUILDING",
+    category: "ที่ดินที่มีกรรมสิทธิ์",
     asset_code: "101-64-0001",
     name: "ที่ดินที่ทำการสำนักงานเทศบาลนครนนทบุรี",
     location: "ถนนรัตนาธิเบศร์ ตำบลบางกระสอ อำเภอเมืองนนทบุรี",
@@ -19,6 +20,7 @@ const initialAssetsRaw = [
   },
   {
     asset_type: "LAND_BUILDING",
+    category: "อาคารสำนักงาน",
     asset_code: "102-65-0002",
     name: "อาคารหอประชุมอเนกประสงค์ 3 ชั้น",
     location: "ลานกิจกรรมกลาง เทศบาลนครนนทบุรี",
@@ -43,6 +45,7 @@ const initialAssetsRaw = [
   // --- พ.ด. 2 (EQUIPMENT) ---
   {
     asset_type: "EQUIPMENT",
+    category: "ครุภัณฑ์คอมพิวเตอร์",
     asset_code: "412-67-0001",
     name: "เครื่องคอมพิวเตอร์พกพา (Notebook)",
     location: "ห้องทำงานเทคโนโลยีสารสนเทศ",
@@ -70,6 +73,7 @@ const initialAssetsRaw = [
   },
   {
     asset_type: "EQUIPMENT",
+    category: "ครุภัณฑ์สำนักงาน",
     asset_code: "311-68-0008",
     name: "เก้าอี้ทำงานสำนักงานเพื่อสุขภาพ",
     location: "ห้องธุรการทั่วไป",
@@ -89,6 +93,7 @@ const initialAssetsRaw = [
   },
   {
     asset_type: "EQUIPMENT",
+    category: "ครุภัณฑ์ไฟฟ้าและวิทยุ",
     asset_code: "313-66-0014",
     name: "เครื่องปรับอากาศ 18000 BTU Inverter",
     location: "ห้องทำงานผู้ว่าราชการ",
@@ -116,6 +121,7 @@ const initialAssetsRaw = [
   },
   {
     asset_type: "EQUIPMENT",
+    category: "ครุภัณฑ์สำนักงาน",
     asset_code: "311-65-0003",
     name: "โต๊ะประชุมไม้ ขนาด 12 ที่นั่ง",
     location: "ห้องประชุมใหญ่ ชั้น 3",
@@ -135,6 +141,7 @@ const initialAssetsRaw = [
   },
   {
     asset_type: "EQUIPMENT",
+    category: "ครุภัณฑ์ยานพาหนะและขนส่ง",
     asset_code: "312-64-0001",
     name: "รถยนต์อเนกประสงค์ (SUV) 2,400 ซีซี",
     location: "โรงจอดรถยนต์กลาง",
@@ -169,6 +176,7 @@ const initialAssetsRaw = [
   },
   {
     asset_type: "EQUIPMENT",
+    category: "ครุภัณฑ์คอมพิวเตอร์",
     asset_code: "412-68-0012",
     name: "เครื่องพิมพ์มัลติฟังก์ชัน เลเซอร์",
     location: "ห้องทำงานเทคโนโลยีสารสนเทศ",
@@ -191,13 +199,12 @@ const initialAssetsRaw = [
 export function getSeedAssets() {
   return initialAssetsRaw.map((asset, index) => {
     const dep = calculateDepreciation(asset.asset_code, asset.unit_price);
-    
-    // Add default status
     const statusVal = index === 5 ? 'ชำรุด' : index === 6 ? 'รอจำหน่าย' : 'ใช้งาน';
 
     return {
       id: `asset-${Date.now()}-${index}`,
       asset_type: asset.asset_type,
+      category: asset.category,
       asset_code: asset.asset_code,
       name: asset.name,
       location: asset.location,

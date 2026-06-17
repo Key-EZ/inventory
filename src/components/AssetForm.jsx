@@ -3,6 +3,24 @@ import { useState, useEffect } from 'react';
 import { calculateDepreciation } from '../utils/depreciation';
 import { defaultDepartments } from '../utils/mockData';
 
+const LAND_BUILDING_CATEGORIES = [
+  'ที่ดินที่มีกรรมสิทธิ์',
+  'อาคารสำนักงาน',
+  'สิ่งปลูกสร้าง'
+];
+
+const EQUIPMENT_CATEGORIES = [
+  'ครุภัณฑ์สำนักงาน',
+  'ครุภัณฑ์คอมพิวเตอร์',
+  'ครุภัณฑ์ยานพาหนะและขนส่ง',
+  'ครุภัณฑ์ไฟฟ้าและวิทยุ',
+  'ครุภัณฑ์โฆษณาและเผยแพร่',
+  'ครุภัณฑ์งานบ้านงานครัว',
+  'ครุภัณฑ์วิทยาศาสตร์และการแพทย์',
+  'ครุภัณฑ์กีฬา',
+  'สินทรัพย์ไม่มีตัวตนอื่น'
+];
+
 export default function AssetForm({ asset, brands = [], locations = [], onSubmit, onClose }) {
   const isEdit = !!asset;
 
@@ -11,6 +29,7 @@ export default function AssetForm({ asset, brands = [], locations = [], onSubmit
 
   // Form states (Flat fields)
   const [assetType, setAssetType] = useState('EQUIPMENT'); // 'LAND_BUILDING', 'EQUIPMENT'
+  const [category, setCategory] = useState('');
   const [assetCode, setAssetCode] = useState('');
   const [name, setName] = useState('');
   const [location, setLocation] = useState('');
@@ -42,7 +61,7 @@ export default function AssetForm({ asset, brands = [], locations = [], onSubmit
 
   // Maintenances CRUD states
   const [maintenances, setMaintenances] = useState([]);
-  
+
   // New maintenance entry fields
   const [maintApprovalNoDate, setMaintApprovalNoDate] = useState('');
   const [maintDescription, setMaintDescription] = useState('');
@@ -54,6 +73,7 @@ export default function AssetForm({ asset, brands = [], locations = [], onSubmit
   useEffect(() => {
     if (asset) {
       setAssetType(asset.asset_type || 'EQUIPMENT');
+      setCategory(asset.category || '');
       setAssetCode(asset.asset_code || '');
       setName(asset.name || '');
       setLocation(asset.location || '');
@@ -80,6 +100,7 @@ export default function AssetForm({ asset, brands = [], locations = [], onSubmit
     } else {
       // Clear/Reset for new asset
       setAssetType('EQUIPMENT');
+      setCategory('ครุภัณฑ์สำนักงาน');
       setAssetCode('');
       setName('');
       setLocation('');
@@ -171,8 +192,8 @@ export default function AssetForm({ asset, brands = [], locations = [], onSubmit
   // Submit Handler
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!name || !assetCode) {
-      alert('กรุณากรอก ชื่อพัสดุ และ รหัสพัสดุ');
+    if (!name || !assetCode || !category) {
+      alert('กรุณากรอก ชื่อพัสดุ รหัสพัสดุ และเลือกหมวดหมู่พัสดุ');
       return;
     }
 
@@ -187,6 +208,7 @@ export default function AssetForm({ asset, brands = [], locations = [], onSubmit
     const payload = {
       id: asset?.id || `asset-${Date.now()}`,
       asset_type: assetType,
+      category,
       asset_code: assetCode,
       name,
       location,
@@ -269,23 +291,40 @@ export default function AssetForm({ asset, brands = [], locations = [], onSubmit
             <div className="tab-panel">
               <div className="form-row">
                 <div className="form-group col">
-                  <label>ประเภททะเบียนทะเบียนหลัก *</label>
+                  <label>ประเภททะเบียนหลัก *</label>
                   <select
                     value={assetType}
-                    onChange={(e) => setAssetType(e.target.value)}
+                    onChange={(e) => {
+                      const newType = e.target.value;
+                      setAssetType(newType);
+                      setCategory(newType === 'LAND_BUILDING' ? 'ที่ดินที่มีกรรมสิทธิ์' : 'ครุภัณฑ์สำนักงาน');
+                    }}
                     required
                   >
-                    <option value="EQUIPMENT">ทะเบียนครุภัณฑ์ ปศุสัตว์ สัตว์พาหนะ (พ.ด.2)</option>
+                    <option value="EQUIPMENT">ทะเบียนครุภัณฑ์ (พ.ด.2)</option>
                     <option value="LAND_BUILDING">ทะเบียนที่ดินและสิ่งก่อสร้าง (พ.ด.1)</option>
                   </select>
                 </div>
                 <div className="form-group col">
-                  <label>รหัสพัสดุ (แนะนำ: 3กลุ่ม 9หลัก เช่น 001-10-0001) *</label>
+                  <label>หมวดหมู่พัสดุ *</label>
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    required
+                  >
+                    <option value="">-- เลือกหมวดหมู่ --</option>
+                    {(assetType === 'LAND_BUILDING' ? LAND_BUILDING_CATEGORIES : EQUIPMENT_CATEGORIES).map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="form-group col">
+                  <label>รหัสพัสดุ *</label>
                   <input
                     type="text"
                     value={assetCode}
                     onChange={(e) => setAssetCode(e.target.value)}
-                    placeholder="รหัสตามบัญชี พ.ด.5 หรือ พ.ด.6"
+                    placeholder="000-00-0000"
                     required
                   />
                 </div>
@@ -293,7 +332,7 @@ export default function AssetForm({ asset, brands = [], locations = [], onSubmit
 
               <div className="form-row">
                 <div className="form-group col-2">
-                  <label>ชื่อพัสดุ/ทรัพย์สิน *</label>
+                  <label>ชื่อพัสดุ *</label>
                   <input
                     type="text"
                     value={name}

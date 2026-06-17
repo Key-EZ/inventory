@@ -26,16 +26,16 @@ export default function ReportPanel({ assets = [], locations = [] }) {
       '102': 'อาคารสำนักงาน',
       '103': 'สิ่งปลูกสร้าง',
       '311': 'ครุภัณฑ์สำนักงาน',
-      '312': 'ครุภัณฑ์ยานพาหนะ',
+      '312': 'ครุภัณฑ์ยานพาหนะและขนส่ง',
       '313': 'ครุภัณฑ์ไฟฟ้าและวิทยุ',
       '314': 'ครุภัณฑ์โฆษณาและเผยแพร่',
       '315': 'ครุภัณฑ์งานบ้านงานครัว',
-      '316': 'ครุภัณฑ์วิทยาศาสตร์ทางการแพทย์',
+      '316': 'ครุภัณฑ์วิทยาศาสตร์และการแพทย์',
       '317': 'ครุภัณฑ์กีฬา',
       '412': 'ครุภัณฑ์คอมพิวเตอร์',
       '501': 'สินทรัพย์ไม่มีตัวตนอื่น'
     };
-    return { code, name: mapping[code] || 'ครุภัณฑ์ประเภทอื่น' };
+    return { code, name: asset.category || mapping[code] || 'ครุภัณฑ์ประเภทอื่น' };
   };
 
   // --- Extract Filter Options ---
@@ -70,6 +70,7 @@ export default function ReportPanel({ assets = [], locations = [] }) {
         const matchesText =
           (item.asset_code || '').toLowerCase().includes(q) ||
           (item.name || '').toLowerCase().includes(q) ||
+          (item.category || '').toLowerCase().includes(q) ||
           (item.responsible_department || '').toLowerCase().includes(q) ||
           (item.location || '').toLowerCase().includes(q) ||
           (item.manufacturer_brand || '').toLowerCase().includes(q);
@@ -174,6 +175,7 @@ export default function ReportPanel({ assets = [], locations = [] }) {
       filename = `ทะเบียนที่ดินและสิ่งก่อสร้าง_พด1_${new Date().toISOString().slice(0, 10)}.csv`;
       headers = [
         "เลขรหัสพัสดุ",
+        "หมวดหมู่ทรัพย์สิน",
         "ชื่อพัสดุ",
         "ที่ตั้งของพัสดุ",
         "ลักษณะการได้กรรมสิทธิ์",
@@ -188,6 +190,7 @@ export default function ReportPanel({ assets = [], locations = [] }) {
       ];
       rows = pd1Assets.map(item => [
         item.asset_code || '',
+        item.category || '',
         item.name || '',
         item.location || '',
         item.acquisition_method || '',
@@ -204,6 +207,7 @@ export default function ReportPanel({ assets = [], locations = [] }) {
       filename = `ทะเบียนครุภัณฑ์_พด2_${new Date().toISOString().slice(0, 10)}.csv`;
       headers = [
         "เลขรหัสพัสดุ",
+        "หมวดหมู่ครุภัณฑ์",
         "ชื่อครุภัณฑ์",
         "ยี่ห้อ",
         "เลขที่ใบอนุมัติ",
@@ -220,6 +224,7 @@ export default function ReportPanel({ assets = [], locations = [] }) {
       ];
       rows = pd2Assets.map(item => [
         item.asset_code || '',
+        item.category || '',
         item.name || '',
         item.manufacturer_brand || '',
         item.approval_document || '',
@@ -465,7 +470,12 @@ export default function ReportPanel({ assets = [], locations = [] }) {
                         <td><strong>{item.asset_code}</strong></td>
                         <td>
                           <div className="item-title">{item.name}</div>
-                          <div className="item-sub-desc">{item.building_style}</div>
+                          <div className="item-sub-desc">
+                            <span style={{ color: 'var(--status-active-text)', fontWeight: '600', marginRight: '6px' }}>
+                              [{item.category || 'ที่ดินและสิ่งก่อสร้าง'}]
+                            </span>
+                            {item.building_style}
+                          </div>
                         </td>
                         <td>
                           <div>{item.document_of_title || '-'}</div>
@@ -511,8 +521,8 @@ export default function ReportPanel({ assets = [], locations = [] }) {
                         <div className="card-cell-val font-bold text-lg">{item.name}</div>
                       </div>
                       <div className="grid-cell">
-                        <span className="card-cell-label">ประเภทพัสดุ</span>
-                        <div className="card-cell-val">{item.asset_type === 'LAND_BUILDING' ? 'ที่ดินและสิ่งก่อสร้าง' : 'ครุภัณฑ์'}</div>
+                        <span className="card-cell-label">หมวดหมู่ทรัพย์สิน</span>
+                        <div className="card-cell-val font-bold">{item.category || 'ที่ดินและสิ่งก่อสร้าง'}</div>
                       </div>
 
                       <div className="grid-cell span-2">
@@ -651,7 +661,12 @@ export default function ReportPanel({ assets = [], locations = [] }) {
                         <td><strong>{item.asset_code}</strong></td>
                         <td>
                           <div className="item-title">{item.name}</div>
-                          <div className="item-sub-desc">{item.manufacturer_brand} {item.color}</div>
+                          <div className="item-sub-desc">
+                            <span style={{ color: 'var(--primary-color)', fontWeight: '600', marginRight: '6px' }}>
+                              [{item.category || 'ครุภัณฑ์'}]
+                            </span>
+                            {item.manufacturer_brand} {item.color}
+                          </div>
                         </td>
                         <td>
                           <div className="item-title">{item.vehicle_registration || item.serial_number || '-'}</div>
@@ -693,7 +708,7 @@ export default function ReportPanel({ assets = [], locations = [] }) {
                     
                     <div className="official-card-grid">
                       <div className="grid-cell span-3">
-                        <span className="card-cell-label">ชื่อพัสดุ/ครุภัณฑ์</span>
+                        <span className="card-cell-label">ชื่อพัสดุ/ครุภัณฑ์ (หมวดหมู่: {item.category || 'ครุภัณฑ์'})</span>
                         <div className="card-cell-val font-bold text-lg">{item.name}</div>
                       </div>
                       <div className="grid-cell">

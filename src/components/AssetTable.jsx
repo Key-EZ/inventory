@@ -31,6 +31,7 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, initial
       result = result.filter(item =>
         (item.asset_code || '').toLowerCase().includes(q) ||
         (item.name || '').toLowerCase().includes(q) ||
+        (item.category || '').toLowerCase().includes(q) ||
         (item.location || '').toLowerCase().includes(q) ||
         (item.responsible_department || '').toLowerCase().includes(q) ||
         (item.manufacturer_brand || '').toLowerCase().includes(q) ||
@@ -234,15 +235,13 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, initial
                     <td className="table-cell-name">
                       <div className="item-name-main">{item.name}</div>
                       <div className="item-name-sub">
-                        {item.asset_type === 'LAND_BUILDING' ? (
-                          <span style={{ color: 'var(--status-active-text)', fontWeight: '600', marginRight: '6px' }}>
-                            [พ.ด.1 ที่ดิน/โรงเรือน]
-                          </span>
-                        ) : (
-                          <span style={{ color: 'var(--primary-color)', fontWeight: '600', marginRight: '6px' }}>
-                            [พ.ด.2 ครุภัณฑ์]
-                          </span>
-                        )}
+                        <span style={{
+                          color: item.asset_type === 'LAND_BUILDING' ? 'var(--status-active-text)' : 'var(--primary-color)',
+                          fontWeight: '600',
+                          marginRight: '6px'
+                        }}>
+                          [{item.category || (item.asset_type === 'LAND_BUILDING' ? 'พ.ด.1 ที่ดิน/โรงเรือน' : 'พ.ด.2 ครุภัณฑ์')}]
+                        </span>
                         {item.asset_type === 'LAND_BUILDING' ? (
                           <span>{item.building_style || 'ที่ดินเปล่า'}</span>
                         ) : (
