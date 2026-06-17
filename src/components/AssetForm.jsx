@@ -545,32 +545,20 @@ export default function AssetForm({
                   <div className="form-group">
                     <label>ชื่อผู้รับผิดชอบดูแล *</label>
                     {custodians.length > 0 ? (
-                      <div style={{ display: 'flex', gap: '8px' }}>
-                        <select
-                          value={custHistoryCustodian}
-                          onChange={(e) => setCustHistoryCustodian(e.target.value)}
-                          style={{ flex: 1 }}
-                        >
-                          <option value="">-- เลือกจากผู้รับผิดชอบดูแล --</option>
-                          {custodians.map(c => (
-                            <option key={c.id} value={c.name}>{c.name} ({c.position})</option>
-                          ))}
-                        </select>
-                        <input
-                          type="text"
-                          value={custHistoryCustodian}
-                          onChange={(e) => setCustHistoryCustodian(e.target.value)}
-                          placeholder="หรือระบุชื่อเอง"
-                          style={{ width: '40%' }}
-                        />
-                      </div>
-                    ) : (
-                      <input
-                        type="text"
+                      <select
                         value={custHistoryCustodian}
                         onChange={(e) => setCustHistoryCustodian(e.target.value)}
-                        placeholder="เช่น นายสมเกียรติ ใจซื่อ"
-                      />
+                        required
+                      >
+                        <option value="">-- เลือกผู้รับผิดชอบดูแล --</option>
+                        {custodians.map(c => (
+                          <option key={c.id} value={c.name}>{c.name} ({c.position || '-'})</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <div className="read-only-box" style={{ color: 'var(--status-pending-text)', padding: '8px 12px', border: '1px dashed var(--border-color)', borderRadius: '6px' }}>
+                        ⚠️ กรุณาไปเพิ่มข้อมูลผู้รับผิดชอบดูแลในหน้าการตั้งค่าก่อน
+                      </div>
                     )}
                   </div>
                   <div className="form-group">
@@ -587,6 +575,7 @@ export default function AssetForm({
                   type="button"
                   className="button-primary maint-add-btn"
                   onClick={handleAddOrEditCustodianHistory}
+                  disabled={custodians.length === 0}
                 >
                   {editingCustHistoryId ? 'บันทึกการแก้ไข' : 'บันทึกรายการเพิ่ม'}
                 </button>
