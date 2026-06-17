@@ -277,6 +277,17 @@ export default function AssetForm({
       }
     }
 
+    // Determine overall budget_owner from the latest custodian history entry, if any
+    let finalBudgetOwner = budgetOwner || '';
+    if (custodianHistory.length > 0) {
+      const sorted = [...custodianHistory].sort((a, b) => {
+        const yA = parseInt(a.year) || 0;
+        const yB = parseInt(b.year) || 0;
+        return yB - yA;
+      });
+      finalBudgetOwner = sorted[0]?.budget_owner || '';
+    }
+
     const payload = {
       id: asset?.id || `asset-${Date.now()}`,
       asset_type: assetType,
@@ -287,7 +298,7 @@ export default function AssetForm({
       acquisition_method: acquisitionMethod,
       approval_document: approvalDocument,
       unit_price: parseFloat(unitPrice) || 0,
-      budget_owner: budgetOwner,
+      budget_owner: finalBudgetOwner,
       responsible_department: responsibleDepartment,
       status,
 
@@ -459,7 +470,16 @@ export default function AssetForm({
                     required
                   />
                 </div>
-
+                <div className="form-group col">
+                  <label>เลขที่/วันเดือนปี หนังสืออนุมัติ *</label>
+                  <input
+                    type="text"
+                    value={approvalDocument}
+                    onChange={(e) => setApprovalDocument(e.target.value)}
+                    placeholder="เช่น PO-67123 ลงวันที่ 10 ธ.ค. 2567"
+                    required
+                  />
+                </div>
               </div>
 
               <div className="form-row">
@@ -488,28 +508,6 @@ export default function AssetForm({
                       <option key={d} value={d}>{d}</option>
                     ))}
                   </select>
-                </div>
-              </div>
-
-              <div className="form-row">
-                <div className="form-group col">
-                  <label>เจ้าของงบประมาณ</label>
-                  <input
-                    type="text"
-                    value={budgetOwner}
-                    onChange={(e) => setBudgetOwner(e.target.value)}
-                    placeholder="เช่น งบประมาณประจำปี, เทศบาลจังหวัด"
-                  />
-                </div>
-                <div className="form-group col">
-                  <label>เลขที่/วันเดือนปี หนังสืออนุมัติ *</label>
-                  <input
-                    type="text"
-                    value={approvalDocument}
-                    onChange={(e) => setApprovalDocument(e.target.value)}
-                    placeholder="เช่น PO-67123 ลงวันที่ 10 ธ.ค. 2567"
-                    required
-                  />
                 </div>
               </div>
             </div>
