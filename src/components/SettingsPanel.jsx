@@ -36,12 +36,17 @@ export default function SettingsPanel({
   onDeleteBrand,
   onAddLocation,
   onEditLocation,
-  onDeleteLocation
+  onDeleteLocation,
+  agencies = [],
+  onAddAgency,
+  onEditAgency,
+  onDeleteAgency
 }) {
   const [activeTab, setActiveTab] = useState('custodians'); // 'custodians', 'org', 'options'
   const [landingBadgeInput, setLandingBadgeInput] = useState(landingBadgeText || 'ระบบดิจิทัลบริหารทรัพย์สิน');
   const [newLandCatInput, setNewLandCatInput] = useState('');
   const [newEquipCatInput, setNewEquipCatInput] = useState('');
+  const [newAgencyInput, setNewAgencyInput] = useState('');
 
   useEffect(() => {
     if (landingBadgeText) {
@@ -302,6 +307,44 @@ export default function SettingsPanel({
     }
     if (window.confirm(`คุณแน่ใจว่าต้องการลบสถานที่ตั้ง "${loc}" ใช่หรือไม่?`)) {
       onDeleteLocation(loc);
+    }
+  };
+
+  const handleAddAgency = (e) => {
+    e.preventDefault();
+    const val = newAgencyInput.trim();
+    if (!val) return;
+    if (agencies.includes(val)) {
+      alert('มีชื่อส่วนราชการนี้อยู่แล้วในระบบ');
+      return;
+    }
+    onAddAgency(val);
+    setNewAgencyInput('');
+  };
+
+  const handleEditAgencyPrompt = (oldVal) => {
+    const newVal = prompt('แก้ไขชื่อส่วนราชการ:', oldVal);
+    if (newVal === null) return;
+    const trimmed = newVal.trim();
+    if (!trimmed) return;
+    if (agencies.includes(trimmed) && trimmed !== oldVal) {
+      alert('มีชื่อส่วนราชการนี้อยู่แล้วในระบบ');
+      return;
+    }
+    onEditAgency(oldVal, trimmed);
+  };
+
+  const handleDeleteAgencyCheck = (agency) => {
+    const inUse = assets.some(a => 
+      a.budget_owner === agency || 
+      (a.custodian_history && a.custodian_history.some(ch => ch.budget_owner === agency))
+    );
+    if (inUse) {
+      alert(`ไม่สามารถลบชื่อส่วนราชการ "${agency}" ได้ เนื่องจากมีประวัติการดูแลหรือข้อมูลพัสดุใช้งานอยู่`);
+      return;
+    }
+    if (window.confirm(`คุณแน่ใจว่าต้องการลบชื่อส่วนราชการ "${agency}" ใช่หรือไม่?`)) {
+      onDeleteAgency(agency);
     }
   };
 
@@ -618,6 +661,47 @@ export default function SettingsPanel({
                 ))
               ) : (
                 <div className="table-empty-row">ไม่มีข้อมูลสถานที่ตั้ง</div>
+              )}
+            </div>
+          </div>
+
+          {/* Government Agency Column */}
+          <div className="layout-card">
+            <h3>🏛️ รายการส่วนราชการ</h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginBottom: '16px' }}>
+              ตัวเลือกส่วนราชการในการกำหนดผู้ใช้-ดูแล
+            </p>
+
+            <form onSubmit={handleAddAgency} className="settings-inline-add-form">
+              <input
+                type="text"
+                value={newAgencyInput}
+                onChange={(e) => setNewAgencyInput(e.target.value)}
+                placeholder="เช่น กองช่าง, กองการศึกษา"
+                className="filter-input-element"
+              />
+              <button type="submit" className="button-primary" style={{ padding: '8px 16px', whiteSpace: 'nowrap' }}>
+                เพิ่ม
+              </button>
+            </form>
+
+            <div className="settings-inline-list">
+              {agencies.length > 0 ? (
+                agencies.map(agency => (
+                  <div key={agency} className="settings-list-row">
+                    <span className="settings-item-name">{agency}</span>
+                    <div className="settings-item-actions">
+                      <button className="btn-mini-action" onClick={() => handleEditAgencyPrompt(agency)} type="button">
+                        ✏️
+                      </button>
+                      <button className="btn-mini-action btn-mini-delete" onClick={() => handleDeleteAgencyCheck(agency)} type="button">
+                        🗑️
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="table-empty-row">ไม่มีข้อมูลส่วนราชการ</div>
               )}
             </div>
           </div>

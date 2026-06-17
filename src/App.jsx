@@ -8,7 +8,7 @@ import CenteredLanding from './components/CenteredLanding';
 import SettingsPanel from './components/SettingsPanel';
 import ReportPanel from './components/ReportPanel';
 import InventoryPrint from './components/InventoryPrint';
-import { getSeedAssets, defaultDivisions, defaultDepartments, defaultCustodians, defaultPositions, defaultBrands, defaultLocations, defaultLandBuildingCategories, defaultEquipmentCategories } from './utils/mockData';
+import { getSeedAssets, defaultDivisions, defaultDepartments, defaultCustodians, defaultPositions, defaultBrands, defaultLocations, defaultLandBuildingCategories, defaultEquipmentCategories, defaultAgencies } from './utils/mockData';
 
 export default function App() {
   // --- States ---
@@ -31,6 +31,7 @@ export default function App() {
   const [landingBadgeText, setLandingBadgeText] = useState('ระบบดิจิทัลบริหารทรัพย์สิน');
   const [landBuildingCategories, setLandBuildingCategories] = useState([]);
   const [equipmentCategories, setEquipmentCategories] = useState([]);
+  const [agencies, setAgencies] = useState([]);
 
   // --- Initial Load ---
   useEffect(() => {
@@ -176,6 +177,19 @@ export default function App() {
       setEquipmentCategories(defaultEquipmentCategories);
       localStorage.setItem('inventory_equipment_categories', JSON.stringify(defaultEquipmentCategories));
     }
+
+    // 13. Load government agencies
+    const savedAgencies = localStorage.getItem('inventory_agencies');
+    if (savedAgencies) {
+      try {
+        setAgencies(JSON.parse(savedAgencies));
+      } catch (e) {
+        setAgencies(defaultAgencies);
+      }
+    } else {
+      setAgencies(defaultAgencies);
+      localStorage.setItem('inventory_agencies', JSON.stringify(defaultAgencies));
+    }
   }, []);
 
   // --- Helpers ---
@@ -258,6 +272,7 @@ export default function App() {
       saveLocations(defaultLocations);
       saveLandBuildingCategories(defaultLandBuildingCategories);
       saveEquipmentCategories(defaultEquipmentCategories);
+      saveAgencies(defaultAgencies);
       alert('โหลดข้อมูลตัวอย่างเรียบร้อยแล้ว');
     }
   };
@@ -301,6 +316,11 @@ export default function App() {
   const saveEquipmentCategories = (list) => {
     setEquipmentCategories(list);
     localStorage.setItem('inventory_equipment_categories', JSON.stringify(list));
+  };
+
+  const saveAgencies = (list) => {
+    setAgencies(list);
+    localStorage.setItem('inventory_agencies', JSON.stringify(list));
   };
 
   const handleAddCustodian = (cust) => {
@@ -430,6 +450,38 @@ export default function App() {
 
   const handleDeleteEquipmentCategory = (cat) => {
     saveEquipmentCategories(equipmentCategories.filter(c => c !== cat));
+  };
+
+  const handleAddAgency = (agency) => {
+    saveAgencies([...agencies, agency]);
+  };
+
+  const handleEditAgency = (oldAgency, newAgency) => {
+    saveAgencies(agencies.map(a => a === oldAgency ? newAgency : a));
+    // Sync assets' custodian history entries and flat budget_owner
+    saveAssetsToStateAndStorage(assets.map(a => {
+      let changed = false;
+      let updatedHistory = a.custodian_history;
+      if (a.custodian_history && a.custodian_history.length > 0) {
+        updatedHistory = a.custodian_history.map(ch => {
+          if (ch.budget_owner === oldAgency) {
+            changed = true;
+            return { ...ch, budget_owner: newAgency };
+          }
+          return ch;
+        });
+      }
+      let finalBudgetOwner = a.budget_owner;
+      if (a.budget_owner === oldAgency) {
+        changed = true;
+        finalBudgetOwner = newAgency;
+      }
+      return changed ? { ...a, budget_owner: finalBudgetOwner, custodian_history: updatedHistory } : a;
+    }));
+  };
+
+  const handleDeleteAgency = (agency) => {
+    saveAgencies(agencies.filter(a => a !== agency));
   };
 
   // Navigation helper from Centered Landing
@@ -679,6 +731,10 @@ export default function App() {
             onAddLocation={handleAddLocation}
             onEditLocation={handleEditLocation}
             onDeleteLocation={handleDeleteLocation}
+            agencies={agencies}
+            onAddAgency={handleAddAgency}
+            onEditAgency={handleEditAgency}
+            onDeleteAgency={handleDeleteAgency}
           />
         )}
       </BaseLayout>
@@ -692,6 +748,7 @@ export default function App() {
           locations={locations}
           landBuildingCategories={landBuildingCategories}
           equipmentCategories={equipmentCategories}
+          agencies={agencies}
           onSubmit={handleSubmitForm}
           onClose={() => setIsFormOpen(false)}
         />

@@ -23,6 +23,7 @@ export default function AssetForm({
   locations = [],
   landBuildingCategories = [],
   equipmentCategories = [],
+  agencies = [],
   onSubmit,
   onClose
 }) {
@@ -535,13 +536,23 @@ export default function AssetForm({
                     />
                   </div>
                   <div className="form-group">
-                    <label>เจ้าของงบประมาณ *</label>
-                    <input
-                      type="text"
-                      value={custHistoryBudgetOwner}
-                      onChange={(e) => setCustHistoryBudgetOwner(e.target.value)}
-                      placeholder="เช่น งบดำเนินงานปกติ"
-                    />
+                    <label>ชื่อส่วนราชการ *</label>
+                    {agencies.length > 0 ? (
+                      <select
+                        value={custHistoryBudgetOwner}
+                        onChange={(e) => setCustHistoryBudgetOwner(e.target.value)}
+                        required
+                      >
+                        <option value="">-- เลือกส่วนราชการ --</option>
+                        {agencies.map(agency => (
+                          <option key={agency} value={agency}>{agency}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <select disabled value="">
+                        <option value="">-- ไม่มีข้อมูลส่วนราชการในระบบ --</option>
+                      </select>
+                    )}
                   </div>
                   <div className="form-group">
                     <label>ชื่อผู้รับผิดชอบดูแล</label>
@@ -602,7 +613,7 @@ export default function AssetForm({
                     <tr>
                       <th style={{ width: '8%' }}>ครั้งที่</th>
                       <th style={{ width: '12%' }}>ปี พ.ศ.</th>
-                      <th style={{ width: '25%' }}>เจ้าของงบประมาณ</th>
+                      <th style={{ width: '25%' }}>ชื่อส่วนราชการ</th>
                       <th style={{ width: '25%' }}>ชื่อผู้รับผิดชอบดูแล</th>
                       <th style={{ width: '20%' }}>ชื่อหัวหน้าส่วน</th>
                       <th style={{ width: '10%' }} className="text-center">จัดการ</th>
