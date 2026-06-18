@@ -38,6 +38,8 @@ export default function App() {
   const [equipmentCategories, setEquipmentCategories] = useState([]);
   const [agencies, setAgencies] = useState([]);
   const [repairRequests, setRepairRequests] = useState([]);
+  const [selectedAssetForRepair, setSelectedAssetForRepair] = useState(null);
+  const [isRepairFormOpen, setIsRepairFormOpen] = useState(false);
 
   // --- Initial Load ---
   useEffect(() => {
@@ -234,7 +236,8 @@ export default function App() {
             rejection_reason: '',
             repair_cost: 0,
             contractor: '',
-            approval_no_date: '',
+            approval_date: '',
+            document_number: '',
             officer_notes: ''
           },
           {
@@ -246,7 +249,8 @@ export default function App() {
             rejection_reason: '',
             repair_cost: 0,
             contractor: '',
-            approval_no_date: '',
+            approval_date: '',
+            document_number: '',
             officer_notes: ''
           }
         ];
@@ -353,7 +357,8 @@ export default function App() {
             rejection_reason: '',
             repair_cost: 0,
             contractor: '',
-            approval_no_date: '',
+            approval_date: '',
+            document_number: '',
             officer_notes: ''
           },
           {
@@ -365,7 +370,8 @@ export default function App() {
             rejection_reason: '',
             repair_cost: 0,
             contractor: '',
-            approval_no_date: '',
+            approval_date: '',
+            document_number: '',
             officer_notes: ''
           }
         ];
@@ -388,7 +394,8 @@ export default function App() {
       rejection_reason: '',
       repair_cost: 0,
       contractor: '',
-      approval_no_date: '',
+      approval_date: '',
+      document_number: '',
       officer_notes: ''
     };
     const updated = [newRequest, ...repairRequests];
@@ -444,7 +451,7 @@ export default function App() {
     localStorage.setItem('inventory_repair_requests', JSON.stringify(updated));
   };
 
-  const handleCompleteRepairJob = (requestId, cost, contractor, approvalNoDate, notes) => {
+  const handleCompleteRepairJob = (requestId, cost, contractor, approvalDate, documentNumber, notes) => {
     let targetRequest = null;
     const updatedRequests = repairRequests.map(req => {
       if (req.id === requestId) {
@@ -453,7 +460,8 @@ export default function App() {
           status: 'COMPLETED',
           repair_cost: cost,
           contractor: contractor,
-          approval_no_date: approvalNoDate,
+          approval_date: approvalDate,
+          document_number: documentNumber,
           officer_notes: notes,
           completion_date: new Date().toISOString()
         };
@@ -473,7 +481,8 @@ export default function App() {
         
         const newMaintenanceLog = {
           id: `maint-${Date.now()}`,
-          approval_no_date: approvalNoDate,
+          approval_date: approvalDate,
+          document_number: documentNumber,
           description: targetRequest.problem_description + (notes ? ` (${notes})` : ''),
           cost: cost,
           contractor: contractor
@@ -749,12 +758,6 @@ export default function App() {
           📈 รายงาน พ.ด.1-3
         </li>
         <li
-          className={`sidebar-menu-item ${activeLayout === 'get_repair' ? 'active' : ''}`}
-          onClick={() => handleChangeLayout('get_repair')}
-        >
-          🔧 แจ้งซ่อมอุปกรณ์
-        </li>
-        <li
           className={`sidebar-menu-item ${activeLayout === 'repair_jobs' ? 'active' : ''}`}
           onClick={() => handleChangeLayout('repair_jobs')}
         >
@@ -791,7 +794,6 @@ export default function App() {
     'reports': 'รายงานสรุป พ.ด.1-3',
     'centered': 'ค้นหา',
     'settings': 'ตั้งค่าระบบครุภัณฑ์',
-    'get_repair': 'แจ้งซ่อมอุปกรณ์',
     'repair_jobs': 'งานซ่อมอุปกรณ์'
   };
 
@@ -832,13 +834,6 @@ export default function App() {
             title="พ.ด. 1, พ.ด. 2, และ พ.ด. 3"
           >
             รายงาน
-          </button>
-          <button
-            className={`layout-toggle-btn ${activeLayout === 'get_repair' ? 'active' : ''}`}
-            onClick={() => handleChangeLayout('get_repair')}
-            title="แจ้งซ่อมอุปกรณ์"
-          >
-            แจ้งซ่อม
           </button>
           <button
             className={`layout-toggle-btn ${activeLayout === 'repair_jobs' ? 'active' : ''}`}
@@ -903,6 +898,10 @@ export default function App() {
               assets={assets}
               onEditAsset={handleOpenEditForm}
               onDeleteAsset={handleDeleteAsset}
+              onRepairAsset={(item) => {
+                setSelectedAssetForRepair(item);
+                setIsRepairFormOpen(true);
+              }}
               onPrintAsset={(item) => setPrintingAsset(item)}
               initialSearchQuery={searchQueryFromLanding}
             />
@@ -980,14 +979,6 @@ export default function App() {
           />
         )}
 
-        {activeLayout === 'get_repair' && (
-          <GetRepair
-            assets={assets}
-            repairRequests={repairRequests}
-            onCreateRepairRequest={handleCreateRepairRequest}
-          />
-        )}
-
         {activeLayout === 'repair_jobs' && (
           <RepairJobs
             assets={assets}
@@ -1012,6 +1003,17 @@ export default function App() {
           positions={positions}
           onSubmit={handleSubmitForm}
           onClose={() => setIsFormOpen(false)}
+        />
+      )}
+
+      {isRepairFormOpen && (
+        <GetRepair
+          assets={assets}
+          repairRequests={repairRequests}
+          onCreateRepairRequest={handleCreateRepairRequest}
+          preselectedAsset={selectedAssetForRepair}
+          onClearPreselectedAsset={() => setSelectedAssetForRepair(null)}
+          onClose={() => setIsRepairFormOpen(false)}
         />
       )}
 
@@ -1059,12 +1061,6 @@ export default function App() {
                 onClick={() => handleChangeLayout('reports')}
               >
                 📈 รายงาน พ.ด.1-3
-              </li>
-              <li
-                className={`sidebar-menu-item ${activeLayout === 'get_repair' ? 'active' : ''}`}
-                onClick={() => handleChangeLayout('get_repair')}
-              >
-                🔧 แจ้งซ่อมอุปกรณ์
               </li>
               <li
                 className={`sidebar-menu-item ${activeLayout === 'repair_jobs' ? 'active' : ''}`}

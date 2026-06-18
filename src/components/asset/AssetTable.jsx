@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useState, useMemo, useEffect } from 'react';
 
-export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onPrintAsset, initialSearchQuery = '' }) {
+export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onRepairAsset, onPrintAsset, initialSearchQuery = '' }) {
   // Filter & Search states
   const [search, setSearch] = useState(initialSearchQuery);
   const [filterStatus, setFilterStatus] = useState('ทั้งหมด');
@@ -184,7 +184,7 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onPrint
 
       {/* Main Table Grid */}
       <div className="layout-card table-data-card animate-fade-in" style={{ padding: '20px' }}>
-        <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', gap: '2px', marginBottom: '16px' }}>
           <div className="results-indicator">
             พบครุภัณฑ์ทั้งหมด <strong>{totalItems}</strong> รายการ
             {totalItems !== assets.length && ` (จากข้อมูลหลัก ${assets.length} รายการ)`}
@@ -195,11 +195,11 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onPrint
           <table className="data-table">
             <thead>
               <tr>
-                <th style={{ width: '18%' }}>รหัสพัสดุ</th>
-                <th style={{ width: '44%' }}>รายการทรัพย์สิน / พัสดุ</th>
+                <th style={{ width: '10%' }}>รหัสพัสดุ</th>
+                <th style={{ width: '20%' }}>รายการทรัพย์สิน / พัสดุ</th>
                 <th style={{ width: '20%' }}>หน่วยดูแล/สถานที่ตั้ง</th>
-                <th style={{ width: '8%' }}>สถานะ</th>
-                <th style={{ width: '10%' }} className="text-center">การจัดการ</th>
+                <th style={{ width: '5%' }}>สถานะ</th>
+                <th style={{ width: '35%' }} className="text-center">การจัดการ</th>
               </tr>
             </thead>
             <tbody>
@@ -235,8 +235,11 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onPrint
                     </td>
                     <td className="text-center">
                       <div className="table-actions">
-                        <button className="btn-table-print" onClick={() => onPrintAsset && onPrintAsset(item)} title="พิมพ์เอกสาร">
+                        <button className="btn-table-print" onClick={() => onPrintAsset(item)} title="พิมพ์เอกสาร">
                           🖨️ พิมพ์
+                        </button>
+                        <button className="btn-table-repair" onClick={() => onRepairAsset(item)} title="แจ้งซ่อม">
+                          🔧 แจ้งซ่อม
                         </button>
                         <button className="btn-table-edit" onClick={() => onEditAsset(item)} title="แก้ไขข้อมูล">
                           ✏️ แก้ไข

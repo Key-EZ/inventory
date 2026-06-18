@@ -1,4 +1,14 @@
+import { useEffect } from 'react';
+import { formatThaiDateString } from '../../utils/dateUtils';
+
 export default function InventoryPrint({ asset, onClose }) {
+    useEffect(() => {
+        document.body.classList.add('modal-print-open');
+        return () => {
+            document.body.classList.remove('modal-print-open');
+        };
+    }, []);
+
     // Fallback data if no asset is passed
     const defaultData = {
         category: "ค.สำนักงาน",
@@ -72,31 +82,7 @@ export default function InventoryPrint({ asset, onClose }) {
         });
     };
 
-    const formatThaiDateString = (dateStr) => {
-        if (!dateStr) return '';
-        // YYYY-MM-DD
-        const parts = dateStr.split('-');
-        if (parts.length === 3) {
-            const year = parseInt(parts[0]) || '';
-            const monthIdx = parseInt(parts[1]) - 1;
-            const day = parseInt(parts[2]) || '';
-            const thaiMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
-            const monthName = thaiMonths[monthIdx] || '';
-            const yearBE = year < 2400 ? year + 543 : year;
-            return `${day} ${monthName} ${yearBE}`;
-        }
-        // Fallback to DD/MM/YYYY
-        const slashParts = dateStr.split('/');
-        if (slashParts.length === 3) {
-            const day = parseInt(slashParts[0]) || '';
-            const monthIdx = parseInt(slashParts[1]) - 1;
-            const year = slashParts[2] || '';
-            const thaiMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
-            const monthName = thaiMonths[monthIdx] || '';
-            return `${day} ${monthName} ${year}`;
-        }
-        return dateStr;
-    };
+
 
     const getDisplayData = () => {
         if (!asset) return defaultData;
@@ -108,7 +94,10 @@ export default function InventoryPrint({ asset, onClose }) {
             yearBE = parts[1];
         }
 
-        const depList = getYearsDepreciation(asset.unit_price, asset.depreciation_rate_percent || 10);
+        const depRate = (asset.depreciation_rate_percent !== undefined && asset.depreciation_rate_percent !== null)
+            ? asset.depreciation_rate_percent
+            : 10;
+        const depList = getYearsDepreciation(asset.unit_price, depRate);
 
         let displayAcquiredDate = `พ.ศ. 25${yearBE}`;
         let displayYear = `25${yearBE}`;
@@ -154,7 +143,7 @@ export default function InventoryPrint({ asset, onClose }) {
         }
 
         return {
-            category: asset.category || "ครุภัณฑ์",
+            category: asset.category || (asset.asset_type === 'LAND_BUILDING' ? 'ที่ดินและสิ่งก่อสร้าง' : 'ครุภัณฑ์'),
             agency: "เทศบาลตำบลเสาธงหิน",
             office: asset.responsible_department || "สำนักงาน",
             amphoe: "บางใหญ่",
@@ -210,7 +199,11 @@ export default function InventoryPrint({ asset, onClose }) {
             {/* หน้าเอกสารควบคุมสัดส่วน */}
             <div className="a4-landscape-page">
                 {/* ส่วนหัวเอกสาร */}
-                <div className="header-title" style={{ textAlign: 'center' }}>ทะเบียนพัสดุครุภัณฑ์ ปศุสัตว์และสัตว์พาหนะ </div>
+                <div className="header-title" style={{ textAlign: 'center' }}>
+                    {asset?.asset_type === 'LAND_BUILDING' 
+                        ? 'ทะเบียนที่ดินและสิ่งก่อสร้าง (แบบ พ.ด.1)' 
+                        : 'ทะเบียนพัสดุครุภัณฑ์ ปศุสัตว์และสัตว์พาหนะ (แบบ พ.ด.2)'}
+                </div>
 
                 <table className="form-table">
                     <tbody>
@@ -246,18 +239,32 @@ export default function InventoryPrint({ asset, onClose }) {
 
                         {/* แถวที่ 3: รายละเอียดสเปค และ ข้อมูลราคา/ค่าเสื่อม */}
                         <tr className="text-sm">
-                            {/* ฝั่งซ้าย: ข้อมูลจำเพาะทางเทคนิค */}
-                            <td colSpan="2" className="lh-1-6">
-                                ใบส่งของ: <span className="dotted-line" style={{ width: '75%' }}></span><br />
-                                ชื่อ/ยี่ห้อผู้ทำหรือผลิต: <span className="dotted-line" style={{ width: '55%' }}>{data.brand}</span><br />
-                                แบบ/ชนิด/ลักษณะ: <span className="dotted-line" style={{ width: '60%' }}>{data.model}</span><br />
-                                หมายเลขตัวรถ: <span className="dotted-line" style={{ width: '70%' }}>{data.carNumber}</span><br />
-                                หมายเลขเครื่อง (ถ้ามี): <span className="dotted-line" style={{ width: '58%' }}>{data.engineNumber}</span><br />
-                                หมายเลขกรอบ (ถ้ามี): <span className="dotted-line" style={{ width: '58%' }}>{data.chassisNumber}</span><br />
-                                หมายเลขจดทะเบียน (ถ้ามี): <span className="dotted-line" style={{ width: '53%' }}>{data.registrationNumber}</span><br />
-                                สีของพัสดุ: <span className="dotted-line" style={{ width: '75%' }}>{data.color}</span><br />
-                                อื่นๆ (ถ้ามีระบุ): <span className="dotted-line" style={{ width: '70%' }}>{data.other}</span>
-                            </td>
+                            {/* ฝั่งซ้าย: ข้อมูลจำเพาะทางเทคนิค (พ.ด. 2) หรือรายละเอียดเฉพาะที่ดินและสิ่งก่อสร้าง (พ.ด. 1) */}
+                            {asset?.asset_type === 'LAND_BUILDING' ? (
+                                <td colSpan="2" className="lh-1-6">
+                                    เอกสารสิทธิ์ (โฉนด/น.ส.3): <span className="dotted-line" style={{ width: '50%' }}>{asset.document_of_title || '-'}</span><br />
+                                    ขนาดเนื้อที่: <span className="dotted-line" style={{ width: '70%' }}>{asset.area_size || '-'}</span><br />
+                                    ลักษณะโรงเรือน/สิ่งก่อสร้าง: <span className="dotted-line" style={{ width: '45%' }}>{asset.building_style || '-'}</span><br />
+                                    สถานะพัสดุ: <span className="dotted-line" style={{ width: '70%' }}>{asset.status || '-'}</span><br />
+                                    ลักษณะการได้มา: <span className="dotted-line" style={{ width: '60%' }}>{asset.acquisition_method || '-'}</span><br />
+                                    เอกสารอนุมัติ/สัญญา: <span className="dotted-line" style={{ width: '53%' }}>{asset.approval_document || '-'}</span><br />
+                                    <span style={{ visibility: 'hidden' }}>-</span><br />
+                                    <span style={{ visibility: 'hidden' }}>-</span><br />
+                                    <span style={{ visibility: 'hidden' }}>-</span>
+                                </td>
+                            ) : (
+                                <td colSpan="2" className="lh-1-6">
+                                    ใบส่งของ: <span className="dotted-line" style={{ width: '75%' }}></span><br />
+                                    ชื่อ/ยี่ห้อผู้ทำหรือผลิต: <span className="dotted-line" style={{ width: '55%' }}>{data.brand}</span><br />
+                                    แบบ/ชนิด/ลักษณะ: <span className="dotted-line" style={{ width: '60%' }}>{data.model}</span><br />
+                                    หมายเลขตัวรถ: <span className="dotted-line" style={{ width: '70%' }}>{data.carNumber}</span><br />
+                                    หมายเลขเครื่อง (ถ้ามี): <span className="dotted-line" style={{ width: '58%' }}>{data.engineNumber}</span><br />
+                                    หมายเลขกรอบ (ถ้ามี): <span className="dotted-line" style={{ width: '58%' }}>{data.chassisNumber}</span><br />
+                                    หมายเลขจดทะเบียน (ถ้ามี): <span className="dotted-line" style={{ width: '53%' }}>{data.registrationNumber}</span><br />
+                                    สีของพัสดุ: <span className="dotted-line" style={{ width: '75%' }}>{data.color}</span><br />
+                                    อื่นๆ (ถ้ามีระบุ): <span className="dotted-line" style={{ width: '70%' }}>{data.other}</span>
+                                </td>
+                            )}
 
                             {/* ฝั่งกลาง: ราคาและการคำนวณค่าเสื่อม */}
                             <td colSpan="2">

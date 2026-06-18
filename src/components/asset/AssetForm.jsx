@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { calculateDepreciation } from '../../utils/depreciation';
 import { defaultDepartments } from '../../utils/mockData';
+import { formatThaiDateString } from '../../utils/dateUtils';
 
 
 
@@ -70,7 +71,8 @@ export default function AssetForm({
   const [maintenances, setMaintenances] = useState([]);
 
   // New maintenance entry fields
-  const [maintApprovalNoDate, setMaintApprovalNoDate] = useState('');
+  const [maintApprovalDate, setMaintApprovalDate] = useState('');
+  const [maintDocumentNumber, setMaintDocumentNumber] = useState('');
   const [maintDescription, setMaintDescription] = useState('');
   const [maintCost, setMaintCost] = useState(0);
   const [maintContractor, setMaintContractor] = useState('');
@@ -154,8 +156,8 @@ export default function AssetForm({
 
   // --- Maintenance Log Operations ---
   const handleAddOrEditMaintenance = () => {
-    if (!maintApprovalNoDate || !maintDescription || maintCost <= 0) {
-      alert('กรุณากรอก เลขที่อนุมัติ, รายการซ่อมแซม และจำนวนเงินค่าซ่อมที่ถูกต้อง');
+    if (!maintApprovalDate.trim() || !maintDocumentNumber.trim() || !maintDescription.trim() || maintCost <= 0) {
+      alert('กรุณากรอก เลขที่หนังสืออนุมัติ, วันเดือนปีอนุมัติ, รายการซ่อมแซม และจำนวนเงินค่าซ่อมที่ถูกต้อง');
       return;
     }
 
@@ -163,26 +165,29 @@ export default function AssetForm({
       // Edit
       setMaintenances(maintenances.map(m => m.id === editingMaintId ? {
         id: editingMaintId,
-        approval_no_date: maintApprovalNoDate,
-        description: maintDescription,
+        approval_date: maintApprovalDate.trim(),
+        document_number: maintDocumentNumber.trim(),
+        description: maintDescription.trim(),
         cost: parseFloat(maintCost) || 0,
-        contractor: maintContractor
+        contractor: maintContractor.trim()
       } : m));
       setEditingMaintId(null);
     } else {
       // Add new
       const newMaint = {
         id: `maint-${Date.now()}`,
-        approval_no_date: maintApprovalNoDate,
-        description: maintDescription,
+        approval_date: maintApprovalDate.trim(),
+        document_number: maintDocumentNumber.trim(),
+        description: maintDescription.trim(),
         cost: parseFloat(maintCost) || 0,
-        contractor: maintContractor
+        contractor: maintContractor.trim()
       };
       setMaintenances([...maintenances, newMaint]);
     }
 
     // Reset entry inputs
-    setMaintApprovalNoDate('');
+    setMaintApprovalDate('');
+    setMaintDocumentNumber('');
     setMaintDescription('');
     setMaintCost(0);
     setMaintContractor('');
@@ -190,7 +195,8 @@ export default function AssetForm({
 
   const handleEditMaintClick = (maint) => {
     setEditingMaintId(maint.id);
-    setMaintApprovalNoDate(maint.approval_no_date);
+    setMaintApprovalDate(maint.approval_date || '');
+    setMaintDocumentNumber(maint.document_number || '');
     setMaintDescription(maint.description);
     setMaintCost(maint.cost);
     setMaintContractor(maint.contractor || '');
@@ -201,7 +207,8 @@ export default function AssetForm({
       setMaintenances(maintenances.filter(m => m.id !== id));
       if (editingMaintId === id) {
         setEditingMaintId(null);
-        setMaintApprovalNoDate('');
+        setMaintApprovalDate('');
+        setMaintDocumentNumber('');
         setMaintDescription('');
         setMaintCost(0);
         setMaintContractor('');
@@ -856,12 +863,21 @@ export default function AssetForm({
                 <h4>{editingMaintId ? '✏️ แก้ไขรายการซ่อมแซม' : '➕ เพิ่มประวัติการซ่อมบำรุง'}</h4>
                 <div className="maint-form-grid">
                   <div className="form-group">
-                    <label>เลขที่/วันเดือนปีอนุมัติซ่อม *</label>
+                    <label>เลขที่หนังสืออนุมัติ *</label>
                     <input
                       type="text"
-                      value={maintApprovalNoDate}
-                      onChange={(e) => setMaintApprovalNoDate(e.target.value)}
-                      placeholder="เช่น อนุมัติเลขที่ 45/67 ลงวันที่ 5 พ.ค. 67"
+                      value={maintDocumentNumber}
+                      onChange={(e) => setMaintDocumentNumber(e.target.value)}
+                      placeholder="เช่น นบ 5420X/XXXX"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>วันเดือนปีที่ได้รับอนุมัติ *</label>
+                    <input
+                      type="date"
+                      value={maintApprovalDate}
+                      onChange={(e) => setMaintApprovalDate(e.target.value)}
+                      required
                     />
                   </div>
                   <div className="form-group">
@@ -905,7 +921,8 @@ export default function AssetForm({
                     className="button-secondary maint-cancel-btn"
                     onClick={() => {
                       setEditingMaintId(null);
-                      setMaintApprovalNoDate('');
+                      setMaintApprovalDate('');
+                      setMaintDocumentNumber('');
                       setMaintDescription('');
                       setMaintCost(0);
                       setMaintContractor('');
@@ -934,7 +951,10 @@ export default function AssetForm({
                       maintenances.map((maint, idx) => (
                         <tr key={maint.id}>
                           <td className="text-center">{idx + 1}</td>
-                          <td>{maint.approval_no_date}</td>
+                          <td>
+                            {maint.document_number && <span>{maint.document_number}</span>}
+                            {maint.approval_date && <span style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-muted)' }}>ลงวันที่ {formatThaiDateString(maint.approval_date)}</span>}
+                          </td>
                           <td>{maint.description}</td>
                           <td className="text-right">{(maint.cost || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                           <td>{maint.contractor || '-'}</td>

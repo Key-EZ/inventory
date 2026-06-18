@@ -17,7 +17,8 @@ export default function RepairJobs({
   // Completion Form States
   const [repairCost, setRepairCost] = useState('');
   const [contractor, setContractor] = useState('');
-  const [approvalNoDate, setApprovalNoDate] = useState('');
+  const [approvalDate, setApprovalDate] = useState('');
+  const [documentNumber, setDocumentNumber] = useState('');
   const [officerNotes, setOfficerNotes] = useState('');
 
   // Rejection Form States
@@ -77,7 +78,8 @@ export default function RepairJobs({
     setCompletingRequest(req);
     setRepairCost('');
     setContractor('');
-    setApprovalNoDate('');
+    setApprovalDate('');
+    setDocumentNumber('');
     setOfficerNotes('');
   };
 
@@ -97,7 +99,7 @@ export default function RepairJobs({
   const handleSubmitComplete = (e) => {
     e.preventDefault();
     if (!completingRequest) return;
-    if (!repairCost || !contractor.trim() || !approvalNoDate.trim()) {
+    if (!repairCost || !contractor.trim() || !approvalDate.trim() || !documentNumber.trim()) {
       alert('กรุณากรอกข้อมูลการซ่อมให้ครบถ้วน');
       return;
     }
@@ -105,7 +107,8 @@ export default function RepairJobs({
       completingRequest.id,
       parseFloat(repairCost),
       contractor.trim(),
-      approvalNoDate.trim(),
+      approvalDate.trim(),
+      documentNumber.trim(),
       officerNotes.trim()
     );
     handleCloseComplete();
@@ -358,12 +361,22 @@ export default function RepairJobs({
               </div>
 
               <div className="form-group">
-                <label>หนังสืออนุมัติซ่อม (เลขที่ / วันเดือนปี) *</label>
+                <label>เลขที่หนังสืออนุมัติ *</label>
                 <input
                   type="text"
-                  value={approvalNoDate}
-                  onChange={(e) => setApprovalNoDate(e.target.value)}
-                  placeholder="เช่น อนุมัติเลขที่ 98/2569 ลงวันที่ 10 มิ.ย. 2569"
+                  value={documentNumber}
+                  onChange={(e) => setDocumentNumber(e.target.value)}
+                  placeholder="เช่น นบ 5420X/XXXX"
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>วันเดือนปีที่อนุมัติ *</label>
+                <input
+                  type="date"
+                  value={approvalDate}
+                  onChange={(e) => setApprovalDate(e.target.value)}
                   required
                 />
               </div>

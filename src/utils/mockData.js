@@ -35,7 +35,8 @@ const initialAssetsRaw = [
     maintenances: [
       {
         id: "maint-101",
-        approval_no_date: "อนุมัติเลขที่ 145/2567 วันที่ 12 พ.ค. 2567",
+        approval_date: "2024-05-12",
+        document_number: "อนุมัติเลขที่ 145/2567",
         description: "ปรับปรุงระบบกันซึมดาดฟ้าและทาสีภายนอกอาคารใหม่",
         cost: 250000.00,
         contractor: "หจก. นนทบุรีการช่าง"
@@ -64,7 +65,8 @@ const initialAssetsRaw = [
     maintenances: [
       {
         id: "maint-201",
-        approval_no_date: "อนุมัติเลขที่ ไอที 12/2568 วันที่ 10 ม.ค. 2568",
+        approval_date: "2025-01-10",
+        document_number: "อนุมัติเลขที่ ไอที 12/2568",
         description: "เปลี่ยนคีย์บอร์ดที่ชำรุดและอัพเกรด RAM เป็น 32GB",
         cost: 4800.00,
         contractor: "ร้านคอมพิวเตอร์เซอร์วิส นนทบุรี"
@@ -112,7 +114,8 @@ const initialAssetsRaw = [
     maintenances: [
       {
         id: "maint-202",
-        approval_no_date: "ล้างและเติมน้ำยาประจำปี วันที่ 15 มิ.ย. 2567",
+        approval_date: "2024-06-15",
+        document_number: "ล้างและเติมน้ำยาประจำปี",
         description: "บริการล้างแอร์ เติมน้ำยารั่วซึม และซ่อมบอร์ดมอเตอร์คอยล์เย็น",
         cost: 2500.00,
         contractor: "ร้านแอร์เจริญยนต์นนทบุรี"
@@ -160,14 +163,16 @@ const initialAssetsRaw = [
     maintenances: [
       {
         id: "maint-301",
-        approval_no_date: "อนุมัติซ่อมเลขที่ 45/2566 วันที่ 15 ต.ค. 2566",
+        approval_date: "2023-10-15",
+        document_number: "อนุมัติซ่อมเลขที่ 45/2566",
         description: "เปลี่ยนยางรถยนต์ 4 เส้น และเช็คระยะรอบ 80,000 กม.",
         cost: 28000.00,
         contractor: "ศูนย์บริการโตโยต้านนทบุรี"
       },
       {
         id: "maint-302",
-        approval_no_date: "ใบเสร็จเลขที่ 5894 วันที่ 20 มี.ค. 2567",
+        approval_date: "2024-03-20",
+        document_number: "ใบเสร็จเลขที่ 5894",
         description: "เปลี่ยนแบตเตอรี่รถยนต์และซ่อมเปลี่ยนไดชาร์จ",
         cost: 7500.00,
         contractor: "ร้านบี-ควิก สาขารัตนาธิเบศร์"
