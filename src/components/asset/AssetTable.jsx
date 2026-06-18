@@ -5,7 +5,7 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onPrint
   // Filter & Search states
   const [search, setSearch] = useState(initialSearchQuery);
   const [filterStatus, setFilterStatus] = useState('ทั้งหมด');
-  const [filterLocation, setFilterLocation] = useState('ทั้งหมด');
+  const [filterCategory, setFilterCategory] = useState('ทั้งหมด');
 
   // Sort states
   const [sortBy, setSortBy] = useState('code-asc'); // date-desc, date-asc, cost-desc, cost-asc, id-asc, bookvalue-desc, code-asc
@@ -14,10 +14,10 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onPrint
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
-  // Extract unique locations for filtering
-  const locations = useMemo(() => {
-    const locSet = new Set(assets.map(item => item.location).filter(Boolean));
-    return ['ทั้งหมด', ...Array.from(locSet)];
+  // Extract unique categories for filtering
+  const categories = useMemo(() => {
+    const catSet = new Set(assets.map(item => item.category).filter(Boolean));
+    return ['ทั้งหมด', ...Array.from(catSet)];
   }, [assets]);
 
   // Filtered and sorted assets
@@ -44,9 +44,9 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onPrint
       result = result.filter(item => item.status === filterStatus);
     }
 
-    // 3. Location Filter
-    if (filterLocation !== 'ทั้งหมด') {
-      result = result.filter(item => item.location === filterLocation);
+    // 3. Category Filter
+    if (filterCategory !== 'ทั้งหมด') {
+      result = result.filter(item => item.category === filterCategory);
     }
 
     // 5. Sorting
@@ -77,12 +77,12 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onPrint
     });
 
     return result;
-  }, [assets, search, filterStatus, filterLocation, sortBy]);
+  }, [assets, search, filterStatus, filterCategory, sortBy]);
 
   // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, filterStatus, filterLocation, sortBy]);
+  }, [search, filterStatus, filterCategory, sortBy]);
 
   // Pagination math
   const totalItems = processedAssets.length;
@@ -102,7 +102,7 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onPrint
   const handleClearFilters = () => {
     setSearch('');
     setFilterStatus('ทั้งหมด');
-    setFilterLocation('ทั้งหมด');
+    setFilterCategory('ทั้งหมด');
     setSortBy('code-asc');
   };
 
@@ -112,7 +112,7 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onPrint
       <div className="layout-card filter-panel-card">
         <div className="filter-panel-header">
           <h3>🔍 ค้นหาและตัวกรองข้อมูล</h3>
-          {(search || filterStatus !== 'ทั้งหมด' || filterLocation !== 'ทั้งหมด' || sortBy !== 'code-asc') && (
+          {(search || filterStatus !== 'ทั้งหมด' || filterCategory !== 'ทั้งหมด' || sortBy !== 'code-asc') && (
             <button className="btn-clear-filter" onClick={handleClearFilters}>
               ล้างตัวกรองทั้งหมด
             </button>
@@ -148,17 +148,17 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onPrint
             </select>
           </div>
 
-          {/* Location Select */}
+          {/* Category Select */}
           <div className="filter-group-item">
-            <label>สถานที่ตั้ง</label>
+            <label>หมวดหมู่พัสดุ</label>
             <select
-              value={filterLocation}
-              onChange={(e) => setFilterLocation(e.target.value)}
+              value={filterCategory}
+              onChange={(e) => setFilterCategory(e.target.value)}
               className="filter-input-element"
             >
-              <option value="ทั้งหมด">ทั้งหมดทุกสถานที่</option>
-              {locations.map(loc => (
-                <option key={loc} value={loc}>{loc}</option>
+              <option value="ทั้งหมด">ทั้งหมดทุกหมวดหมู่</option>
+              {categories.map(cat => (
+                <option key={cat} value={cat}>{cat}</option>
               ))}
             </select>
           </div>
