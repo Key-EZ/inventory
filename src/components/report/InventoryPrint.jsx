@@ -9,49 +9,7 @@ export default function InventoryPrint({ asset, onClose }) {
         };
     }, []);
 
-    // Fallback data if no asset is passed
-    const defaultData = {
-        category: "ค.สำนักงาน",
-        agency: "เทศบาลตำบลเสาธงหิน",
-        office: "สำนักงาน",
-        amphoe: "บางใหญ่",
-        province: "นนทบุรี",
-        assetCode: "๔๐๐/๖๓/๐ 654",
-        assetName: "โต๊ะอเนกประสงค์",
-        acquiredFrom: "ร้าน เอสซี",
-        acquiredDate: "๒๗ พ.ศ. ๖๓",
-        budgetSource: "ทต.เสาธงหิน",
-        price: "๕,๕๓๓.๓๓",
-        brand: "พานาโซนิค",
-        model: "-",
-        carNumber: "-",
-        engineNumber: "-",
-        chassisNumber: "-",
-        registrationNumber: "-",
-        color: "ดำ",
-        other: "-",
-        warrantyUntil: "-",
-        warrantyCompany: "-",
-        warrantyDate: "-",
-        depreciation: [
-            { year: "ปีที่ ๑", rate: "", balance: "" },
-            { year: "ปีที่ ๒", rate: "", balance: "" },
-            { year: "ปีที่ ๓", rate: "", balance: "" },
-            { year: "ปีที่ ๔", rate: "", balance: "" },
-            { year: "ปีที่ ๕", rate: "", balance: "" },
-        ],
-        history: [
-            { year: "๒๕๖๔", department: "กองสาธารณสุขฯ", user: "-", head: "นางพรรณี ปัทมนิรันตร์กุล\n(พยาบาลวิชาชีพชำนาญการ)" },
-            { year: "๒๕๖๕", department: "กองสาธารณสุขฯ", user: "-", head: "นางพรรณี ปัทมนิรันตร์กุล\n(พยาบาลวิชาชีพชำนาญการ)" },
-            { year: "", department: "", user: "", head: "" },
-        ],
-        disposalDate: "-",
-        disposalMethod: "-",
-        disposalDocNo: "-",
-        disposalPrice: "-",
-        profit: "-",
-        benefits: []
-    };
+    if (!asset) return null;
 
     const getYearsDepreciation = (price, ratePercent) => {
         const priceVal = parseFloat(price) || 0;
@@ -85,7 +43,6 @@ export default function InventoryPrint({ asset, onClose }) {
 
 
     const getDisplayData = () => {
-        if (!asset) return defaultData;
 
         const code = asset.asset_code || '';
         const parts = code.split('-');
