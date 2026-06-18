@@ -1,9 +1,10 @@
-/* eslint-disable react-hooks/set-state-in-effect */
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { calculateDepreciation } from '../../utils/depreciation';
 import { defaultDepartments } from '../../utils/mockData';
 
 
+
+const generateNewAssetId = () => `asset-${Date.now()}`;
 
 const formatAssetCode = (value) => {
   const clean = value.replace(/\D/g, '');
@@ -34,118 +35,50 @@ export default function AssetForm({
   const [activeTab, setActiveTab] = useState('general');
 
   // Form states (Flat fields)
-  const [assetType, setAssetType] = useState('EQUIPMENT'); // 'LAND_BUILDING', 'EQUIPMENT'
-  const [category, setCategory] = useState('');
-  const [assetCode, setAssetCode] = useState('');
-  const [name, setName] = useState('');
-  const [location, setLocation] = useState('');
-  const [acquisitionMethod, setAcquisitionMethod] = useState('ซื้อ');
-  const [approvalDocument, setApprovalDocument] = useState('');
-  const [deliveryDate, setDeliveryDate] = useState('');
-  const [unitPrice, setUnitPrice] = useState(0);
-  const [budgetOwner, setBudgetOwner] = useState('');
-  const [responsibleDepartment, setResponsibleDepartment] = useState('');
+  const [assetType, setAssetType] = useState(asset ? asset.asset_type || 'EQUIPMENT' : 'EQUIPMENT'); // 'LAND_BUILDING', 'EQUIPMENT'
+  const [category, setCategory] = useState(asset ? asset.category || '' : (equipmentCategories[0] || ''));
+  const [assetCode, setAssetCode] = useState(asset ? asset.asset_code || '' : '');
+  const [name, setName] = useState(asset ? asset.name || '' : '');
+  const [location, setLocation] = useState(asset ? asset.location || '' : '');
+  const [acquisitionMethod, setAcquisitionMethod] = useState(asset ? asset.acquisition_method || 'ซื้อ' : 'ซื้อ');
+  const [approvalDocument, setApprovalDocument] = useState(asset ? asset.approval_document || '' : '');
+  const [deliveryDate, setDeliveryDate] = useState(asset ? asset.delivery_date || '' : '');
+  const [unitPrice, setUnitPrice] = useState(asset ? asset.unit_price || 0 : 0);
+  const budgetOwner = asset ? asset.budget_owner || '' : '';
+  const [responsibleDepartment, setResponsibleDepartment] = useState(asset ? asset.responsible_department || '' : '');
 
   // พ.ด. 1 fields
-  const [documentOfTitle, setDocumentOfTitle] = useState('');
-  const [areaSize, setAreaSize] = useState('');
-  const [buildingStyle, setBuildingStyle] = useState('');
+  const [documentOfTitle, setDocumentOfTitle] = useState(asset ? asset.document_of_title || '' : '');
+  const [areaSize, setAreaSize] = useState(asset ? asset.area_size || '' : '');
+  const [buildingStyle, setBuildingStyle] = useState(asset ? asset.building_style || '' : '');
 
   // พ.ด. 2 fields
-  const [manufacturerBrand, setManufacturerBrand] = useState('');
-  const [serialNumber, setSerialNumber] = useState('');
-  const [engineNumber, setEngineNumber] = useState('');
-  const [chassisNumber, setChassisNumber] = useState('');
-  const [vehicleRegistration, setVehicleRegistration] = useState('');
-  const [color, setColor] = useState('');
-  const [warrantyDetail, setWarrantyDetail] = useState('');
+  const [manufacturerBrand, setManufacturerBrand] = useState(asset ? asset.manufacturer_brand || '' : '');
+  const [serialNumber, setSerialNumber] = useState(asset ? asset.serial_number || '' : '');
+  const [engineNumber, setEngineNumber] = useState(asset ? asset.engine_number || '' : '');
+  const [chassisNumber, setChassisNumber] = useState(asset ? asset.chassis_number || '' : '');
+  const [vehicleRegistration, setVehicleRegistration] = useState(asset ? asset.vehicle_registration || '' : '');
+  const [color, setColor] = useState(asset ? asset.color || '' : '');
+  const [warrantyDetail, setWarrantyDetail] = useState(asset ? asset.warranty_detail || '' : '');
 
-  // Status & calculated depreciation
-  const [status, setStatus] = useState('ใช้งาน');
-  const [depreciationRate, setDepreciationRate] = useState(10);
-  const [accumulatedDepreciation, setAccumulatedDepreciation] = useState(0);
-  const [bookValue, setBookValue] = useState(0);
+  // Status
+  const [status, setStatus] = useState(asset ? asset.status || 'ใช้งาน' : 'ใช้งาน');
 
-  // Maintenances CRUD states
-  const [maintenances, setMaintenances] = useState([]);
-
-
+  const maintenances = asset ? asset.maintenances || [] : [];
 
   // Custodian History CRUD states
-  const [custodianHistory, setCustodianHistory] = useState([]);
+  const [custodianHistory, setCustodianHistory] = useState(asset ? asset.custodian_history || [] : []);
   const [custHistoryYear, setCustHistoryYear] = useState('');
   const [custHistoryBudgetOwner, setCustHistoryBudgetOwner] = useState('');
   const [custHistoryCustodian, setCustHistoryCustodian] = useState('');
   const [custHistorySectionHead, setCustHistorySectionHead] = useState('');
   const [editingCustHistoryId, setEditingCustHistoryId] = useState(null);
 
-  // Initialize form
-  useEffect(() => {
-    if (asset) {
-      setAssetType(asset.asset_type || 'EQUIPMENT');
-      setCategory(asset.category || '');
-      setAssetCode(asset.asset_code || '');
-      setName(asset.name || '');
-      setLocation(asset.location || '');
-      setAcquisitionMethod(asset.acquisition_method || 'ซื้อ');
-      setApprovalDocument(asset.approval_document || '');
-      setDeliveryDate(asset.delivery_date || '');
-      setUnitPrice(asset.unit_price || 0);
-      setBudgetOwner(asset.budget_owner || '');
-      setResponsibleDepartment(asset.responsible_department || '');
-
-      setDocumentOfTitle(asset.document_of_title || '');
-      setAreaSize(asset.area_size || '');
-      setBuildingStyle(asset.building_style || '');
-
-      setManufacturerBrand(asset.manufacturer_brand || '');
-      setSerialNumber(asset.serial_number || '');
-      setEngineNumber(asset.engine_number || '');
-      setChassisNumber(asset.chassis_number || '');
-      setVehicleRegistration(asset.vehicle_registration || '');
-      setColor(asset.color || '');
-      setWarrantyDetail(asset.warranty_detail || '');
-
-      setStatus(asset.status || 'ใช้งาน');
-      setMaintenances(asset.maintenances || []);
-      setCustodianHistory(asset.custodian_history || []);
-    } else {
-      // Clear/Reset for new asset
-      setAssetType('EQUIPMENT');
-      setCategory(equipmentCategories[0] || '');
-      setAssetCode('');
-      setName('');
-      setLocation('');
-      setAcquisitionMethod('ซื้อ');
-      setApprovalDocument('');
-      setDeliveryDate('');
-      setUnitPrice(0);
-      setBudgetOwner('');
-      setResponsibleDepartment('');
-      setDocumentOfTitle('');
-      setAreaSize('');
-      setBuildingStyle('');
-      setManufacturerBrand('');
-      setSerialNumber('');
-      setEngineNumber('');
-      setChassisNumber('');
-      setVehicleRegistration('');
-      setColor('');
-      setWarrantyDetail('');
-      setStatus('ใช้งาน');
-      setMaintenances([]);
-      setCustodianHistory([]);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [asset]);
-
-  // Recalculate depreciation live when price or code changes
-  useEffect(() => {
-    const calc = calculateDepreciation(assetCode, unitPrice);
-    setDepreciationRate(calc.depreciationRatePercent);
-    setAccumulatedDepreciation(calc.accumulatedDepreciation);
-    setBookValue(calc.bookValue);
-  }, [assetCode, unitPrice]);
+  // Calculate depreciation dynamically during render
+  const calc = calculateDepreciation(assetCode, unitPrice);
+  const depreciationRate = calc.depreciationRatePercent;
+  const accumulatedDepreciation = calc.accumulatedDepreciation;
+  const bookValue = calc.bookValue;
 
 
 
@@ -234,7 +167,7 @@ export default function AssetForm({
     }
 
     const payload = {
-      id: asset?.id || `asset-${Date.now()}`,
+      id: asset?.id || generateNewAssetId(),
       asset_type: assetType,
       category,
       asset_code: assetCode,

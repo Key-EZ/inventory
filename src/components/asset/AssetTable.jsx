@@ -1,5 +1,4 @@
-/* eslint-disable react-hooks/set-state-in-effect */
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 
 export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onRepairAsset, onPrintAsset, initialSearchQuery = '' }) {
   // Filter & Search states
@@ -79,10 +78,17 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onRepai
     return result;
   }, [assets, search, filterStatus, filterCategory, sortBy]);
 
-  // Reset page when filters change
-  useEffect(() => {
+  // Reset page when filters change during render (React-recommended pattern)
+  const [prevFilters, setPrevFilters] = useState({ search, filterStatus, filterCategory, sortBy });
+  if (
+    prevFilters.search !== search ||
+    prevFilters.filterStatus !== filterStatus ||
+    prevFilters.filterCategory !== filterCategory ||
+    prevFilters.sortBy !== sortBy
+  ) {
+    setPrevFilters({ search, filterStatus, filterCategory, sortBy });
     setCurrentPage(1);
-  }, [search, filterStatus, filterCategory, sortBy]);
+  }
 
   // Pagination math
   const totalItems = processedAssets.length;

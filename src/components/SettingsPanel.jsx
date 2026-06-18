@@ -1,5 +1,4 @@
-/* eslint-disable react-hooks/set-state-in-effect */
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 export default function SettingsPanel({
   assets,
@@ -48,11 +47,12 @@ export default function SettingsPanel({
   const [newEquipCatInput, setNewEquipCatInput] = useState('');
   const [newAgencyInput, setNewAgencyInput] = useState('');
 
-  useEffect(() => {
-    if (landingBadgeText) {
-      setLandingBadgeInput(landingBadgeText);
-    }
-  }, [landingBadgeText]);
+  // Adjust input state when badge text prop changes during render
+  const [prevLandingBadgeText, setPrevLandingBadgeText] = useState(landingBadgeText);
+  if (landingBadgeText !== prevLandingBadgeText) {
+    setPrevLandingBadgeText(landingBadgeText);
+    setLandingBadgeInput(landingBadgeText || 'ระบบดิจิทัลบริหารทรัพย์สิน');
+  }
 
   // Custodian Form Modal states
   const [isCustFormOpen, setIsCustFormOpen] = useState(false);
