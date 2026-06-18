@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useState, useEffect } from 'react';
-import { calculateDepreciation } from '../utils/depreciation';
-import { defaultDepartments } from '../utils/mockData';
+import { calculateDepreciation } from '../../utils/depreciation';
+import { defaultDepartments } from '../../utils/mockData';
 
 
 

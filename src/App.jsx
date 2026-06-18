@@ -1,15 +1,15 @@
 /* eslint-disable react-hooks/set-state-in-effect, no-unused-vars */
 import { useState, useEffect } from 'react';
 import BaseLayout from './components/BaseLayout';
-import AssetForm from './components/AssetForm';
-import AssetTable from './components/AssetTable';
+import AssetForm from './components/asset/AssetForm';
+import AssetTable from './components/asset/AssetTable';
 import BentoDashboard from './components/BentoDashboard';
 import CenteredLanding from './components/CenteredLanding';
 import SettingsPanel from './components/SettingsPanel';
-import ReportPanel from './components/ReportPanel';
-import InventoryPrint from './components/InventoryPrint';
-import GetRepair from './components/GetRepair';
-import RepairJobs from './components/RepairJobs';
+import ReportPanel from './components/report/ReportPanel';
+import InventoryPrint from './components/report/InventoryPrint';
+import GetRepair from './components/repair/GetRepair';
+import RepairJobs from './components/repair/RepairJobs';
 import { getSeedAssets, defaultDivisions, defaultDepartments, defaultCustodians, defaultPositions, defaultBrands, defaultLocations, defaultLandBuildingCategories, defaultEquipmentCategories, defaultAgencies } from './utils/mockData';
 
 const SEED_DATE_1 = '2026-06-17T08:30:00.000Z';
