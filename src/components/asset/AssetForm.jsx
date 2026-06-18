@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { calculateDepreciation } from '../../utils/depreciation';
 import { defaultDepartments } from '../../utils/mockData';
-import { formatThaiDateString } from '../../utils/dateUtils';
 
 
 
@@ -31,7 +30,7 @@ export default function AssetForm({
 }) {
   const isEdit = !!asset;
 
-  // Tabs: 'general', 'spec', 'financial', 'maintenances'
+  // Tabs: 'general', 'custodian_history', 'spec', 'financial'
   const [activeTab, setActiveTab] = useState('general');
 
   // Form states (Flat fields)
@@ -70,13 +69,7 @@ export default function AssetForm({
   // Maintenances CRUD states
   const [maintenances, setMaintenances] = useState([]);
 
-  // New maintenance entry fields
-  const [maintApprovalDate, setMaintApprovalDate] = useState('');
-  const [maintDocumentNumber, setMaintDocumentNumber] = useState('');
-  const [maintDescription, setMaintDescription] = useState('');
-  const [maintCost, setMaintCost] = useState(0);
-  const [maintContractor, setMaintContractor] = useState('');
-  const [editingMaintId, setEditingMaintId] = useState(null);
+
 
   // Custodian History CRUD states
   const [custodianHistory, setCustodianHistory] = useState([]);
@@ -154,67 +147,7 @@ export default function AssetForm({
     setBookValue(calc.bookValue);
   }, [assetCode, unitPrice]);
 
-  // --- Maintenance Log Operations ---
-  const handleAddOrEditMaintenance = () => {
-    if (!maintApprovalDate.trim() || !maintDocumentNumber.trim() || !maintDescription.trim() || maintCost <= 0) {
-      alert('กรุณากรอก เลขที่หนังสืออนุมัติ, วันเดือนปีอนุมัติ, รายการซ่อมแซม และจำนวนเงินค่าซ่อมที่ถูกต้อง');
-      return;
-    }
 
-    if (editingMaintId) {
-      // Edit
-      setMaintenances(maintenances.map(m => m.id === editingMaintId ? {
-        id: editingMaintId,
-        approval_date: maintApprovalDate.trim(),
-        document_number: maintDocumentNumber.trim(),
-        description: maintDescription.trim(),
-        cost: parseFloat(maintCost) || 0,
-        contractor: maintContractor.trim()
-      } : m));
-      setEditingMaintId(null);
-    } else {
-      // Add new
-      const newMaint = {
-        id: `maint-${Date.now()}`,
-        approval_date: maintApprovalDate.trim(),
-        document_number: maintDocumentNumber.trim(),
-        description: maintDescription.trim(),
-        cost: parseFloat(maintCost) || 0,
-        contractor: maintContractor.trim()
-      };
-      setMaintenances([...maintenances, newMaint]);
-    }
-
-    // Reset entry inputs
-    setMaintApprovalDate('');
-    setMaintDocumentNumber('');
-    setMaintDescription('');
-    setMaintCost(0);
-    setMaintContractor('');
-  };
-
-  const handleEditMaintClick = (maint) => {
-    setEditingMaintId(maint.id);
-    setMaintApprovalDate(maint.approval_date || '');
-    setMaintDocumentNumber(maint.document_number || '');
-    setMaintDescription(maint.description);
-    setMaintCost(maint.cost);
-    setMaintContractor(maint.contractor || '');
-  };
-
-  const handleDeleteMaintClick = (id) => {
-    if (window.confirm('คุณต้องการลบรายการประวัติการซ่อมบำรุงนี้ใช่หรือไม่?')) {
-      setMaintenances(maintenances.filter(m => m.id !== id));
-      if (editingMaintId === id) {
-        setEditingMaintId(null);
-        setMaintApprovalDate('');
-        setMaintDocumentNumber('');
-        setMaintDescription('');
-        setMaintCost(0);
-        setMaintContractor('');
-      }
-    }
-  };
 
   // --- Custodian History Operations ---
   const handleAddOrEditCustodianHistory = () => {
@@ -352,7 +285,6 @@ export default function AssetForm({
           <button className="close-btn" onClick={onClose} type="button">&times;</button>
         </div>
 
-        {/* Form Tab Navigator */}
         <div className="form-tabs">
           <button
             type="button"
@@ -381,13 +313,6 @@ export default function AssetForm({
             onClick={() => setActiveTab('financial')}
           >
             4. ค่าเสื่อมราคา
-          </button>
-          <button
-            type="button"
-            className={`tab-btn ${activeTab === 'maintenances' ? 'active' : ''}`}
-            onClick={() => setActiveTab('maintenances')}
-          >
-            5. ประวัติซ่อมบำรุง ({maintenances.length})
           </button>
         </div>
 
@@ -851,144 +776,6 @@ export default function AssetForm({
             </div>
           )}
 
-          {/* TAB 4: Maintenance history Log */}
-          {activeTab === 'maintenances' && (
-            <div className="tab-panel">
-              <div className="info-alert">
-                <strong>🛠️ ประวัติการซ่อมแซมและบำรุงรักษา (แบบ พ.ด.1/2 หน้า 2):</strong> บันทึกประวัติการบำรุงรักษา อะไหล่ หรือการซ่อมแซมปรับปรุงของทรัพย์สินชิ้นนี้
-              </div>
-
-              {/* Add/Edit Sub-Form */}
-              <div className="maint-entry-box">
-                <h4>{editingMaintId ? '✏️ แก้ไขรายการซ่อมแซม' : '➕ เพิ่มประวัติการซ่อมบำรุง'}</h4>
-                <div className="maint-form-grid">
-                  <div className="form-group">
-                    <label>เลขที่หนังสืออนุมัติ *</label>
-                    <input
-                      type="text"
-                      value={maintDocumentNumber}
-                      onChange={(e) => setMaintDocumentNumber(e.target.value)}
-                      placeholder="เช่น นบ 5420X/XXXX"
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>วันเดือนปีที่ได้รับอนุมัติ *</label>
-                    <input
-                      type="date"
-                      value={maintApprovalDate}
-                      onChange={(e) => setMaintApprovalDate(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>รายการซ่อมแซม/เปลี่ยนอะไหล่ *</label>
-                    <input
-                      type="text"
-                      value={maintDescription}
-                      onChange={(e) => setMaintDescription(e.target.value)}
-                      placeholder="เช่น ซ่อมคอมบิวเตอร์ เปลี่ยนหน้าจอแสดงผล"
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>จำนวนเงินค่าซ่อม (บาท) *</label>
-                    <input
-                      type="number"
-                      min="0"
-                      value={maintCost}
-                      onChange={(e) => setMaintCost(parseFloat(e.target.value) || 0)}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>บริษัท/ชื่อผู้รับจ้าง</label>
-                    <input
-                      type="text"
-                      value={maintContractor}
-                      onChange={(e) => setMaintContractor(e.target.value)}
-                      placeholder="เช่น บริษัท อาร์ตไอที จำกัด"
-                    />
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  className="button-primary maint-add-btn"
-                  onClick={handleAddOrEditMaintenance}
-                >
-                  {editingMaintId ? 'บันทึกการแก้ไข' : 'บันทึกรายการเพิ่ม'}
-                </button>
-                {editingMaintId && (
-                  <button
-                    type="button"
-                    className="button-secondary maint-cancel-btn"
-                    onClick={() => {
-                      setEditingMaintId(null);
-                      setMaintApprovalDate('');
-                      setMaintDocumentNumber('');
-                      setMaintDescription('');
-                      setMaintCost(0);
-                      setMaintContractor('');
-                    }}
-                  >
-                    ยกเลิกแก้ไข
-                  </button>
-                )}
-              </div>
-
-              {/* Maintenance List Table */}
-              <div className="maint-table-container">
-                <table className="maint-log-table">
-                  <thead>
-                    <tr>
-                      <th style={{ width: '8%' }}>ครั้งที่</th>
-                      <th style={{ width: '25%' }}>หนังสืออนุมัติ</th>
-                      <th style={{ width: '30%' }}>รายการซ่อมแซม</th>
-                      <th style={{ width: '15%' }} className="text-right">จำนวนเงิน (บาท)</th>
-                      <th style={{ width: '17%' }}>ผู้รับจ้าง</th>
-                      <th style={{ width: '10%' }} className="text-center">จัดการ</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {maintenances.length > 0 ? (
-                      maintenances.map((maint, idx) => (
-                        <tr key={maint.id}>
-                          <td className="text-center">{idx + 1}</td>
-                          <td>
-                            {maint.document_number && <span>{maint.document_number}</span>}
-                            {maint.approval_date && <span style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-muted)' }}>ลงวันที่ {formatThaiDateString(maint.approval_date)}</span>}
-                          </td>
-                          <td>{maint.description}</td>
-                          <td className="text-right">{(maint.cost || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
-                          <td>{maint.contractor || '-'}</td>
-                          <td className="text-center">
-                            <div className="maint-row-actions">
-                              <span
-                                className="action-maint-edit"
-                                onClick={() => handleEditMaintClick(maint)}
-                                title="แก้ไขรายการ"
-                              >
-                                ✏️
-                              </span>
-                              <span
-                                className="action-maint-delete"
-                                onClick={() => handleDeleteMaintClick(maint.id)}
-                                title="ลบรายการ"
-                              >
-                                🗑️
-                              </span>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="6" className="text-center text-muted py-8 font-italic">ยังไม่มีรายการประวัติการซ่อมบำรุงทรัพย์สินนี้</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
           {/* Form Actions Footer */}
           <div className="form-actions-footer">
             <button className="btn-cancel" type="button" onClick={onClose}>ยกเลิก</button>
@@ -1001,13 +788,12 @@ export default function AssetForm({
                     if (activeTab === 'custodian_history') setActiveTab('general');
                     if (activeTab === 'spec') setActiveTab('custodian_history');
                     if (activeTab === 'financial') setActiveTab('spec');
-                    if (activeTab === 'maintenances') setActiveTab('financial');
                   }}
                 >
                   ย้อนกลับ
                 </button>
               )}
-              {activeTab !== 'maintenances' ? (
+              {activeTab !== 'financial' ? (
                 <button
                   className="btn-next-tab button-primary"
                   type="button"
@@ -1015,7 +801,6 @@ export default function AssetForm({
                     if (activeTab === 'general') setActiveTab('custodian_history');
                     else if (activeTab === 'custodian_history') setActiveTab('spec');
                     else if (activeTab === 'spec') setActiveTab('financial');
-                    else if (activeTab === 'financial') setActiveTab('maintenances');
                   }}
                 >
                   ถัดไป

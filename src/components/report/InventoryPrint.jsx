@@ -158,21 +158,20 @@ export default function InventoryPrint({ asset, onClose }) {
                 {/* ส่วนหัวเอกสาร */}
                 <div className="print-header-title">
                     {asset?.asset_type === 'LAND_BUILDING'
-                        ? 'ทะเบียนที่ดินและสิ่งก่อสร้าง (แบบ พ.ด.1)'
-                        : 'ทะเบียนพัสดุครุภัณฑ์ ปศุสัตว์และสัตว์พาหนะ (แบบ พ.ด.2)'}
+                        ? 'ทะเบียนที่ดินและสิ่งก่อสร้าง'
+                        : 'ทะเบียนพัสดุครุภัณฑ์ ปศุสัตว์และสัตว์พาหนะ'}
                 </div>
-
                 <table className="form-table">
                     <tbody>
                         {/* แถวที่ 1: ข้อมูลหน่วยงาน */}
                         <tr>
                             <td colSpan="2" style={{ width: '40%' }}>
-                                <strong>ประเภท</strong> <span className="dotted-line" style={{ width: '80%' }}>{data.category}</span>
+                                ประเภท <span className="dotted-line" style={{ width: '72%' }}>{data.category}</span>
                             </td>
                             <td colSpan="2" style={{ width: '40%' }}>
-                                <strong>ส่วนราชการ:</strong> <span className="dotted-line" style={{ width: '70%' }}>{data.agency}</span><br />
-                                <strong>สำนักงาน:</strong> <span className="dotted-line" style={{ width: '73%' }}>{data.office}</span><br />
-                                <strong>อำเภอ:</strong> <span className="dotted-line" style={{ width: '30%' }}>{data.amphoe}</span>
+                                ส่วนราชการ: <span className="dotted-line" style={{ width: '70%' }}>{data.agency}</span><br />
+                                สำนักงาน: <span className="dotted-line" style={{ width: '73%' }}>{data.office}</span><br />
+                                อำเภอ: <span className="dotted-line" style={{ width: '30%' }}>{data.amphoe}</span>
                                 <strong>จังหวัด:</strong> <span className="dotted-line" style={{ width: '35%' }}>{data.province}</span>
                             </td>
                             <td style={{ width: '20%' }}>
