@@ -156,9 +156,9 @@ export default function InventoryPrint({ asset, onClose }) {
             {/* หน้าเอกสารควบคุมสัดส่วน */}
             <div className="a4-landscape-page">
                 {/* ส่วนหัวเอกสาร */}
-                <div className="header-title" style={{ textAlign: 'center' }}>
-                    {asset?.asset_type === 'LAND_BUILDING' 
-                        ? 'ทะเบียนที่ดินและสิ่งก่อสร้าง (แบบ พ.ด.1)' 
+                <div className="print-header-title">
+                    {asset?.asset_type === 'LAND_BUILDING'
+                        ? 'ทะเบียนที่ดินและสิ่งก่อสร้าง (แบบ พ.ด.1)'
                         : 'ทะเบียนพัสดุครุภัณฑ์ ปศุสัตว์และสัตว์พาหนะ (แบบ พ.ด.2)'}
                 </div>
 

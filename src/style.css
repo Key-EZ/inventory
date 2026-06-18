@@ -2296,6 +2296,15 @@ body {
   color: var(--status-disposed-text);
 }
 
+.print-header-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+  width: 100%;
+  margin-bottom: 20px;
+  color: #000000;
+}
+
 /* --- Inventory Report Print Preview Styles (Screen Only) --- */
 .preview-container {
   position: fixed;
