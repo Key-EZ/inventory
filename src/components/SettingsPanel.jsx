@@ -53,11 +53,11 @@ export default function SettingsPanel({
       setLandingBadgeInput(landingBadgeText);
     }
   }, [landingBadgeText]);
-  
+
   // Custodian Form Modal states
   const [isCustFormOpen, setIsCustFormOpen] = useState(false);
   const [editingCust, setEditingCust] = useState(null);
-  
+
   const [custName, setCustName] = useState('');
   const [custPosition, setCustPosition] = useState('');
   const [custDivision, setCustDivision] = useState('');
@@ -335,8 +335,8 @@ export default function SettingsPanel({
   };
 
   const handleDeleteAgencyCheck = (agency) => {
-    const inUse = assets.some(a => 
-      a.budget_owner === agency || 
+    const inUse = assets.some(a =>
+      a.budget_owner === agency ||
       (a.custodian_history && a.custodian_history.some(ch => ch.budget_owner === agency))
     );
     if (inUse) {
@@ -711,11 +711,11 @@ export default function SettingsPanel({
       {/* Tab 4: Landing Badge Configuration */}
       {activeTab === 'landing' && (
         <div className="layout-card animate-fade-in" style={{ maxWidth: '600px' }}>
-          <h3>🏷️ ตั้งค่าข้อความ Landing Badge</h3>
+          <h3>🏷️ ตั้งค่าข้อความ</h3>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '16px' }}>
             แก้ไขข้อความป้ายชื่อ (Badge) ที่แสดงอยู่ด้านบนสุดของหน้าแรก (Landing Page)
           </p>
-          
+
           <div className="form-group" style={{ marginBottom: '16px' }}>
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>ข้อความป้ายชื่อ *</label>
             <input
@@ -727,7 +727,7 @@ export default function SettingsPanel({
               style={{ width: '100%', padding: '10px' }}
             />
           </div>
-          
+
           <button
             onClick={() => {
               if (!landingBadgeInput.trim()) {
@@ -1005,8 +1005,8 @@ export default function SettingsPanel({
 
               <div className="form-actions-footer">
                 <button className="btn-cancel" type="button" onClick={handleCloseCustForm}>ยกเลิก</button>
-                <button 
-                  className="button-primary" 
+                <button
+                  className="button-primary"
                   type="submit"
                   disabled={divisions.length === 0 || departments.length === 0}
                 >

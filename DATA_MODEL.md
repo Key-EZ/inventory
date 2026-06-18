@@ -18,13 +18,13 @@
 | `category` | `String` | Required | หมวดหมู่ย่อยของพัสดุ (เช่น "ครุภัณฑ์สำนักงาน", "ครุภัณฑ์คอมพิวเตอร์") |
 | `asset_code` | `String` (9 หลัก) | Unique, Format: `XXX-YY-ZZZZ` | รหัสคุมพัสดุราชการ (กลุ่ม1: รหัสประเภท, กลุ่ม2: ปี พ.ศ. ที่ได้มา, กลุ่ม3: ลำดับพัสดุ) |
 | `name` | `String` | Required | ชื่อพัสดุ/ทรัพย์สิน (เช่น "เครื่องปรับอากาศ 18000 BTU") |
-| `location` | `String` | Required | สถานที่ตั้งพัสดุ / แหล่งเก็บใบส่งของ (เช่น "ห้องธุรการทั่วไป") |
+| `location` | `String` | Required | สถานที่ตั้งพัสดุ (เช่น "ห้องธุรการทั่วไป") |
 | `acquisition_method` | `String` (Enum) | `'ซื้อ'` \| `'จ้าง'` \| `'รับโอน'` \| `'บริจาค'` | ลักษณะการได้กรรมสิทธิ์พัสดุ |
 | `approval_document` | `String` | Required | เลขที่และวันเดือนปี ของหนังสืออนุมัติ/สัญญาจัดหา |
 | `unit_price` | `Number` (Float) | Min: 0 | ราคาทุนต่อหน่วย (บาท) |
 | `budget_owner` | `String` | Optional | ชื่อเจ้าของงบประมาณ (เช่น "เงินงบประมาณประจำปี 2568") |
 | `responsible_department` | `String` | Required | ชื่อส่วนราชการหรือฝ่ายที่ดูแลรับผิดชอบ (เช่น "กองช่าง", "ฝ่ายธุรการทั่วไป") |
-| `status` | `String` (Enum) | `'ใช้งาน'` \| `'ชำรุด'` \| `'รอจำหน่าย'` \| `'จำหน่ายแล้ว'` | สถานะทางกายภาพของพัสดุ |
+| `status` | `String` (Enum) | `'ใช้งาน'` \| `'ชำรุด'` \| `'กำลังซ่อม'` \| `'รอจำหน่าย'` \| `'จำหน่ายแล้ว'` | สถานะทางกายภาพของพัสดุ |
 
 #### ฟิลด์เฉพาะแบบ พ.ด.1 (ที่ดินและสิ่งก่อสร้าง - `asset_type: 'LAND_BUILDING'`)
 | ชื่อฟิลด์ | ชนิดข้อมูล | คำอธิบาย |
@@ -53,7 +53,8 @@
 | :--- | :--- | :--- | :--- |
 | `id` | `String` | Primary Key | รหัสรายการซ่อมแซม (เช่น `maint-1718528990000`) |
 | `asset_id` | `String` | Foreign Key | เชื่อมโยงไปยังฟิลด์ `id` ในตาราง `assets` |
-| `approval_no_date` | `String` | Required | เลขที่และวันเดือนปีหนังสืออนุมัติให้ซ่อมบำรุง |
+| `approval_date` | `Date` (String) | Required | วันเดือนปีที่ได้รับอนุมัติให้ซ่อมบำรุง (Format: `YYYY-MM-DD`) |
+| `document_number` | `String` | Required | เลขที่หนังสืออนุมัติ (เช่น "นบ 5420X/XXXX") |
 | `description` | `String` | Required | รายการซ่อมแซมหรือเปลี่ยนอะไหล่โดยละเอียด |
 | `cost` | `Number` (Float) | Min: 0 | จำนวนเงินค่าซ่อมแซมบำรุงรักษา (บาท) |
 | `contractor` | `String` | Optional | ชื่อบุคคลหรือบริษัทผู้รับจ้างดำเนินการซ่อมแซม |
@@ -92,7 +93,8 @@ erDiagram
     ASSET_MAINTENANCE {
         string id PK
         string asset_id FK "References Asset.id"
-        string approval_no_date
+        string approval_date
+        string document_number
         string description
         float cost
         string contractor
@@ -155,7 +157,8 @@ erDiagram
   "maintenances": [
     {
       "id": "maint-301",
-      "approval_no_date": "อนุมัติซ่อมเลขที่ 45/2566 วันที่ 15 ต.ค. 2566",
+      "approval_date": "2023-10-15",
+      "document_number": "45/2566",
       "description": "เปลี่ยนยางรถยนต์ 4 เส้น และเช็คระยะรอบ 80,000 กม.",
       "cost": 28000.00,
       "contractor": "ศูนย์บริการโตโยต้านนทบุรี"

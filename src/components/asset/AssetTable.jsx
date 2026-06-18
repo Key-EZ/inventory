@@ -1,12 +1,11 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useState, useMemo, useEffect } from 'react';
 
-export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onPrintAsset, initialSearchQuery = '' }) {
+export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onRepairAsset, onPrintAsset, initialSearchQuery = '' }) {
   // Filter & Search states
   const [search, setSearch] = useState(initialSearchQuery);
-  const [filterType, setFilterType] = useState('ทั้งหมด');
   const [filterStatus, setFilterStatus] = useState('ทั้งหมด');
-  const [filterLocation, setFilterLocation] = useState('ทั้งหมด');
+  const [filterCategory, setFilterCategory] = useState('ทั้งหมด');
 
   // Sort states
   const [sortBy, setSortBy] = useState('code-asc'); // date-desc, date-asc, cost-desc, cost-asc, id-asc, bookvalue-desc, code-asc
@@ -15,10 +14,10 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onPrint
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
-  // Extract unique locations for filtering
-  const locations = useMemo(() => {
-    const locSet = new Set(assets.map(item => item.location).filter(Boolean));
-    return ['ทั้งหมด', ...Array.from(locSet)];
+  // Extract unique categories for filtering
+  const categories = useMemo(() => {
+    const catSet = new Set(assets.map(item => item.category).filter(Boolean));
+    return ['ทั้งหมด', ...Array.from(catSet)];
   }, [assets]);
 
   // Filtered and sorted assets
@@ -40,19 +39,14 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onPrint
       );
     }
 
-    // 2. Type Filter (พ.ด. 1 vs พ.ด. 2)
-    if (filterType !== 'ทั้งหมด') {
-      result = result.filter(item => item.asset_type === filterType);
-    }
-
-    // 3. Status Filter
+    // 2. Status Filter
     if (filterStatus !== 'ทั้งหมด') {
       result = result.filter(item => item.status === filterStatus);
     }
 
-    // 4. Location Filter
-    if (filterLocation !== 'ทั้งหมด') {
-      result = result.filter(item => item.location === filterLocation);
+    // 3. Category Filter
+    if (filterCategory !== 'ทั้งหมด') {
+      result = result.filter(item => item.category === filterCategory);
     }
 
     // 5. Sorting
@@ -83,12 +77,12 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onPrint
     });
 
     return result;
-  }, [assets, search, filterType, filterStatus, filterLocation, sortBy]);
+  }, [assets, search, filterStatus, filterCategory, sortBy]);
 
   // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, filterType, filterStatus, filterLocation, sortBy]);
+  }, [search, filterStatus, filterCategory, sortBy]);
 
   // Pagination math
   const totalItems = processedAssets.length;
@@ -107,9 +101,8 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onPrint
 
   const handleClearFilters = () => {
     setSearch('');
-    setFilterType('ทั้งหมด');
     setFilterStatus('ทั้งหมด');
-    setFilterLocation('ทั้งหมด');
+    setFilterCategory('ทั้งหมด');
     setSortBy('code-asc');
   };
 
@@ -119,7 +112,7 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onPrint
       <div className="layout-card filter-panel-card">
         <div className="filter-panel-header">
           <h3>🔍 ค้นหาและตัวกรองข้อมูล</h3>
-          {(search || filterType !== 'ทั้งหมด' || filterStatus !== 'ทั้งหมด' || filterLocation !== 'ทั้งหมด' || sortBy !== 'code-asc') && (
+          {(search || filterStatus !== 'ทั้งหมด' || filterCategory !== 'ทั้งหมด' || sortBy !== 'code-asc') && (
             <button className="btn-clear-filter" onClick={handleClearFilters}>
               ล้างตัวกรองทั้งหมด
             </button>
@@ -139,20 +132,6 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onPrint
             />
           </div>
 
-          {/* Asset Type Select */}
-          <div className="filter-group-item">
-            <label>ประเภททะเบียนทะเบียน</label>
-            <select
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-              className="filter-input-element"
-            >
-              <option value="ทั้งหมด">ทั้งหมด (พ.ด.1 และ พ.ด.2)</option>
-              <option value="LAND_BUILDING">ที่ดินและสิ่งก่อสร้าง (พ.ด.1)</option>
-              <option value="EQUIPMENT">ครุภัณฑ์และยานพาหนะ (พ.ด.2)</option>
-            </select>
-          </div>
-
           {/* Status Select */}
           <div className="filter-group-item">
             <label>สถานะ</label>
@@ -169,17 +148,17 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onPrint
             </select>
           </div>
 
-          {/* Location Select */}
+          {/* Category Select */}
           <div className="filter-group-item">
-            <label>สถานที่ตั้ง</label>
+            <label>หมวดหมู่พัสดุ</label>
             <select
-              value={filterLocation}
-              onChange={(e) => setFilterLocation(e.target.value)}
+              value={filterCategory}
+              onChange={(e) => setFilterCategory(e.target.value)}
               className="filter-input-element"
             >
-              <option value="ทั้งหมด">ทั้งหมดทุกสถานที่</option>
-              {locations.map(loc => (
-                <option key={loc} value={loc}>{loc}</option>
+              <option value="ทั้งหมด">ทั้งหมดทุกหมวดหมู่</option>
+              {categories.map(cat => (
+                <option key={cat} value={cat}>{cat}</option>
               ))}
             </select>
           </div>
@@ -204,8 +183,8 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onPrint
       </div>
 
       {/* Main Table Grid */}
-      <div className="layout-card table-data-card">
-        <div className="table-data-header">
+      <div className="layout-card table-data-card animate-fade-in" style={{ padding: '20px' }}>
+        <div style={{ display: 'flex', gap: '2px', marginBottom: '16px' }}>
           <div className="results-indicator">
             พบครุภัณฑ์ทั้งหมด <strong>{totalItems}</strong> รายการ
             {totalItems !== assets.length && ` (จากข้อมูลหลัก ${assets.length} รายการ)`}
@@ -216,15 +195,11 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onPrint
           <table className="data-table">
             <thead>
               <tr>
-                <th style={{ width: '12%' }}>รหัสพัสดุ</th>
-                <th style={{ width: '25%' }}>รายการทรัพย์สิน / พัสดุ</th>
-                <th style={{ width: '10%' }}>ประเภท</th>
-                <th style={{ width: '12%' }} className="text-right">ราคาทุน (บาท)</th>
-                <th style={{ width: '10%' }} className="text-right">ค่าเสื่อมสะสม</th>
-                <th style={{ width: '11%' }} className="text-right">มูลค่าสุทธิ (Book Value)</th>
-                <th style={{ width: '18%' }}>หน่วยดูแล/สถานที่ตั้ง</th>
-                <th style={{ width: '8%' }}>สถานะ</th>
-                <th style={{ width: '10%' }} className="text-center">การจัดการ</th>
+                <th style={{ width: '10%' }}>รหัสพัสดุ</th>
+                <th style={{ width: '20%' }}>รายการทรัพย์สิน / พัสดุ</th>
+                <th style={{ width: '20%' }}>หน่วยดูแล/สถานที่ตั้ง</th>
+                <th style={{ width: '5%' }}>สถานะ</th>
+                <th style={{ width: '35%' }} className="text-center">การจัดการ</th>
               </tr>
             </thead>
             <tbody>
@@ -249,16 +224,6 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onPrint
                         )}
                       </div>
                     </td>
-                    <td>{item.asset_type === 'LAND_BUILDING' ? 'ที่ดิน/อาคาร' : 'ครุภัณฑ์'}</td>
-                    <td className="text-right">
-                      {(item.unit_price || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </td>
-                    <td className="text-right text-depreciation">
-                      -{(item.accumulated_depreciation || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </td>
-                    <td className="text-right text-bookvalue">
-                      <strong>{(item.book_value || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
-                    </td>
                     <td>
                       <div className="custodian-text">🏢 {item.responsible_department || 'ไม่ระบุหน่วยงาน'}</div>
                       <div className="location-text">📍 {item.location || 'ไม่ระบุสถานที่'}</div>
@@ -270,8 +235,11 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onPrint
                     </td>
                     <td className="text-center">
                       <div className="table-actions">
-                        <button className="btn-table-print" onClick={() => onPrintAsset && onPrintAsset(item)} title="พิมพ์เอกสาร">
+                        <button className="btn-table-print" onClick={() => onPrintAsset(item)} title="พิมพ์เอกสาร">
                           🖨️ พิมพ์
+                        </button>
+                        <button className="btn-table-repair" onClick={() => onRepairAsset(item)} title="แจ้งซ่อม">
+                          🔧 แจ้งซ่อม
                         </button>
                         <button className="btn-table-edit" onClick={() => onEditAsset(item)} title="แก้ไขข้อมูล">
                           ✏️ แก้ไข
@@ -285,7 +253,7 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onPrint
                 ))
               ) : (
                 <tr>
-                  <td colSpan="9" className="table-empty-row">
+                  <td colSpan="5" className="table-empty-row">
                     🔍 ไม่พบข้อมูลพัสดุที่ตรงกับเงื่อนไขการค้นหา
                   </td>
                 </tr>

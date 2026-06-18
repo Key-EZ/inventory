@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { formatThaiDateString } from '../../utils/dateUtils';
 
 const landTypes = ['LAND_BUILDING'];
 
@@ -597,7 +598,11 @@ export default function ReportPanel({ assets = [], locations = [] }) {
                           item.maintenances.map((maint, idx) => (
                             <tr key={maint.id}>
                               <td className="text-center">{idx + 1}</td>
-                              <td>{maint.approval_no_date}</td>
+                              <td>
+                                {maint.document_number || ''}
+                                {maint.approval_date ? ` ลงวันที่ ${formatThaiDateString(maint.approval_date)}` : ''}
+                                {!maint.document_number && !maint.approval_date && (maint.approval_no_date || '-')}
+                              </td>
                               <td>{maint.description}</td>
                               <td className="text-right">{(maint.cost || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                               <td>{maint.contractor || '-'}</td>
@@ -818,7 +823,11 @@ export default function ReportPanel({ assets = [], locations = [] }) {
                           item.maintenances.map((maint, idx) => (
                             <tr key={maint.id}>
                               <td className="text-center">{idx + 1}</td>
-                              <td>{maint.approval_no_date}</td>
+                              <td>
+                                {maint.document_number || ''}
+                                {maint.approval_date ? ` ลงวันที่ ${formatThaiDateString(maint.approval_date)}` : ''}
+                                {!maint.document_number && !maint.approval_date && (maint.approval_no_date || '-')}
+                              </td>
                               <td>{maint.description}</td>
                               <td className="text-right">{(maint.cost || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                               <td>{maint.contractor || '-'}</td>

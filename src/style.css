@@ -1286,7 +1286,7 @@ body {
   justify-content: center;
 }
 
-.btn-table-edit, .btn-table-delete, .btn-table-print {
+.btn-table-edit, .btn-table-delete, .btn-table-print, .btn-table-repair {
   background: none;
   border: 1px solid var(--border-color);
   padding: 6px 12px;
@@ -1329,6 +1329,17 @@ body {
   background-color: var(--status-pending-text);
   color: white;
   border-color: var(--status-pending-text);
+}
+
+.btn-table-repair {
+  color: var(--status-damaged-text, #d97706);
+  background-color: var(--bg-secondary);
+}
+
+.btn-table-repair:hover {
+  background-color: var(--status-damaged-text, #d97706);
+  color: white;
+  border-color: var(--status-damaged-text, #d97706);
 }
 
 .table-empty-row {
@@ -1865,6 +1876,11 @@ body {
   color: var(--status-damaged-text);
 }
 
+.ledger-status-badge.status-กำลังซ่อม {
+  background-color: var(--status-damaged-bg);
+  color: var(--status-damaged-text);
+}
+
 .ledger-status-badge.status-รอจำหน่าย {
   background-color: var(--status-pending-bg);
   color: var(--status-pending-text);
@@ -2262,5 +2278,150 @@ body {
   }
 }
 
+/* Repair status badges */
+.ledger-status-badge.repair-status-pending {
+  background-color: var(--status-pending-bg);
+  color: var(--status-pending-text);
+}
+.ledger-status-badge.repair-status-progress {
+  background-color: var(--status-damaged-bg);
+  color: var(--status-damaged-text);
+}
+.ledger-status-badge.repair-status-completed {
+  background-color: var(--status-active-bg);
+  color: var(--status-active-text);
+}
+.ledger-status-badge.repair-status-rejected {
+  background-color: var(--status-disposed-bg);
+  color: var(--status-disposed-text);
+}
 
+.print-header-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+  width: 100%;
+  margin-bottom: 20px;
+  color: #000000;
+}
 
+/* --- Inventory Report Print Preview Styles (Screen Only) --- */
+.preview-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  z-index: 1000;
+  padding: 40px 20px;
+  overflow-y: auto;
+}
+
+.no-print-zone {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.print-btn {
+  background-color: #0d9488;
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.print-btn:hover {
+  background-color: #0f766e;
+  transform: translateY(-1px);
+}
+
+.print-btn-close {
+  background-color: #ef4444;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.print-btn-close:hover {
+  background-color: #dc2626;
+}
+
+.a4-landscape-page {
+  background-color: white;
+  color: #000000;
+  width: 297mm;
+  min-height: 210mm;
+  padding: 15mm 20mm;
+  border-radius: 8px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  box-sizing: border-box;
+  font-family: 'Sarabun', sans-serif;
+  position: relative;
+  margin-bottom: 40px;
+}
+
+.form-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+.form-table td {
+  padding: 6px 8px;
+  vertical-align: top;
+}
+
+.dotted-line {
+  border-bottom: 1px dotted #000000;
+  display: inline-block;
+  text-align: left;
+  padding-left: 5px;
+  font-weight: 500;
+}
+
+/* --- Media Print Overrides for isolated item printing --- */
+@media print {
+  body.modal-print-open {
+    background-color: white !important;
+  }
+
+  body.modal-print-open .sidebar-layout-container,
+  body.modal-print-open .bento-container,
+  body.modal-print-open .centered-container,
+  body.modal-print-open .mobile-sidebar-drawer,
+  body.modal-print-open .mobile-drawer-backdrop,
+  body.modal-print-open .no-print-zone {
+    display: none !important;
+  }
+
+  body.modal-print-open .preview-container {
+    position: static !important;
+    background: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: block !important;
+    overflow: visible !important;
+  }
+
+  body.modal-print-open .a4-landscape-page {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    min-height: auto !important;
+  }
+}
