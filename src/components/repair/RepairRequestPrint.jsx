@@ -280,9 +280,9 @@ export default function RepairRequestPrint({ repairRequest, asset, onClose }) {
           {/* Memorandum Header Title */}
           <div style={{ display: 'flex', alignItems: 'flex-start', position: 'relative' }}>
             <img
-              src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Emblem_of_Thailand.svg/120px-Emblem_of_Thailand.svg.png"
+              src="/krut-1.5-cm.png"
               alt="ตราครุฑ"
-              style={{ width: '60px', height: 'auto', position: 'absolute', left: '0', top: '0' }}
+              style={{ height: '1.5cm', width: 'auto', position: 'absolute', left: '0', top: '0' }}
             />
             <div className="memo-title" style={{ flex: '1', textAlign: 'center', margin: '0 0 20px 0' }}>
               บันทึกข้อความ
