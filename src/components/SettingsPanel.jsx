@@ -71,6 +71,35 @@ export default function SettingsPanel({
   const [newBrandInput, setNewBrandInput] = useState('');
   const [newLocationInput, setNewLocationInput] = useState('');
 
+  // Settings for Repair Request Print Signatories
+  const [agencyInput, setAgencyInput] = useState(() => localStorage.getItem('print_rr_agency') || 'เทศบาลตำบลเสาธงหิน');
+  const [docNoInput, setDocNoInput] = useState(() => localStorage.getItem('print_rr_docNo') || 'ทบ. ๕๑๐๐๘/');
+  const [subjectInput, setSubjectInput] = useState(() => localStorage.getItem('print_rr_subject') || 'ขออนุมัติซ่อมแซมครุภัณฑ์');
+
+  const [reqName, setReqName] = useState(() => localStorage.getItem('print_rr_requesterName') || 'นายสมชาย ใจดี');
+  const [reqPos, setReqPos] = useState(() => localStorage.getItem('print_rr_requesterPosition') || 'เจ้าหน้าที่พัสดุ');
+
+  const [budgetAudName, setBudgetAudName] = useState(() => localStorage.getItem('print_rr_budgetAuditorName') || 'นางสาวจงดี มีทรัพย์');
+  const [budgetAudPos, setBudgetAudPos] = useState(() => localStorage.getItem('print_rr_budgetAuditorPosition') || 'เจ้าหน้าที่การเงินและบัญชี');
+
+  const [c1Name, setC1Name] = useState(() => localStorage.getItem('print_rr_comm1Name') || 'นายสมบูรณ์ ดีพร้อม');
+  const [c1Pos, setC1Pos] = useState(() => localStorage.getItem('print_rr_comm1Position') || 'นายช่างโยธา');
+
+  const [c2Name, setC2Name] = useState(() => localStorage.getItem('print_rr_comm2Name') || 'นายรักชาติ ยิ่งชีพ');
+  const [c2Pos, setC2Pos] = useState(() => localStorage.getItem('print_rr_comm2Position') || 'เจ้าพนักงานธุรการ');
+
+  const [c3Name, setC3Name] = useState(() => localStorage.getItem('print_rr_comm3Name') || 'นายวิทยา เก่งกาจ');
+  const [c3Pos, setC3Pos] = useState(() => localStorage.getItem('print_rr_comm3Position') || 'เจ้าพนักงานพัสดุ');
+
+  const [dirName, setDirName] = useState(() => localStorage.getItem('print_rr_directorName') || 'นายวิเชียร ยอดแก้ว');
+  const [dirPos, setDirPos] = useState(() => localStorage.getItem('print_rr_directorPosition') || 'ผู้อำนวยการกองช่าง');
+
+  const [clkName, setClkName] = useState(() => localStorage.getItem('print_rr_clerkName') || 'นายอดิศร วงศ์เจริญ');
+  const [clkPos, setClkPos] = useState(() => localStorage.getItem('print_rr_clerkPosition') || 'ปลัดเทศบาลตำบลเสาธงหิน');
+
+  const [mayorName, setMayorName] = useState(() => localStorage.getItem('print_rr_mayorName') || 'นายเกรียงไกร ไตรธรรม');
+  const [mayorPos, setMayorPos] = useState(() => localStorage.getItem('print_rr_mayorPosition') || 'นายกเทศมนตรีตำบลเสาธงหิน');
+
   // --- Custodian Modal Controls ---
   const handleOpenAddCust = () => {
     setEditingCust(null);
@@ -95,6 +124,30 @@ export default function SettingsPanel({
   const handleCloseCustForm = () => {
     setIsCustFormOpen(false);
     setEditingCust(null);
+  };
+
+  const handleSaveRepairPrintSettings = (e) => {
+    e.preventDefault();
+    localStorage.setItem('print_rr_agency', agencyInput);
+    localStorage.setItem('print_rr_docNo', docNoInput);
+    localStorage.setItem('print_rr_subject', subjectInput);
+    localStorage.setItem('print_rr_requesterName', reqName);
+    localStorage.setItem('print_rr_requesterPosition', reqPos);
+    localStorage.setItem('print_rr_budgetAuditorName', budgetAudName);
+    localStorage.setItem('print_rr_budgetAuditorPosition', budgetAudPos);
+    localStorage.setItem('print_rr_comm1Name', c1Name);
+    localStorage.setItem('print_rr_comm1Position', c1Pos);
+    localStorage.setItem('print_rr_comm2Name', c2Name);
+    localStorage.setItem('print_rr_comm2Position', c2Pos);
+    localStorage.setItem('print_rr_comm3Name', c3Name);
+    localStorage.setItem('print_rr_comm3Position', c3Pos);
+    localStorage.setItem('print_rr_directorName', dirName);
+    localStorage.setItem('print_rr_directorPosition', dirPos);
+    localStorage.setItem('print_rr_clerkName', clkName);
+    localStorage.setItem('print_rr_clerkPosition', clkPos);
+    localStorage.setItem('print_rr_mayorName', mayorName);
+    localStorage.setItem('print_rr_mayorPosition', mayorPos);
+    alert('บันทึกการตั้งค่าข้อมูลใบแจ้งซ่อมสำเร็จ');
   };
 
   const handleSubmitCust = (e) => {
@@ -398,6 +451,13 @@ export default function SettingsPanel({
           onClick={() => setActiveTab('categories')}
         >
           📁 หมวดหมู่ทรัพย์สิน
+        </button>
+        <button
+          type="button"
+          className={`tab-btn ${activeTab === 'repair_print' ? 'active' : ''}`}
+          onClick={() => setActiveTab('repair_print')}
+        >
+          🔧 ตั้งค่าใบแจ้งซ่อม
         </button>
       </div>
 
@@ -909,6 +969,146 @@ export default function SettingsPanel({
             </div>
           </div>
         </div>
+      )}
+
+      {activeTab === 'repair_print' && (
+        <form onSubmit={handleSaveRepairPrintSettings} className="layout-card animate-fade-in" style={{ padding: '24px' }}>
+          <h3 style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '10px', marginBottom: '20px' }}>🔧 การตั้งค่าลายมือชื่อและข้อมูลใบแจ้งซ่อม</h3>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', marginBottom: '24px' }}>
+            {/* Group 1: General document meta */}
+            <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '20px', borderRadius: '8px' }}>
+              <h4 style={{ color: 'var(--primary-color)', marginTop: 0, marginBottom: '16px' }}>📝 ข้อมูลเอกสารทั่วไป</h4>
+              <div className="form-group" style={{ marginBottom: '12px' }}>
+                <label>ชื่อส่วนราชการ</label>
+                <input type="text" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={agencyInput} onChange={(e) => setAgencyInput(e.target.value)} />
+              </div>
+              <div className="form-group" style={{ marginBottom: '12px' }}>
+                <label>เลขที่หนังสือเริ่มต้น</label>
+                <input type="text" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={docNoInput} onChange={(e) => setDocNoInput(e.target.value)} />
+              </div>
+              <div className="form-group" style={{ marginBottom: '12px' }}>
+                <label>เรื่อง</label>
+                <input type="text" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={subjectInput} onChange={(e) => setSubjectInput(e.target.value)} />
+              </div>
+            </div>
+
+            {/* Group 2: Requester & Budget Auditor */}
+            <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '20px', borderRadius: '8px' }}>
+              <h4 style={{ color: 'var(--primary-color)', marginTop: 0, marginBottom: '16px' }}>🧑‍💼 ผู้เสนอเรื่อง & ตรวจงบประมาณ</h4>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '12px' }}>
+                <div className="form-group">
+                  <label>ชื่อผู้เสนอ/แจ้งซ่อม</label>
+                  <input type="text" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={reqName} onChange={(e) => setReqName(e.target.value)} />
+                </div>
+                <div className="form-group">
+                  <label>ตำแหน่ง</label>
+                  <input type="text" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={reqPos} onChange={(e) => setReqPos(e.target.value)} />
+                </div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '12px' }}>
+                <div className="form-group">
+                  <label>ชื่อผู้ตรวจงบประมาณ</label>
+                  <input type="text" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={budgetAudName} onChange={(e) => setBudgetAudName(e.target.value)} />
+                </div>
+                <div className="form-group">
+                  <label>ตำแหน่ง</label>
+                  <input type="text" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={budgetAudPos} onChange={(e) => setBudgetAudPos(e.target.value)} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Group 3: Inspection Committee */}
+          <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '20px', borderRadius: '8px', marginBottom: '24px' }}>
+            <h4 style={{ color: 'var(--primary-color)', marginTop: 0, marginBottom: '16px' }}>📋 คณะกรรมการตรวจสภาพครุภัณฑ์ (3 ท่าน)</h4>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
+              <div>
+                <strong style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>คนที่ 1 (ประธานกรรมการ)</strong>
+                <div className="form-group" style={{ marginTop: '8px', marginBottom: '8px' }}>
+                  <label>ชื่อ-นามสกุล</label>
+                  <input type="text" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={c1Name} onChange={(e) => setC1Name(e.target.value)} />
+                </div>
+                <div className="form-group">
+                  <label>ตำแหน่ง</label>
+                  <input type="text" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={c1Pos} onChange={(e) => setC1Pos(e.target.value)} />
+                </div>
+              </div>
+              
+              <div>
+                <strong style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>คนที่ 2 (กรรมการ)</strong>
+                <div className="form-group" style={{ marginTop: '8px', marginBottom: '8px' }}>
+                  <label>ชื่อ-นามสกุล</label>
+                  <input type="text" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={c2Name} onChange={(e) => setC2Name(e.target.value)} />
+                </div>
+                <div className="form-group">
+                  <label>ตำแหน่ง</label>
+                  <input type="text" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={c2Pos} onChange={(e) => setC2Pos(e.target.value)} />
+                </div>
+              </div>
+
+              <div>
+                <strong style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>คนที่ 3 (กรรมการ)</strong>
+                <div className="form-group" style={{ marginTop: '8px', marginBottom: '8px' }}>
+                  <label>ชื่อ-นามสกุล</label>
+                  <input type="text" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={c3Name} onChange={(e) => setC3Name(e.target.value)} />
+                </div>
+                <div className="form-group">
+                  <label>ตำแหน่ง</label>
+                  <input type="text" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={c3Pos} onChange={(e) => setC3Pos(e.target.value)} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Group 4: Executives Signatories */}
+          <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '20px', borderRadius: '8px', marginBottom: '24px' }}>
+            <h4 style={{ color: 'var(--primary-color)', marginTop: 0, marginBottom: '16px' }}>🏢 รายชื่อคณะผู้บริหารระดับสูง</h4>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px' }}>
+              <div>
+                <strong style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>ผู้อำนวยการกอง</strong>
+                <div className="form-group" style={{ marginTop: '8px', marginBottom: '8px' }}>
+                  <label>ชื่อ-นามสกุล</label>
+                  <input type="text" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={dirName} onChange={(e) => setDirName(e.target.value)} />
+                </div>
+                <div className="form-group">
+                  <label>ตำแหน่ง</label>
+                  <input type="text" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={dirPos} onChange={(e) => setDirPos(e.target.value)} />
+                </div>
+              </div>
+
+              <div>
+                <strong style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>ปลัดเทศบาล</strong>
+                <div className="form-group" style={{ marginTop: '8px', marginBottom: '8px' }}>
+                  <label>ชื่อ-นามสกุล</label>
+                  <input type="text" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={clkName} onChange={(e) => setClkName(e.target.value)} />
+                </div>
+                <div className="form-group">
+                  <label>ตำแหน่ง</label>
+                  <input type="text" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={clkPos} onChange={(e) => setClkPos(e.target.value)} />
+                </div>
+              </div>
+
+              <div>
+                <strong style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>นายกเทศมนตรี</strong>
+                <div className="form-group" style={{ marginTop: '8px', marginBottom: '8px' }}>
+                  <label>ชื่อ-นามสกุล</label>
+                  <input type="text" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={mayorName} onChange={(e) => setMayorName(e.target.value)} />
+                </div>
+                <div className="form-group">
+                  <label>ตำแหน่ง</label>
+                  <input type="text" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={mayorPos} onChange={(e) => setMayorPos(e.target.value)} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+            <button type="submit" className="button-primary" style={{ padding: '10px 24px' }}>
+              💾 บันทึกการตั้งค่า
+            </button>
+          </div>
+        </form>
       )}
 
       {/* Custodian Add/Edit Modal */}
