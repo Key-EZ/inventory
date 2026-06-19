@@ -2526,3 +2526,182 @@ body {
     width: 100% !important;
   }
 }
+
+/* Layout split for memorandum configuration and preview */
+.memo-print-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.memo-config-sidebar {
+  width: 380px;
+  background-color: var(--bg-secondary);
+  border-right: 1px solid var(--border-color);
+  padding: 24px;
+  overflow-y: auto;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  box-sizing: border-box;
+}
+
+.memo-config-sidebar h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.memo-config-sidebar .form-group {
+  margin-bottom: 16px;
+}
+
+.memo-config-sidebar label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--text-muted);
+}
+
+.memo-config-sidebar input, .memo-config-sidebar select, .memo-config-sidebar textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  box-sizing: border-box;
+  font-size: 0.85rem;
+}
+
+.memo-preview-area {
+  flex: 1;
+  padding: 40px 20px;
+  overflow-y: auto;
+  background-color: #6b7280; /* dark background to make A4 stand out */
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.dark .memo-preview-area {
+  background-color: #1f2937;
+}
+
+.a4-portrait-page {
+  background-color: white;
+  color: #000000;
+  width: 210mm;
+  min-height: 297mm;
+  padding: 25mm 20mm; /* A4 page standard margins */
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  box-sizing: border-box;
+  font-family: 'Sarabun', 'TH Sarabun PSK', sans-serif;
+  line-height: 1.5;
+  font-size: 16px; /* 16px for Sarabun represents standard font scale */
+}
+
+/* Memorandum specific typography and elements */
+.memo-header-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.memo-header-table td {
+  padding: 4px 0;
+  vertical-align: bottom;
+  font-size: 16px;
+}
+
+.memo-title {
+  text-align: center;
+  font-size: 28px;
+  font-weight: bold;
+  margin-top: 15px;
+  margin-bottom: 15px;
+  letter-spacing: 2px;
+}
+
+.memo-subject-line {
+  border-bottom: 1.5px solid #000000;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+}
+
+.memo-body {
+  text-align: justify;
+  text-justify: inter-word;
+  margin-bottom: 20px;
+}
+
+.memo-paragraph {
+  text-indent: 2.5cm;
+  margin-bottom: 12px;
+  line-height: 1.6;
+}
+
+.memo-signatures-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-top: 30px;
+  margin-bottom: 30px;
+}
+
+.memo-signature-block {
+  text-align: center;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.memo-section-divider {
+  border-top: 1px dashed #000000;
+  margin: 25px 0;
+  padding-top: 15px;
+}
+
+.memo-committee-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.memo-committee-table td {
+  padding: 6px 0;
+  vertical-align: middle;
+}
+
+/* Print CSS overrides */
+@media print {
+  body.modal-print-open .memo-print-layout {
+    display: block !important;
+    background: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  body.modal-print-open .memo-config-sidebar {
+    display: none !important;
+  }
+
+  body.modal-print-open .memo-preview-area {
+    background: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: block !important;
+    overflow: visible !important;
+  }
+
+  body.modal-print-open .a4-portrait-page {
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    min-height: auto !important;
+    page-break-after: avoid;
+  }
+}

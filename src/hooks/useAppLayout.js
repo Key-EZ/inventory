@@ -13,6 +13,7 @@ export default function useAppLayout() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingAsset, setEditingAsset] = useState(null);
   const [printingAsset, setPrintingAsset] = useState(null);
+  const [printingRepairRequest, setPrintingRepairRequest] = useState(null);
   const [searchQueryFromLanding, setSearchQueryFromLanding] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [selectedAssetForRepair, setSelectedAssetForRepair] = useState(null);
@@ -86,6 +87,8 @@ export default function useAppLayout() {
     isFormOpen,
     editingAsset,
     printingAsset,
+    printingRepairRequest,
+    setPrintingRepairRequest,
     searchQueryFromLanding,
     isMobileMenuOpen,
     selectedAssetForRepair,

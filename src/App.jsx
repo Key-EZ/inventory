@@ -9,6 +9,7 @@ import InventoryPrint from './components/report/InventoryPrint';
 import GetRepair from './components/repair/GetRepair';
 import RepairJobs from './components/repair/RepairJobs';
 import AuditLogPanel from './components/AuditLogPanel';
+import RepairRequestPrint from './components/repair/RepairRequestPrint';
 
 import useAppLayout from './hooks/useAppLayout';
 import useInventory from './hooks/useInventory';
@@ -20,6 +21,8 @@ export default function App() {
     isFormOpen,
     editingAsset,
     printingAsset,
+    printingRepairRequest,
+    setPrintingRepairRequest,
     searchQueryFromLanding,
     isMobileMenuOpen,
     selectedAssetForRepair,
@@ -407,6 +410,7 @@ export default function App() {
           onClearPreselectedAsset={() => openRepairForm(null)}
           onClose={closeRepairForm}
           initialTab={repairActiveTab}
+          onPrintRepairRequest={setPrintingRepairRequest}
         />
       )}
 
@@ -414,6 +418,14 @@ export default function App() {
         <InventoryPrint
           asset={printingAsset}
           onClose={closePrintAsset}
+        />
+      )}
+
+      {printingRepairRequest && (
+        <RepairRequestPrint
+          repairRequest={printingRepairRequest}
+          asset={assets.find(a => a.id === printingRepairRequest.asset_id)}
+          onClose={() => setPrintingRepairRequest(null)}
         />
       )}
 

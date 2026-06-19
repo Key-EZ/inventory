@@ -8,7 +8,8 @@ export default function GetRepair({
   preselectedAsset = null,
   onClearPreselectedAsset,
   onClose,
-  initialTab = 'new_request'
+  initialTab = 'new_request',
+  onPrintRepairRequest
 }) {
   const [activeSubTab, setActiveSubTab] = useState(initialTab); // 'new_request', 'history'
   const [showOnlyPreselectedHistory, setShowOnlyPreselectedHistory] = useState(!!preselectedAsset);
@@ -227,6 +228,7 @@ export default function GetRepair({
                   <th>รายละเอียดอาการเสีย</th>
                   <th style={{ width: '140px', textAlign: 'center' }}>สถานะ</th>
                   <th>ข้อมูลซ่อมแซม (ถ้าเสร็จสิ้น)</th>
+                  <th style={{ width: '90px', textAlign: 'center' }}>พิมพ์เอกสาร</th>
                 </tr>
               </thead>
               <tbody>
@@ -282,12 +284,23 @@ export default function GetRepair({
                               <span style={{ color: 'var(--status-damaged-text)' }}>กำลังดำเนินงานซ่อมแซม...</span>
                             )}
                           </td>
+                          <td style={{ textAlign: 'center' }}>
+                            <button
+                              type="button"
+                              className="btn-table-print"
+                              onClick={() => onPrintRepairRequest(req)}
+                              title="พิมพ์ใบแจ้งซ่อม"
+                              style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 8px', fontSize: '0.75rem' }}
+                            >
+                              🖨️ พิมพ์
+                            </button>
+                          </td>
                         </tr>
                       );
                     })
                 ) : (
                   <tr>
-                    <td colSpan="6" className="table-empty-row" style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>
+                    <td colSpan="7" className="table-empty-row" style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>
                       ยังไม่มีประวัติการส่งข้อมูลแจ้งซ่อมอุปกรณ์
                     </td>
                   </tr>
