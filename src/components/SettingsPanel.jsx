@@ -58,11 +58,18 @@ export default function SettingsPanel({
   const [isCustFormOpen, setIsCustFormOpen] = useState(false);
   const [editingCust, setEditingCust] = useState(null);
 
-  const [custName, setCustName] = useState('');
-  const [custPosition, setCustPosition] = useState('');
-  const [custDivision, setCustDivision] = useState('');
-  const [custDepartment, setCustDepartment] = useState('');
-  const [custEmail, setCustEmail] = useState('');
+  const [custodianForm, setCustodianForm] = useState({
+    name: '',
+    position: '',
+    division: '',
+    department: '',
+    email: ''
+  });
+
+  const handleCustodianFormChange = (e) => {
+    const { name, value } = e.target;
+    setCustodianForm(prev => ({ ...prev, [name]: value }));
+  };
 
   // Inline inputs for divisions/departments/positions/brands/locations
   const [newDivisionInput, setNewDivisionInput] = useState('');
@@ -71,53 +78,55 @@ export default function SettingsPanel({
   const [newBrandInput, setNewBrandInput] = useState('');
   const [newLocationInput, setNewLocationInput] = useState('');
 
-  // Settings for Repair Request Print Signatories
-  const [agencyInput, setAgencyInput] = useState(() => localStorage.getItem('print_rr_agency') || 'เทศบาลตำบลเสาธงหิน');
-  const [docNoInput, setDocNoInput] = useState(() => localStorage.getItem('print_rr_docNo') || 'ทบ. ๕๑๐๐๘/');
-  const [subjectInput, setSubjectInput] = useState(() => localStorage.getItem('print_rr_subject') || 'ขออนุมัติซ่อมแซมครุภัณฑ์');
+  const [printConfig, setPrintConfig] = useState(() => ({
+    agency: localStorage.getItem('print_rr_agency') || 'เทศบาลตำบลเสาธงหิน',
+    docNo: localStorage.getItem('print_rr_docNo') || 'ทบ. ๕๑๐๐๘/',
+    subject: localStorage.getItem('print_rr_subject') || 'ขออนุมัติซ่อมแซมครุภัณฑ์',
+    requesterName: localStorage.getItem('print_rr_requesterName') || 'นายสมชาย ใจดี',
+    requesterPosition: localStorage.getItem('print_rr_requesterPosition') || 'เจ้าหน้าที่พัสดุ',
+    budgetAuditorName: localStorage.getItem('print_rr_budgetAuditorName') || 'นางสาวจงดี มีทรัพย์',
+    budgetAuditorPosition: localStorage.getItem('print_rr_budgetAuditorPosition') || 'เจ้าหน้าที่การเงินและบัญชี',
+    comm1Name: localStorage.getItem('print_rr_comm1Name') || 'นายสมบูรณ์ ดีพร้อม',
+    comm1Position: localStorage.getItem('print_rr_comm1Position') || 'นายช่างโยธา',
+    comm2Name: localStorage.getItem('print_rr_comm2Name') || 'นายรักชาติ ยิ่งชีพ',
+    comm2Position: localStorage.getItem('print_rr_comm2Position') || 'เจ้าพนักงานธุรการ',
+    comm3Name: localStorage.getItem('print_rr_comm3Name') || 'นายวิทยา เก่งกาจ',
+    comm3Position: localStorage.getItem('print_rr_comm3Position') || 'เจ้าพนักงานพัสดุ',
+    directorName: localStorage.getItem('print_rr_directorName') || 'นายวิเชียร ยอดแก้ว',
+    directorPosition: localStorage.getItem('print_rr_directorPosition') || 'ผู้อำนวยการกองช่าง',
+    clerkName: localStorage.getItem('print_rr_clerkName') || 'นายอดิศร วงศ์เจริญ',
+    clerkPosition: localStorage.getItem('print_rr_clerkPosition') || 'ปลัดเทศบาลตำบลเสาธงหิน',
+    mayorName: localStorage.getItem('print_rr_mayorName') || 'นายเกรียงไกร ไตรธรรม',
+    mayorPosition: localStorage.getItem('print_rr_mayorPosition') || 'นายกเทศมนตรีตำบลเสาธงหิน'
+  }));
 
-  const [reqName, setReqName] = useState(() => localStorage.getItem('print_rr_requesterName') || 'นายสมชาย ใจดี');
-  const [reqPos, setReqPos] = useState(() => localStorage.getItem('print_rr_requesterPosition') || 'เจ้าหน้าที่พัสดุ');
-
-  const [budgetAudName, setBudgetAudName] = useState(() => localStorage.getItem('print_rr_budgetAuditorName') || 'นางสาวจงดี มีทรัพย์');
-  const [budgetAudPos, setBudgetAudPos] = useState(() => localStorage.getItem('print_rr_budgetAuditorPosition') || 'เจ้าหน้าที่การเงินและบัญชี');
-
-  const [c1Name, setC1Name] = useState(() => localStorage.getItem('print_rr_comm1Name') || 'นายสมบูรณ์ ดีพร้อม');
-  const [c1Pos, setC1Pos] = useState(() => localStorage.getItem('print_rr_comm1Position') || 'นายช่างโยธา');
-
-  const [c2Name, setC2Name] = useState(() => localStorage.getItem('print_rr_comm2Name') || 'นายรักชาติ ยิ่งชีพ');
-  const [c2Pos, setC2Pos] = useState(() => localStorage.getItem('print_rr_comm2Position') || 'เจ้าพนักงานธุรการ');
-
-  const [c3Name, setC3Name] = useState(() => localStorage.getItem('print_rr_comm3Name') || 'นายวิทยา เก่งกาจ');
-  const [c3Pos, setC3Pos] = useState(() => localStorage.getItem('print_rr_comm3Position') || 'เจ้าพนักงานพัสดุ');
-
-  const [dirName, setDirName] = useState(() => localStorage.getItem('print_rr_directorName') || 'นายวิเชียร ยอดแก้ว');
-  const [dirPos, setDirPos] = useState(() => localStorage.getItem('print_rr_directorPosition') || 'ผู้อำนวยการกองช่าง');
-
-  const [clkName, setClkName] = useState(() => localStorage.getItem('print_rr_clerkName') || 'นายอดิศร วงศ์เจริญ');
-  const [clkPos, setClkPos] = useState(() => localStorage.getItem('print_rr_clerkPosition') || 'ปลัดเทศบาลตำบลเสาธงหิน');
-
-  const [mayorName, setMayorName] = useState(() => localStorage.getItem('print_rr_mayorName') || 'นายเกรียงไกร ไตรธรรม');
-  const [mayorPos, setMayorPos] = useState(() => localStorage.getItem('print_rr_mayorPosition') || 'นายกเทศมนตรีตำบลเสาธงหิน');
+  const handlePrintConfigChange = (e) => {
+    const { name, value } = e.target;
+    setPrintConfig(prev => ({ ...prev, [name]: value }));
+  };
 
   // --- Custodian Modal Controls ---
   const handleOpenAddCust = () => {
     setEditingCust(null);
-    setCustName('');
-    setCustPosition(positions[0] || '');
-    setCustDivision(divisions[0] || '');
-    setCustDepartment(departments[0] || '');
-    setCustEmail('');
+    setCustodianForm({
+      name: '',
+      position: positions[0] || '',
+      division: divisions[0] || '',
+      department: departments[0] || '',
+      email: ''
+    });
     setIsCustFormOpen(true);
   };
 
   const handleOpenEditCust = (cust) => {
     setEditingCust(cust);
-    setCustName(cust.name || '');
-    setCustPosition(cust.position || positions[0] || '');
-    setCustDivision(cust.division || divisions[0] || '');
-    setCustDepartment(cust.department || departments[0] || '');
-    setCustEmail(cust.email || '');
+    setCustodianForm({
+      name: cust.name || '',
+      position: cust.position || positions[0] || '',
+      division: cust.division || divisions[0] || '',
+      department: cust.department || departments[0] || '',
+      email: cust.email || ''
+    });
     setIsCustFormOpen(true);
   };
 
@@ -128,42 +137,22 @@ export default function SettingsPanel({
 
   const handleSaveRepairPrintSettings = (e) => {
     e.preventDefault();
-    localStorage.setItem('print_rr_agency', agencyInput);
-    localStorage.setItem('print_rr_docNo', docNoInput);
-    localStorage.setItem('print_rr_subject', subjectInput);
-    localStorage.setItem('print_rr_requesterName', reqName);
-    localStorage.setItem('print_rr_requesterPosition', reqPos);
-    localStorage.setItem('print_rr_budgetAuditorName', budgetAudName);
-    localStorage.setItem('print_rr_budgetAuditorPosition', budgetAudPos);
-    localStorage.setItem('print_rr_comm1Name', c1Name);
-    localStorage.setItem('print_rr_comm1Position', c1Pos);
-    localStorage.setItem('print_rr_comm2Name', c2Name);
-    localStorage.setItem('print_rr_comm2Position', c2Pos);
-    localStorage.setItem('print_rr_comm3Name', c3Name);
-    localStorage.setItem('print_rr_comm3Position', c3Pos);
-    localStorage.setItem('print_rr_directorName', dirName);
-    localStorage.setItem('print_rr_directorPosition', dirPos);
-    localStorage.setItem('print_rr_clerkName', clkName);
-    localStorage.setItem('print_rr_clerkPosition', clkPos);
-    localStorage.setItem('print_rr_mayorName', mayorName);
-    localStorage.setItem('print_rr_mayorPosition', mayorPos);
+    Object.entries(printConfig).forEach(([key, value]) => {
+      localStorage.setItem(`print_rr_${key}`, value);
+    });
     alert('บันทึกการตั้งค่าข้อมูลใบแจ้งซ่อมสำเร็จ');
   };
 
   const handleSubmitCust = (e) => {
     e.preventDefault();
-    if (!custName) {
+    if (!custodianForm.name) {
       alert('กรุณากรอกชื่อ-นามสกุล');
       return;
     }
 
     const payload = {
       id: editingCust?.id || `cust-${Date.now()}`,
-      name: custName,
-      position: custPosition,
-      division: custDivision,
-      department: custDepartment,
-      email: custEmail
+      ...custodianForm
     };
 
     if (editingCust) {
@@ -981,15 +970,15 @@ export default function SettingsPanel({
               <h4 style={{ color: 'var(--primary-color)', marginTop: 0, marginBottom: '16px' }}>📝 ข้อมูลเอกสารทั่วไป</h4>
               <div className="form-group" style={{ marginBottom: '12px' }}>
                 <label>ชื่อส่วนราชการ</label>
-                <input type="text" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={agencyInput} onChange={(e) => setAgencyInput(e.target.value)} />
+                <input type="text" name="agency" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={printConfig.agency} onChange={handlePrintConfigChange} />
               </div>
               <div className="form-group" style={{ marginBottom: '12px' }}>
                 <label>เลขที่หนังสือเริ่มต้น</label>
-                <input type="text" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={docNoInput} onChange={(e) => setDocNoInput(e.target.value)} />
+                <input type="text" name="docNo" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={printConfig.docNo} onChange={handlePrintConfigChange} />
               </div>
               <div className="form-group" style={{ marginBottom: '12px' }}>
                 <label>เรื่อง</label>
-                <input type="text" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={subjectInput} onChange={(e) => setSubjectInput(e.target.value)} />
+                <input type="text" name="subject" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={printConfig.subject} onChange={handlePrintConfigChange} />
               </div>
             </div>
 
@@ -999,21 +988,21 @@ export default function SettingsPanel({
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '12px' }}>
                 <div className="form-group">
                   <label>ชื่อผู้เสนอ/แจ้งซ่อม</label>
-                  <input type="text" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={reqName} onChange={(e) => setReqName(e.target.value)} />
+                  <input type="text" name="requesterName" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={printConfig.requesterName} onChange={handlePrintConfigChange} />
                 </div>
                 <div className="form-group">
                   <label>ตำแหน่ง</label>
-                  <input type="text" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={reqPos} onChange={(e) => setReqPos(e.target.value)} />
+                  <input type="text" name="requesterPosition" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={printConfig.requesterPosition} onChange={handlePrintConfigChange} />
                 </div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '12px' }}>
                 <div className="form-group">
                   <label>ชื่อผู้ตรวจงบประมาณ</label>
-                  <input type="text" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={budgetAudName} onChange={(e) => setBudgetAudName(e.target.value)} />
+                  <input type="text" name="budgetAuditorName" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={printConfig.budgetAuditorName} onChange={handlePrintConfigChange} />
                 </div>
                 <div className="form-group">
                   <label>ตำแหน่ง</label>
-                  <input type="text" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={budgetAudPos} onChange={(e) => setBudgetAudPos(e.target.value)} />
+                  <input type="text" name="budgetAuditorPosition" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={printConfig.budgetAuditorPosition} onChange={handlePrintConfigChange} />
                 </div>
               </div>
             </div>
@@ -1027,11 +1016,11 @@ export default function SettingsPanel({
                 <strong style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>คนที่ 1 (ประธานกรรมการ)</strong>
                 <div className="form-group" style={{ marginTop: '8px', marginBottom: '8px' }}>
                   <label>ชื่อ-นามสกุล</label>
-                  <input type="text" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={c1Name} onChange={(e) => setC1Name(e.target.value)} />
+                  <input type="text" name="comm1Name" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={printConfig.comm1Name} onChange={handlePrintConfigChange} />
                 </div>
                 <div className="form-group">
                   <label>ตำแหน่ง</label>
-                  <input type="text" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={c1Pos} onChange={(e) => setC1Pos(e.target.value)} />
+                  <input type="text" name="comm1Position" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={printConfig.comm1Position} onChange={handlePrintConfigChange} />
                 </div>
               </div>
               
@@ -1039,11 +1028,11 @@ export default function SettingsPanel({
                 <strong style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>คนที่ 2 (กรรมการ)</strong>
                 <div className="form-group" style={{ marginTop: '8px', marginBottom: '8px' }}>
                   <label>ชื่อ-นามสกุล</label>
-                  <input type="text" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={c2Name} onChange={(e) => setC2Name(e.target.value)} />
+                  <input type="text" name="comm2Name" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={printConfig.comm2Name} onChange={handlePrintConfigChange} />
                 </div>
                 <div className="form-group">
                   <label>ตำแหน่ง</label>
-                  <input type="text" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={c2Pos} onChange={(e) => setC2Pos(e.target.value)} />
+                  <input type="text" name="comm2Position" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={printConfig.comm2Position} onChange={handlePrintConfigChange} />
                 </div>
               </div>
 
@@ -1051,11 +1040,11 @@ export default function SettingsPanel({
                 <strong style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>คนที่ 3 (กรรมการ)</strong>
                 <div className="form-group" style={{ marginTop: '8px', marginBottom: '8px' }}>
                   <label>ชื่อ-นามสกุล</label>
-                  <input type="text" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={c3Name} onChange={(e) => setC3Name(e.target.value)} />
+                  <input type="text" name="comm3Name" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={printConfig.comm3Name} onChange={handlePrintConfigChange} />
                 </div>
                 <div className="form-group">
                   <label>ตำแหน่ง</label>
-                  <input type="text" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={c3Pos} onChange={(e) => setC3Pos(e.target.value)} />
+                  <input type="text" name="comm3Position" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={printConfig.comm3Position} onChange={handlePrintConfigChange} />
                 </div>
               </div>
             </div>
@@ -1069,11 +1058,11 @@ export default function SettingsPanel({
                 <strong style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>ผู้อำนวยการกอง</strong>
                 <div className="form-group" style={{ marginTop: '8px', marginBottom: '8px' }}>
                   <label>ชื่อ-นามสกุล</label>
-                  <input type="text" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={dirName} onChange={(e) => setDirName(e.target.value)} />
+                  <input type="text" name="directorName" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={printConfig.directorName} onChange={handlePrintConfigChange} />
                 </div>
                 <div className="form-group">
                   <label>ตำแหน่ง</label>
-                  <input type="text" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={dirPos} onChange={(e) => setDirPos(e.target.value)} />
+                  <input type="text" name="directorPosition" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={printConfig.directorPosition} onChange={handlePrintConfigChange} />
                 </div>
               </div>
 
@@ -1081,11 +1070,11 @@ export default function SettingsPanel({
                 <strong style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>ปลัดเทศบาล</strong>
                 <div className="form-group" style={{ marginTop: '8px', marginBottom: '8px' }}>
                   <label>ชื่อ-นามสกุล</label>
-                  <input type="text" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={clkName} onChange={(e) => setClkName(e.target.value)} />
+                  <input type="text" name="clerkName" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={printConfig.clerkName} onChange={handlePrintConfigChange} />
                 </div>
                 <div className="form-group">
                   <label>ตำแหน่ง</label>
-                  <input type="text" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={clkPos} onChange={(e) => setClkPos(e.target.value)} />
+                  <input type="text" name="clerkPosition" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={printConfig.clerkPosition} onChange={handlePrintConfigChange} />
                 </div>
               </div>
 
@@ -1093,11 +1082,11 @@ export default function SettingsPanel({
                 <strong style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>นายกเทศมนตรี</strong>
                 <div className="form-group" style={{ marginTop: '8px', marginBottom: '8px' }}>
                   <label>ชื่อ-นามสกุล</label>
-                  <input type="text" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={mayorName} onChange={(e) => setMayorName(e.target.value)} />
+                  <input type="text" name="mayorName" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={printConfig.mayorName} onChange={handlePrintConfigChange} />
                 </div>
                 <div className="form-group">
                   <label>ตำแหน่ง</label>
-                  <input type="text" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={mayorPos} onChange={(e) => setMayorPos(e.target.value)} />
+                  <input type="text" name="mayorPosition" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={printConfig.mayorPosition} onChange={handlePrintConfigChange} />
                 </div>
               </div>
             </div>
@@ -1125,8 +1114,9 @@ export default function SettingsPanel({
                 <label>ชื่อ-นามสกุล *</label>
                 <input
                   type="text"
-                  value={custName}
-                  onChange={(e) => setCustName(e.target.value)}
+                  name="name"
+                  value={custodianForm.name}
+                  onChange={handleCustodianFormChange}
                   placeholder="เช่น นายสมเกียรติ ใจซื่อ"
                   required
                 />
@@ -1136,8 +1126,9 @@ export default function SettingsPanel({
                 <label>ตำแหน่ง *</label>
                 {positions.length > 0 ? (
                   <select
-                    value={custPosition}
-                    onChange={(e) => setCustPosition(e.target.value)}
+                    name="position"
+                    value={custodianForm.position}
+                    onChange={handleCustodianFormChange}
                     required
                   >
                     <option value="">-- เลือกตำแหน่ง --</option>
@@ -1157,8 +1148,9 @@ export default function SettingsPanel({
                   <label>กอง / สำนัก *</label>
                   {divisions.length > 0 ? (
                     <select
-                      value={custDivision}
-                      onChange={(e) => setCustDivision(e.target.value)}
+                      name="division"
+                      value={custodianForm.division}
+                      onChange={handleCustodianFormChange}
                       required
                     >
                       {divisions.map(div => (
@@ -1176,8 +1168,9 @@ export default function SettingsPanel({
                   <label>ฝ่าย / แผนก *</label>
                   {departments.length > 0 ? (
                     <select
-                      value={custDepartment}
-                      onChange={(e) => setCustDepartment(e.target.value)}
+                      name="department"
+                      value={custodianForm.department}
+                      onChange={handleCustodianFormChange}
                       required
                     >
                       {departments.map(dept => (
@@ -1196,8 +1189,9 @@ export default function SettingsPanel({
                 <label>e-mail (สำหรับเชื่อมโยงการ Login SSO ในอนาคต)</label>
                 <input
                   type="email"
-                  value={custEmail}
-                  onChange={(e) => setCustEmail(e.target.value)}
+                  name="email"
+                  value={custodianForm.email}
+                  onChange={handleCustodianFormChange}
                   placeholder="เช่น somkiat.j@office.go.th"
                 />
                 <span className="field-hint">ระบบจะใช้ email ในการยืนยันสิทธิ์ Admin/Staff/User ผ่าน SSO</span>

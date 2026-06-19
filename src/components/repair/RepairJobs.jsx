@@ -15,11 +15,21 @@ export default function RepairJobs({
   const [rejectingRequest, setRejectingRequest] = useState(null);
 
   // Completion Form States
-  const [repairCost, setRepairCost] = useState('');
-  const [contractor, setContractor] = useState('');
-  const [approvalDate, setApprovalDate] = useState('');
-  const [documentNumber, setDocumentNumber] = useState('');
-  const [officerNotes, setOfficerNotes] = useState('');
+  const [completionForm, setCompletionForm] = useState({
+    repairCost: '',
+    contractor: '',
+    approvalDate: '',
+    documentNumber: '',
+    officerNotes: ''
+  });
+
+  const handleCompletionChange = (e) => {
+    const { name, value } = e.target;
+    setCompletionForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
   // Rejection Form States
   const [rejectionReason, setRejectionReason] = useState('');
@@ -76,11 +86,13 @@ export default function RepairJobs({
   // Action Handlers
   const handleOpenComplete = (req) => {
     setCompletingRequest(req);
-    setRepairCost('');
-    setContractor('');
-    setApprovalDate('');
-    setDocumentNumber('');
-    setOfficerNotes('');
+    setCompletionForm({
+      repairCost: '',
+      contractor: '',
+      approvalDate: '',
+      documentNumber: '',
+      officerNotes: ''
+    });
   };
 
   const handleCloseComplete = () => {
@@ -99,6 +111,7 @@ export default function RepairJobs({
   const handleSubmitComplete = (e) => {
     e.preventDefault();
     if (!completingRequest) return;
+    const { repairCost, contractor, approvalDate, documentNumber, officerNotes } = completionForm;
     if (!repairCost || !contractor.trim() || !approvalDate.trim() || !documentNumber.trim()) {
       alert('กรุณากรอกข้อมูลการซ่อมให้ครบถ้วน');
       return;
@@ -342,8 +355,9 @@ export default function RepairJobs({
                   type="number"
                   step="0.01"
                   min="0"
-                  value={repairCost}
-                  onChange={(e) => setRepairCost(e.target.value)}
+                  name="repairCost"
+                  value={completionForm.repairCost}
+                  onChange={handleCompletionChange}
                   placeholder="เช่น 2500"
                   required
                 />
@@ -353,8 +367,9 @@ export default function RepairJobs({
                 <label>บริษัท / ผู้รับจ้างซ่อมแซม *</label>
                 <input
                   type="text"
-                  value={contractor}
-                  onChange={(e) => setContractor(e.target.value)}
+                  name="contractor"
+                  value={completionForm.contractor}
+                  onChange={handleCompletionChange}
                   placeholder="เช่น หจก. นนทบุรีไอที"
                   required
                 />
@@ -364,8 +379,9 @@ export default function RepairJobs({
                 <label>เลขที่หนังสืออนุมัติ *</label>
                 <input
                   type="text"
-                  value={documentNumber}
-                  onChange={(e) => setDocumentNumber(e.target.value)}
+                  name="documentNumber"
+                  value={completionForm.documentNumber}
+                  onChange={handleCompletionChange}
                   placeholder="เช่น นบ 5420X/XXXX"
                   required
                 />
@@ -375,8 +391,9 @@ export default function RepairJobs({
                 <label>วันเดือนปีที่อนุมัติ *</label>
                 <input
                   type="date"
-                  value={approvalDate}
-                  onChange={(e) => setApprovalDate(e.target.value)}
+                  name="approvalDate"
+                  value={completionForm.approvalDate}
+                  onChange={handleCompletionChange}
                   required
                 />
               </div>
@@ -385,8 +402,9 @@ export default function RepairJobs({
                 <label>บันทึกหรือหมายเหตุเพิ่มเติม (ของเจ้าหน้าที่)</label>
                 <textarea
                   rows={2}
-                  value={officerNotes}
-                  onChange={(e) => setOfficerNotes(e.target.value)}
+                  name="officerNotes"
+                  value={completionForm.officerNotes}
+                  onChange={handleCompletionChange}
                   placeholder="รายละเอียดอะไหล่ที่เปลี่ยน หรือหมายเหตุเพิ่มเติม..."
                   style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--border-color)', resize: 'vertical' }}
                 />

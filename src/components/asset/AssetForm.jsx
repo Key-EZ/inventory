@@ -34,36 +34,32 @@ export default function AssetForm({
   // Tabs: 'general', 'custodian_history', 'spec', 'financial'
   const [activeTab, setActiveTab] = useState('general');
 
-  // Form states (Flat fields)
-  const [assetType, setAssetType] = useState(asset ? asset.asset_type || 'EQUIPMENT' : 'EQUIPMENT'); // 'LAND_BUILDING', 'EQUIPMENT'
-  const [category, setCategory] = useState(asset ? asset.category || '' : (equipmentCategories[0] || ''));
-  const [assetCode, setAssetCode] = useState(asset ? asset.asset_code || '' : '');
-  const [name, setName] = useState(asset ? asset.name || '' : '');
-  const [location, setLocation] = useState(asset ? asset.location || '' : '');
-  const [acquisitionMethod, setAcquisitionMethod] = useState(asset ? asset.acquisition_method || 'ซื้อ' : 'ซื้อ');
-  const [approvalDocument, setApprovalDocument] = useState(asset ? asset.approval_document || '' : '');
-  const [deliveryDate, setDeliveryDate] = useState(asset ? asset.delivery_date || '' : '');
-  const [unitPrice, setUnitPrice] = useState(asset ? asset.unit_price || 0 : 0);
+  // Form states (Grouped object)
+  const [formData, setFormData] = useState({
+    assetType: asset ? asset.asset_type || 'EQUIPMENT' : 'EQUIPMENT',
+    category: asset ? asset.category || '' : (equipmentCategories[0] || ''),
+    assetCode: asset ? asset.asset_code || '' : '',
+    name: asset ? asset.name || '' : '',
+    location: asset ? asset.location || '' : '',
+    acquisitionMethod: asset ? asset.acquisition_method || 'ซื้อ' : 'ซื้อ',
+    approvalDocument: asset ? asset.approval_document || '' : '',
+    deliveryDate: asset ? asset.delivery_date || '' : '',
+    unitPrice: asset ? asset.unit_price || 0 : 0,
+    responsibleDepartment: asset ? asset.responsible_department || '' : '',
+    documentOfTitle: asset ? asset.document_of_title || '' : '',
+    areaSize: asset ? asset.area_size || '' : '',
+    buildingStyle: asset ? asset.building_style || '' : '',
+    manufacturerBrand: asset ? asset.manufacturer_brand || '' : '',
+    serialNumber: asset ? asset.serial_number || '' : '',
+    engineNumber: asset ? asset.engine_number || '' : '',
+    chassisNumber: asset ? asset.chassis_number || '' : '',
+    vehicleRegistration: asset ? asset.vehicle_registration || '' : '',
+    color: asset ? asset.color || '' : '',
+    warrantyDetail: asset ? asset.warranty_detail || '' : '',
+    status: asset ? asset.status || 'ใช้งาน' : 'ใช้งาน',
+  });
+
   const budgetOwner = asset ? asset.budget_owner || '' : '';
-  const [responsibleDepartment, setResponsibleDepartment] = useState(asset ? asset.responsible_department || '' : '');
-
-  // พ.ด. 1 fields
-  const [documentOfTitle, setDocumentOfTitle] = useState(asset ? asset.document_of_title || '' : '');
-  const [areaSize, setAreaSize] = useState(asset ? asset.area_size || '' : '');
-  const [buildingStyle, setBuildingStyle] = useState(asset ? asset.building_style || '' : '');
-
-  // พ.ด. 2 fields
-  const [manufacturerBrand, setManufacturerBrand] = useState(asset ? asset.manufacturer_brand || '' : '');
-  const [serialNumber, setSerialNumber] = useState(asset ? asset.serial_number || '' : '');
-  const [engineNumber, setEngineNumber] = useState(asset ? asset.engine_number || '' : '');
-  const [chassisNumber, setChassisNumber] = useState(asset ? asset.chassis_number || '' : '');
-  const [vehicleRegistration, setVehicleRegistration] = useState(asset ? asset.vehicle_registration || '' : '');
-  const [color, setColor] = useState(asset ? asset.color || '' : '');
-  const [warrantyDetail, setWarrantyDetail] = useState(asset ? asset.warranty_detail || '' : '');
-
-  // Status
-  const [status, setStatus] = useState(asset ? asset.status || 'ใช้งาน' : 'ใช้งาน');
-
   const maintenances = asset ? asset.maintenances || [] : [];
 
   // Custodian History CRUD states
@@ -74,8 +70,22 @@ export default function AssetForm({
   const [custHistorySectionHead, setCustHistorySectionHead] = useState('');
   const [editingCustHistoryId, setEditingCustHistoryId] = useState(null);
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    let finalValue = value;
+    if (name === 'unitPrice') {
+      finalValue = parseFloat(value) || 0;
+    } else if (name === 'assetCode') {
+      finalValue = formatAssetCode(value);
+    }
+    setFormData(prev => ({
+      ...prev,
+      [name]: finalValue
+    }));
+  };
+
   // Calculate depreciation dynamically during render
-  const calc = calculateDepreciation(assetCode, unitPrice);
+  const calc = calculateDepreciation(formData.assetCode, formData.unitPrice);
   const depreciationRate = calc.depreciationRatePercent;
   const accumulatedDepreciation = calc.accumulatedDepreciation;
   const bookValue = calc.bookValue;
@@ -142,14 +152,14 @@ export default function AssetForm({
   // Submit Handler
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!name || !assetCode || !category) {
+    if (!formData.name || !formData.assetCode || !formData.category) {
       alert('กรุณากรอก ชื่อพัสดุ รหัสพัสดุ และเลือกหมวดหมู่พัสดุ');
       return;
     }
 
     // Basic regex check for 3-part code format
     const codeFormat = /^\d{3}-\d{2}-\d{4}$/;
-    if (!codeFormat.test(assetCode)) {
+    if (!codeFormat.test(formData.assetCode)) {
       if (!window.confirm('คำเตือน: รหัสพัสดุไม่ได้อยู่ในรูปแบบแนะนำ (เช่น 001-10-0001) คุณต้องการใช้รหัสนี้ต่อหรือไม่?')) {
         return;
       }
@@ -168,32 +178,32 @@ export default function AssetForm({
 
     const payload = {
       id: asset?.id || generateNewAssetId(),
-      asset_type: assetType,
-      category,
-      asset_code: assetCode,
-      name,
-      location,
-      acquisition_method: acquisitionMethod,
-      approval_document: approvalDocument,
-      delivery_date: deliveryDate,
-      unit_price: parseFloat(unitPrice) || 0,
+      asset_type: formData.assetType,
+      category: formData.category,
+      asset_code: formData.assetCode,
+      name: formData.name,
+      location: formData.location,
+      acquisition_method: formData.acquisitionMethod,
+      approval_document: formData.approvalDocument,
+      delivery_date: formData.deliveryDate,
+      unit_price: parseFloat(formData.unitPrice) || 0,
       budget_owner: finalBudgetOwner,
-      responsible_department: responsibleDepartment,
-      status,
+      responsible_department: formData.responsibleDepartment,
+      status: formData.status,
 
       // Ph.D. 1 specific fields
-      document_of_title: assetType === 'LAND_BUILDING' ? documentOfTitle : '',
-      area_size: assetType === 'LAND_BUILDING' ? areaSize : '',
-      building_style: assetType === 'LAND_BUILDING' ? buildingStyle : '',
+      document_of_title: formData.assetType === 'LAND_BUILDING' ? formData.documentOfTitle : '',
+      area_size: formData.assetType === 'LAND_BUILDING' ? formData.areaSize : '',
+      building_style: formData.assetType === 'LAND_BUILDING' ? formData.buildingStyle : '',
 
       // Ph.D. 2 specific fields
-      manufacturer_brand: assetType === 'EQUIPMENT' ? manufacturerBrand : '',
-      serial_number: assetType === 'EQUIPMENT' ? serialNumber : '',
-      engine_number: assetType === 'EQUIPMENT' ? engineNumber : '',
-      chassis_number: assetType === 'EQUIPMENT' ? chassisNumber : '',
-      vehicle_registration: assetType === 'EQUIPMENT' ? vehicleRegistration : '',
-      color: assetType === 'EQUIPMENT' ? color : '',
-      warranty_detail: assetType === 'EQUIPMENT' ? warrantyDetail : '',
+      manufacturer_brand: formData.assetType === 'EQUIPMENT' ? formData.manufacturerBrand : '',
+      serial_number: formData.assetType === 'EQUIPMENT' ? formData.serialNumber : '',
+      engine_number: formData.assetType === 'EQUIPMENT' ? formData.engineNumber : '',
+      chassis_number: formData.assetType === 'EQUIPMENT' ? formData.chassisNumber : '',
+      vehicle_registration: formData.assetType === 'EQUIPMENT' ? formData.vehicleRegistration : '',
+      color: formData.assetType === 'EQUIPMENT' ? formData.color : '',
+      warranty_detail: formData.assetType === 'EQUIPMENT' ? formData.warrantyDetail : '',
 
       // Calculated stats
       depreciation_rate_percent: depreciationRate,
@@ -238,14 +248,7 @@ export default function AssetForm({
             className={`tab-btn ${activeTab === 'spec' ? 'active' : ''}`}
             onClick={() => setActiveTab('spec')}
           >
-            3. รายละเอียดเฉพาะ ({assetType === 'LAND_BUILDING' ? 'พ.ด.1' : 'พ.ด.2'})
-          </button>
-          <button
-            type="button"
-            className={`tab-btn ${activeTab === 'financial' ? 'active' : ''}`}
-            onClick={() => setActiveTab('financial')}
-          >
-            4. ค่าเสื่อมราคา
+            3. รายละเอียดเฉพาะ ({formData.assetType === 'LAND_BUILDING' ? 'พ.ด.1' : 'พ.ด.2'})
           </button>
         </div>
 
@@ -257,11 +260,15 @@ export default function AssetForm({
                 <div className="form-group col">
                   <label>ประเภททะเบียนหลัก *</label>
                   <select
-                    value={assetType}
+                    name="assetType"
+                    value={formData.assetType}
                     onChange={(e) => {
                       const newType = e.target.value;
-                      setAssetType(newType);
-                      setCategory(newType === 'LAND_BUILDING' ? (landBuildingCategories[0] || '') : (equipmentCategories[0] || ''));
+                      setFormData(prev => ({
+                        ...prev,
+                        assetType: newType,
+                        category: newType === 'LAND_BUILDING' ? (landBuildingCategories[0] || '') : (equipmentCategories[0] || '')
+                      }));
                     }}
                     required
                   >
@@ -272,12 +279,13 @@ export default function AssetForm({
                 <div className="form-group col">
                   <label>หมวดหมู่พัสดุ *</label>
                   <select
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
+                    name="category"
+                    value={formData.category}
+                    onChange={handleChange}
                     required
                   >
                     <option value="">-- เลือกหมวดหมู่ --</option>
-                    {(assetType === 'LAND_BUILDING' ? landBuildingCategories : equipmentCategories).map(cat => (
+                    {(formData.assetType === 'LAND_BUILDING' ? landBuildingCategories : equipmentCategories).map(cat => (
                       <option key={cat} value={cat}>{cat}</option>
                     ))}
                   </select>
@@ -286,8 +294,9 @@ export default function AssetForm({
                   <label>รหัสพัสดุ *</label>
                   <input
                     type="text"
-                    value={assetCode}
-                    onChange={(e) => setAssetCode(formatAssetCode(e.target.value))}
+                    name="assetCode"
+                    value={formData.assetCode}
+                    onChange={handleChange}
                     placeholder="000-00-0000"
                     required
                   />
@@ -299,15 +308,16 @@ export default function AssetForm({
                   <label>ชื่อพัสดุ *</label>
                   <input
                     type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
                     placeholder="เช่น รถยนต์เอนกประสงค์, กล้องวงจรปิด"
                     required
                   />
                 </div>
                 <div className="form-group col">
                   <label>สถานะ</label>
-                  <select value={status} onChange={(e) => setStatus(e.target.value)}>
+                  <select name="status" value={formData.status} onChange={handleChange}>
                     <option value="ใช้งาน">ใช้งาน</option>
                     <option value="ชำรุด">ชำรุด</option>
                     <option value="กำลังซ่อม">กำลังซ่อม</option>
@@ -318,8 +328,9 @@ export default function AssetForm({
                 <div className="form-group col">
                   <label>ลักษณะที่ได้กรรมสิทธิ์ *</label>
                   <select
-                    value={acquisitionMethod}
-                    onChange={(e) => setAcquisitionMethod(e.target.value)}
+                    name="acquisitionMethod"
+                    value={formData.acquisitionMethod}
+                    onChange={handleChange}
                     required
                   >
                     <option value="ซื้อ">ซื้อ</option>
@@ -337,8 +348,9 @@ export default function AssetForm({
                     type="number"
                     step="0.01"
                     min="0"
-                    value={unitPrice}
-                    onChange={(e) => setUnitPrice(parseFloat(e.target.value) || 0)}
+                    name="unitPrice"
+                    value={formData.unitPrice}
+                    onChange={handleChange}
                     required
                   />
                 </div>
@@ -346,8 +358,9 @@ export default function AssetForm({
                   <label>ใบส่งของ *</label>
                   <input
                     type="text"
-                    value={approvalDocument}
-                    onChange={(e) => setApprovalDocument(e.target.value)}
+                    name="approvalDocument"
+                    value={formData.approvalDocument}
+                    onChange={handleChange}
                     placeholder="เช่น เลขที่ใบส่งของ หรือ PO"
                     required
                   />
@@ -356,8 +369,9 @@ export default function AssetForm({
                   <label>วันเดือนปี *</label>
                   <input
                     type="date"
-                    value={deliveryDate}
-                    onChange={(e) => setDeliveryDate(e.target.value)}
+                    name="deliveryDate"
+                    value={formData.deliveryDate}
+                    onChange={handleChange}
                     required
                   />
                 </div>
@@ -377,8 +391,9 @@ export default function AssetForm({
                 <div className="form-group col">
                   <label>ที่ตั้งพัสดุ*</label>
                   <select
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
+                    name="location"
+                    value={formData.location}
+                    onChange={handleChange}
                     required
                   >
                     <option value="">-- เลือกสถานที่ตั้ง --</option>
@@ -390,8 +405,9 @@ export default function AssetForm({
                 <div className="form-group col">
                   <label>ส่วนราชการเจ้าของพัสดุ *</label>
                   <select
-                    value={responsibleDepartment}
-                    onChange={(e) => setResponsibleDepartment(e.target.value)}
+                    name="responsibleDepartment"
+                    value={formData.responsibleDepartment}
+                    onChange={handleChange}
                     required
                   >
                     <option value="">-- เลือกส่วนราชการ --</option>
@@ -552,7 +568,7 @@ export default function AssetForm({
           {/* TAB 3: Specific Fields */}
           {activeTab === 'spec' && (
             <div className="tab-panel">
-              {assetType === 'LAND_BUILDING' ? (
+              {formData.assetType === 'LAND_BUILDING' ? (
                 <>
                   <div className="info-alert info-green">
                     <strong>📗 ทะเบียนพัสดุ พ.ด.1 (ที่ดินและสิ่งก่อสร้าง):</strong> กรอกข้อมูลกรรมสิทธิ์เอกสารสิทธิ์ ที่ดิน และลักษณะโครงสร้างสิ่งก่อสร้าง
@@ -561,8 +577,9 @@ export default function AssetForm({
                     <label>ชนิดและเลขที่เอกสารสิทธิ์ (โฉนด/น.ส.3/ส.ค.1)</label>
                     <input
                       type="text"
-                      value={documentOfTitle}
-                      onChange={(e) => setDocumentOfTitle(e.target.value)}
+                      name="documentOfTitle"
+                      value={formData.documentOfTitle}
+                      onChange={handleChange}
                       placeholder="เช่น โฉนดที่ดินเลขที่ 45879 เล่ม 458"
                     />
                   </div>
@@ -571,8 +588,9 @@ export default function AssetForm({
                       <label>จำนวนเนื้อที่</label>
                       <input
                         type="text"
-                        value={areaSize}
-                        onChange={(e) => setAreaSize(e.target.value)}
+                        name="areaSize"
+                        value={formData.areaSize}
+                        onChange={handleChange}
                         placeholder="เช่น 10 ไร่ 2 งาน 50 ตารางวา"
                       />
                     </div>
@@ -580,8 +598,9 @@ export default function AssetForm({
                       <label>ลักษณะโรงเรือน (ตึก/ไม้/ครึ่งตึกครึ่งไม้, จำนวนชั้น)</label>
                       <input
                         type="text"
-                        value={buildingStyle}
-                        onChange={(e) => setBuildingStyle(e.target.value)}
+                        name="buildingStyle"
+                        value={formData.buildingStyle}
+                        onChange={handleChange}
                         placeholder="เช่น ตึกคอนกรีต 2 ชั้น"
                       />
                     </div>
@@ -596,8 +615,9 @@ export default function AssetForm({
                     <div className="form-group col">
                       <label>ชื่อผู้ผลิต/ตราสินค้า (ยี่ห้อ)</label>
                       <select
-                        value={manufacturerBrand}
-                        onChange={(e) => setManufacturerBrand(e.target.value)}
+                        name="manufacturerBrand"
+                        value={formData.manufacturerBrand}
+                        onChange={handleChange}
                       >
                         <option value="">-- เลือกยี่ห้อ --</option>
                         {brands.map(b => (
@@ -609,8 +629,9 @@ export default function AssetForm({
                       <label>หมายเลขประจำพัสดุจากโรงงาน (Serial Number)</label>
                       <input
                         type="text"
-                        value={serialNumber}
-                        onChange={(e) => setSerialNumber(e.target.value)}
+                        name="serialNumber"
+                        value={formData.serialNumber}
+                        onChange={handleChange}
                         placeholder="เช่น S/N 4589714"
                       />
                     </div>
@@ -621,8 +642,9 @@ export default function AssetForm({
                       <label>หมายเลขเครื่องยนต์ (ยานพาหนะ)</label>
                       <input
                         type="text"
-                        value={engineNumber}
-                        onChange={(e) => setEngineNumber(e.target.value)}
+                        name="engineNumber"
+                        value={formData.engineNumber}
+                        onChange={handleChange}
                         placeholder="เช่น 1GD-124578"
                       />
                     </div>
@@ -630,8 +652,9 @@ export default function AssetForm({
                       <label>หมายเลขตัวถัง / แคชชี (Chassis Number)</label>
                       <input
                         type="text"
-                        value={chassisNumber}
-                        onChange={(e) => setChassisNumber(e.target.value)}
+                        name="chassisNumber"
+                        value={formData.chassisNumber}
+                        onChange={handleChange}
                         placeholder="เช่น MR0GD12487"
                       />
                     </div>
@@ -642,8 +665,9 @@ export default function AssetForm({
                       <label>ทะเบียนรถยนต์ / ตั๋วรูปพรรณสัตว์</label>
                       <input
                         type="text"
-                        value={vehicleRegistration}
-                        onChange={(e) => setVehicleRegistration(e.target.value)}
+                        name="vehicleRegistration"
+                        value={formData.vehicleRegistration}
+                        onChange={handleChange}
                         placeholder="เช่น กข-1234 นนทบุรี"
                       />
                     </div>
@@ -651,8 +675,9 @@ export default function AssetForm({
                       <label>สีพัสดุ</label>
                       <input
                         type="text"
-                        value={color}
-                        onChange={(e) => setColor(e.target.value)}
+                        name="color"
+                        value={formData.color}
+                        onChange={handleChange}
                         placeholder="เช่น สีดำ, สีบรอนซ์เงิน"
                       />
                     </div>
@@ -662,50 +687,14 @@ export default function AssetForm({
                     <label>ข้อมูลรับประกัน (วันสิ้นสุดการรับประกัน / บริษัทผู้ดูแล)</label>
                     <input
                       type="text"
-                      value={warrantyDetail}
-                      onChange={(e) => setWarrantyDetail(e.target.value)}
+                      name="warrantyDetail"
+                      value={formData.warrantyDetail}
+                      onChange={handleChange}
                       placeholder="เช่น หมดประกันวันที่ 12 มี.ค. 2570 โดย บมจ. เดลล์"
                     />
                   </div>
                 </>
               )}
-            </div>
-          )}
-
-          {/* TAB 3: Calculated Financial status */}
-          {activeTab === 'financial' && (
-            <div className="tab-panel">
-              <div className="info-alert">
-                <strong>💡 การประเมินราคาและค่าเสื่อมราคาประจำปี:</strong> ค่าเสื่อมสะสมจะคิดคำนวณอัตโนมัติตามหลักบัญชีท้องถิ่น โดยถอดปี พ.ศ. ได้มาจากกลุ่มที่ 2 ของรหัสพัสดุ (เช่น 001-<strong>67</strong>-0001 = ได้มาระหว่างปี พ.ศ. 2567)
-              </div>
-              <div className="form-row bg-accent-row">
-                <div className="form-group col">
-                  <label>รหัสพัสดุหลัก</label>
-                  <div className="read-only-box font-bold">{assetCode || 'ยังไม่ได้กำหนด'}</div>
-                </div>
-                <div className="form-group col">
-                  <label>อัตราค่าเสื่อมราคาต่อปี</label>
-                  <div className="read-only-box">{depreciationRate}% ต่อปี</div>
-                </div>
-              </div>
-              <div className="form-row bg-accent-row">
-                <div className="form-group col">
-                  <label>ราคาทุนเริ่มต้นต่อหน่วย</label>
-                  <div className="read-only-box">฿{unitPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} บาท</div>
-                </div>
-                <div className="form-group col">
-                  <label>ค่าเสื่อมราคาสะสม</label>
-                  <div className="read-only-box highlight-depreciation">
-                    -฿{accumulatedDepreciation.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} บาท
-                  </div>
-                </div>
-                <div className="form-group col">
-                  <label>มูลค่าคงเหลือสุทธิ (Book Value)</label>
-                  <div className="read-only-box highlight-bookvalue">
-                    ฿{bookValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} บาท
-                  </div>
-                </div>
-              </div>
             </div>
           )}
 
@@ -720,20 +709,18 @@ export default function AssetForm({
                   onClick={() => {
                     if (activeTab === 'custodian_history') setActiveTab('general');
                     if (activeTab === 'spec') setActiveTab('custodian_history');
-                    if (activeTab === 'financial') setActiveTab('spec');
                   }}
                 >
                   ย้อนกลับ
                 </button>
               )}
-              {activeTab !== 'financial' ? (
+              {activeTab !== 'spec' ? (
                 <button
                   className="btn-next-tab button-primary"
                   type="button"
                   onClick={() => {
                     if (activeTab === 'general') setActiveTab('custodian_history');
                     else if (activeTab === 'custodian_history') setActiveTab('spec');
-                    else if (activeTab === 'spec') setActiveTab('financial');
                   }}
                 >
                   ถัดไป

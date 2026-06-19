@@ -247,9 +247,6 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onRepai
                         <button className="btn-table-repair" onClick={() => onRepairAsset(item)} title="แจ้งซ่อม">
                           🔧 แจ้งซ่อม
                         </button>
-                        <button className="btn-table-history" onClick={() => onViewRepairHistory(item)} title="ประวัติการซ่อมแซม">
-                          📜 ประวัติซ่อม
-                        </button>
                         <button className="btn-table-edit" onClick={() => onEditAsset(item)} title="แก้ไขข้อมูล">
                           ✏️ แก้ไข
                         </button>

@@ -2316,6 +2316,10 @@ body {
   color: #000000;
 }
 
+body.modal-print-open {
+  overflow: hidden !important;
+}
+
 /* --- Inventory Report Print Preview Styles (Screen Only) --- */
 .preview-container {
   position: fixed;
@@ -2529,22 +2533,80 @@ body {
 
 /* Layout split for memorandum configuration and preview */
 .memo-print-layout {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   display: flex;
-  min-height: 100vh;
+  flex-direction: column; /* Stack top tabs and main content */
   background-color: var(--bg-primary);
   color: var(--text-primary);
+  z-index: 1050;
+  overflow: hidden;
+}
+
+/* Top Tab Bar Styles */
+.memo-top-tabs {
+  display: flex;
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  padding: 12px 24px;
+  gap: 16px;
+  align-items: center;
+  justify-content: center;
+}
+
+.memo-tab {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.memo-tab:hover {
+  background-color: var(--bg-secondary);
+  border-color: var(--text-muted);
+  transform: translateY(-1px);
+}
+
+.memo-tab.active {
+  background-color: #0d9488;
+  color: white;
+  border-color: #0d9488;
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
+}
+
+.memo-content-container {
+  display: flex;
+  flex: 1;
+  width: 100%;
+  overflow: hidden;
 }
 
 .memo-config-sidebar {
-  width: 380px;
+  width: 100%;
+  max-width: 650px;
+  margin: 0 auto;
   background-color: var(--bg-secondary);
+  border-left: 1px solid var(--border-color);
   border-right: 1px solid var(--border-color);
   padding: 24px;
   overflow-y: auto;
-  height: 100vh;
-  position: sticky;
-  top: 0;
+  height: 100%;
   box-sizing: border-box;
+}
+
+.memo-config-sidebar.hidden {
+  display: none !important;
 }
 
 .memo-config-sidebar h3 {
@@ -2581,10 +2643,17 @@ body {
   flex: 1;
   padding: 40px 20px;
   overflow-y: auto;
+  height: 100%;
+  box-sizing: border-box;
   background-color: #6b7280; /* dark background to make A4 stand out */
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.memo-preview-area.hidden {
+  display: none !important;
 }
 
 .dark .memo-preview-area {
@@ -2678,10 +2747,12 @@ body {
 /* Print CSS overrides */
 @media print {
   body.modal-print-open .memo-print-layout {
+    position: static !important;
     display: block !important;
     background: none !important;
     padding: 0 !important;
     margin: 0 !important;
+    overflow: visible !important;
   }
 
   body.modal-print-open .memo-config-sidebar {
