@@ -24,6 +24,7 @@ export default function App() {
     isMobileMenuOpen,
     selectedAssetForRepair,
     isRepairFormOpen,
+    repairActiveTab,
     setIsMobileMenuOpen,
     toggleTheme,
     changeLayout,
@@ -286,6 +287,7 @@ export default function App() {
               onDeleteAsset={handleDeleteAsset}
               onRepairAsset={openRepairForm}
               onPrintAsset={openPrintAsset}
+              onViewRepairHistory={(asset) => openRepairForm(asset, 'history')}
               initialSearchQuery={searchQueryFromLanding}
             />
           </div>
@@ -404,6 +406,7 @@ export default function App() {
           preselectedAsset={selectedAssetForRepair}
           onClearPreselectedAsset={() => openRepairForm(null)}
           onClose={closeRepairForm}
+          initialTab={repairActiveTab}
         />
       )}
 

@@ -17,6 +17,7 @@ export default function useAppLayout() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [selectedAssetForRepair, setSelectedAssetForRepair] = useState(null);
   const [isRepairFormOpen, setIsRepairFormOpen] = useState(false);
+  const [repairActiveTab, setRepairActiveTab] = useState('new_request');
 
   // Sync theme to document element
   useEffect(() => {
@@ -54,13 +55,15 @@ export default function useAppLayout() {
     setEditingAsset(null);
   };
 
-  const openRepairForm = (asset) => {
+  const openRepairForm = (asset, initialTab = 'new_request') => {
     setSelectedAssetForRepair(asset);
+    setRepairActiveTab(initialTab);
     setIsRepairFormOpen(true);
   };
 
   const closeRepairForm = () => {
     setSelectedAssetForRepair(null);
+    setRepairActiveTab('new_request');
     setIsRepairFormOpen(false);
   };
 
@@ -87,6 +90,7 @@ export default function useAppLayout() {
     isMobileMenuOpen,
     selectedAssetForRepair,
     isRepairFormOpen,
+    repairActiveTab,
     setIsMobileMenuOpen,
     toggleTheme,
     changeLayout,

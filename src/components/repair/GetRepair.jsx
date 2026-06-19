@@ -7,9 +7,11 @@ export default function GetRepair({
   onCreateRepairRequest,
   preselectedAsset = null,
   onClearPreselectedAsset,
-  onClose
+  onClose,
+  initialTab = 'new_request'
 }) {
-  const [activeSubTab, setActiveSubTab] = useState('new_request'); // 'new_request', 'history'
+  const [activeSubTab, setActiveSubTab] = useState(initialTab); // 'new_request', 'history'
+  const [showOnlyPreselectedHistory, setShowOnlyPreselectedHistory] = useState(!!preselectedAsset);
   const [problemDescription, setProblemDescription] = useState('');
 
   // Helper to find latest custodian name from custodian history (sorted by year descending)
@@ -78,6 +80,11 @@ export default function GetRepair({
     }
   };
 
+  // Filter history requests if preselectedAsset is active and toggle is on
+  const filteredHistoryRequests = (preselectedAsset && showOnlyPreselectedHistory)
+    ? repairRequests.filter(req => req.asset_id === preselectedAsset.id)
+    : repairRequests;
+
   return (
     <div className="modal-backdrop">
       <div className="modal-content-card" style={{ maxWidth: '900px' }}>
@@ -101,7 +108,7 @@ export default function GetRepair({
           className={`tab-btn ${activeSubTab === 'history' ? 'active' : ''}`}
           onClick={() => setActiveSubTab('history')}
         >
-          📜 ประวัติการแจ้งซ่อม ({repairRequests.length})
+          📜 ประวัติการแจ้งซ่อม ({preselectedAsset ? repairRequests.filter(req => req.asset_id === preselectedAsset.id).length : repairRequests.length})
         </button>
       </div>
 
@@ -195,7 +202,20 @@ export default function GetRepair({
 
       {activeSubTab === 'history' && (
         <div className="layout-card table-data-card animate-fade-in" style={{ padding: '20px' }}>
-          <h3 style={{ marginBottom: '16px' }}>📜 รายการประวัติแจ้งซ่อมของคุณ</h3>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
+            <h3 style={{ margin: 0 }}>📜 รายการประวัติแจ้งซ่อม</h3>
+            {preselectedAsset && (
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', cursor: 'pointer', userSelect: 'none', color: 'var(--text-muted)' }}>
+                <input
+                  type="checkbox"
+                  checked={showOnlyPreselectedHistory}
+                  onChange={(e) => setShowOnlyPreselectedHistory(e.target.checked)}
+                  style={{ width: '16px', height: '16px', cursor: 'pointer' }}
+                />
+                <span>แสดงเฉพาะของครุภัณฑ์นี้ (<strong>{preselectedAsset.asset_code}</strong>)</span>
+              </label>
+            )}
+          </div>
 
           <div className="settings-table-wrapper">
             <table className="settings-table">
@@ -210,8 +230,8 @@ export default function GetRepair({
                 </tr>
               </thead>
               <tbody>
-                {repairRequests.length > 0 ? (
-                  [...repairRequests]
+                {filteredHistoryRequests.length > 0 ? (
+                  [...filteredHistoryRequests]
                     .sort((a, b) => new Date(b.request_date) - new Date(a.request_date))
                     .map((req, idx) => {
                       const asset = assets.find(a => a.id === req.asset_id);
