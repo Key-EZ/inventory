@@ -402,7 +402,7 @@ export default function AssetForm({
                       </select>
                     </div>
                     <div className="form-group col">
-                      <label>หมายเลขประจำพัสดุจากโรงงาน (Serial Number)</label>
+                      <label>Serial Number</label>
                       <input
                         type="text"
                         value={serialNumber}
