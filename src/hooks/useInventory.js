@@ -337,6 +337,12 @@ export default function useInventory() {
     if (window.confirm(`คุณต้องการลบข้อมูลครุภัณฑ์ "${assetName}" ใช่หรือไม่?`)) {
       const filtered = assets.filter(a => a.id !== id);
       saveAssetsToStateAndStorage(filtered);
+
+      // Filter out and remove all repair requests associated with the deleted asset
+      const filteredRequests = repairRequests.filter(req => req.asset_id !== id);
+      setRepairRequests(filteredRequests);
+      localStorage.setItem('inventory_repair_requests', JSON.stringify(filteredRequests));
+
       addAuditLog('ครุภัณฑ์', `ลบครุภัณฑ์: ${assetName} (${assetCode})`);
     }
   };
