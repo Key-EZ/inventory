@@ -118,7 +118,7 @@ export default function InventoryPrint({ asset, onClose }) {
             chassisNumber: asset.chassis_number || "-",
             registrationNumber: asset.vehicle_registration || "-",
             color: asset.color || "-",
-            other: asset.approval_document || "-",
+            other: asset.delivery_document_no ? `${asset.delivery_document_no} ลงวันที่ ${asset.delivery_document_date ? formatThaiDateString(asset.delivery_document_date) : '-'} (${asset.seller_name || '-'})` : "-",
             warrantyUntil: asset.warranty_detail || "-",
             warrantyCompany: asset.warranty_detail || "-",
             warrantyDate: "-",
@@ -203,14 +203,14 @@ export default function InventoryPrint({ asset, onClose }) {
                                     ลักษณะโรงเรือน/สิ่งก่อสร้าง: <span className="dotted-line" style={{ width: '45%' }}>{asset.building_style || '-'}</span><br />
                                     สถานะพัสดุ: <span className="dotted-line" style={{ width: '70%' }}>{asset.status || '-'}</span><br />
                                     ลักษณะการได้มา: <span className="dotted-line" style={{ width: '60%' }}>{asset.acquisition_method || '-'}</span><br />
-                                    เอกสารอนุมัติ/สัญญา: <span className="dotted-line" style={{ width: '53%' }}>{asset.approval_document || '-'}</span><br />
+                                    เอกสารอนุมัติ/สัญญา: <span className="dotted-line" style={{ width: '53%' }}>{asset.delivery_document_no ? `${asset.delivery_document_no} ลงวันที่ ${asset.delivery_document_date ? formatThaiDateString(asset.delivery_document_date) : '-'} (${asset.seller_name || '-'})` : '-'}</span><br />
                                     <span style={{ visibility: 'hidden' }}>-</span><br />
                                     <span style={{ visibility: 'hidden' }}>-</span><br />
                                     <span style={{ visibility: 'hidden' }}>-</span>
                                 </td>
                             ) : (
                                 <td colSpan="2" className="lh-1-6">
-                                    ใบส่งของ: <span className="dotted-line" style={{ width: '75%' }}></span><br />
+                                    ใบส่งของ: <span className="dotted-line" style={{ width: '75%' }}>{asset.delivery_document_no ? `${asset.delivery_document_no} ลงวันที่ ${asset.delivery_document_date ? formatThaiDateString(asset.delivery_document_date) : '-'} (${asset.seller_name || '-'})` : '-'}</span><br />
                                     ชื่อ/ยี่ห้อผู้ทำหรือผลิต: <span className="dotted-line" style={{ width: '55%' }}>{data.brand}</span><br />
                                     แบบ/ชนิด/ลักษณะ: <span className="dotted-line" style={{ width: '60%' }}>{data.model}</span><br />
                                     หมายเลขตัวรถ: <span className="dotted-line" style={{ width: '70%' }}>{data.carNumber}</span><br />

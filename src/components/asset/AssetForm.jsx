@@ -27,7 +27,8 @@ export default function AssetForm({
   agencies = [],
   positions = [],
   onSubmit,
-  onClose
+  onClose,
+  sellers = []
 }) {
   const isEdit = !!asset;
 
@@ -41,7 +42,9 @@ export default function AssetForm({
   const [name, setName] = useState(asset ? asset.name || '' : '');
   const [location, setLocation] = useState(asset ? asset.location || '' : '');
   const [acquisitionMethod, setAcquisitionMethod] = useState(asset ? asset.acquisition_method || 'ซื้อ' : 'ซื้อ');
-  const [approvalDocument, setApprovalDocument] = useState(asset ? asset.approval_document || '' : '');
+  const [deliveryDocumentNo, setDeliveryDocumentNo] = useState(asset ? asset.delivery_document_no || '' : '');
+  const [deliveryDocumentDate, setDeliveryDocumentDate] = useState(asset ? asset.delivery_document_date || '' : '');
+  const [sellerName, setSellerName] = useState(asset ? asset.seller_name || '' : (sellers[0] || ''));
   const [deliveryDate, setDeliveryDate] = useState(asset ? asset.delivery_date || '' : '');
   const [unitPrice, setUnitPrice] = useState(asset ? asset.unit_price || 0 : 0);
   const budgetOwner = asset ? asset.budget_owner || '' : '';
@@ -174,7 +177,9 @@ export default function AssetForm({
       name,
       location,
       acquisition_method: acquisitionMethod,
-      approval_document: approvalDocument,
+      delivery_document_no: deliveryDocumentNo,
+      delivery_document_date: deliveryDocumentDate,
+      seller_name: sellerName,
       delivery_date: deliveryDate,
       unit_price: parseFloat(unitPrice) || 0,
       budget_owner: finalBudgetOwner,
@@ -343,23 +348,48 @@ export default function AssetForm({
                   />
                 </div>
                 <div className="form-group col">
-                  <label>ใบส่งของ *</label>
-                  <input
-                    type="text"
-                    value={approvalDocument}
-                    onChange={(e) => setApprovalDocument(e.target.value)}
-                    placeholder="เช่น เลขที่ใบส่งของ หรือ PO"
-                    required
-                  />
-                </div>
-                <div className="form-group col">
-                  <label>วันเดือนปี *</label>
+                  <label>วันเดือนปีที่ได้รับมอบ *</label>
                   <input
                     type="date"
                     value={deliveryDate}
                     onChange={(e) => setDeliveryDate(e.target.value)}
                     required
                   />
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group col">
+                  <label>เลขที่ใบส่งของ/สัญญา *</label>
+                  <input
+                    type="text"
+                    value={deliveryDocumentNo}
+                    onChange={(e) => setDeliveryDocumentNo(e.target.value)}
+                    placeholder="เช่น เลขที่ใบส่งของ หรือ PO"
+                    required
+                  />
+                </div>
+                <div className="form-group col">
+                  <label>วันเดือนปีในเอกสาร *</label>
+                  <input
+                    type="date"
+                    value={deliveryDocumentDate}
+                    onChange={(e) => setDeliveryDocumentDate(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="form-group col">
+                  <label>ผู้ขาย / คู่สัญญา *</label>
+                  <select
+                    value={sellerName}
+                    onChange={(e) => setSellerName(e.target.value)}
+                    required
+                  >
+                    <option value="">-- เลือกผู้ขาย --</option>
+                    {sellers.map(s => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
             </div>

@@ -39,7 +39,11 @@ export default function SettingsPanel({
   agencies = [],
   onAddAgency,
   onEditAgency,
-  onDeleteAgency
+  onDeleteAgency,
+  sellers = [],
+  onAddSeller,
+  onEditSeller,
+  onDeleteSeller
 }) {
   const [activeTab, setActiveTab] = useState('custodians'); // 'custodians', 'org', 'options'
   const [landingBadgeInput, setLandingBadgeInput] = useState(landingBadgeText || 'ระบบดิจิทัลบริหารทรัพย์สิน');
@@ -70,6 +74,7 @@ export default function SettingsPanel({
   const [newPositionInput, setNewPositionInput] = useState('');
   const [newBrandInput, setNewBrandInput] = useState('');
   const [newLocationInput, setNewLocationInput] = useState('');
+  const [newSellerInput, setNewSellerInput] = useState('');
 
   // Settings for Repair Request Print Signatories
   const [agencyInput, setAgencyInput] = useState(() => localStorage.getItem('print_rr_agency') || 'เทศบาลตำบลเสาธงหิน');
@@ -353,13 +358,48 @@ export default function SettingsPanel({
   };
 
   const handleDeleteLocCheck = (loc) => {
-    const inUse = assets.some(a => a.usage?.location === loc);
+    const inUse = assets.some(a => a.location === loc);
     if (inUse) {
       alert(`ไม่สามารถลบสถานที่ตั้ง "${loc}" ได้ เนื่องจากมีครุภัณฑ์จัดตั้งอยู่ในสถานที่นี้`);
       return;
     }
     if (window.confirm(`คุณแน่ใจว่าต้องการลบสถานที่ตั้ง "${loc}" ใช่หรือไม่?`)) {
       onDeleteLocation(loc);
+    }
+  };
+
+  const handleAddSel = (e) => {
+    e.preventDefault();
+    const val = newSellerInput.trim();
+    if (!val) return;
+    if (sellers.includes(val)) {
+      alert('มีชื่อผู้ขายนี้อยู่แล้วในระบบ');
+      return;
+    }
+    onAddSeller(val);
+    setNewSellerInput('');
+  };
+
+  const handleEditSelPrompt = (oldVal) => {
+    const newVal = prompt('แก้ไขชื่อผู้ขาย:', oldVal);
+    if (newVal === null) return;
+    const trimmed = newVal.trim();
+    if (!trimmed) return;
+    if (sellers.includes(trimmed) && trimmed !== oldVal) {
+      alert('มีชื่อผู้ขายนี้อยู่แล้วในระบบ');
+      return;
+    }
+    onEditSeller(oldVal, trimmed);
+  };
+
+  const handleDeleteSelCheck = (seller) => {
+    const inUse = assets.some(a => a.seller_name === seller);
+    if (inUse) {
+      alert(`ไม่สามารถลบผู้ขาย "${seller}" ได้ เนื่องจากมีครุภัณฑ์ลงทะเบียนจัดหาจากผู้ขายรายนี้`);
+      return;
+    }
+    if (window.confirm(`คุณแน่ใจว่าต้องการลบผู้ขาย "${seller}" ใช่หรือไม่?`)) {
+      onDeleteSeller(seller);
     }
   };
 
@@ -436,7 +476,7 @@ export default function SettingsPanel({
           className={`tab-btn ${activeTab === 'options' ? 'active' : ''}`}
           onClick={() => setActiveTab('options')}
         >
-          ⚙️ จัดการตัวเลือก (ตำแหน่ง/ยี่ห้อ/สถานที่)
+          ⚙️ จัดการตัวเลือก (ตำแหน่ง/ยี่ห้อ/สถานที่/ผู้ขาย)
         </button>
         <button
           type="button"
@@ -762,6 +802,47 @@ export default function SettingsPanel({
                 ))
               ) : (
                 <div className="table-empty-row">ไม่มีข้อมูลส่วนราชการ</div>
+              )}
+            </div>
+          </div>
+
+          {/* Seller Column */}
+          <div className="layout-card">
+            <h3>🤝 รายการผู้ขาย / คู่สัญญา</h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginBottom: '16px' }}>
+              ตัวเลือกผู้ขายในการลงทะเบียนจัดหาพัสดุ
+            </p>
+
+            <form onSubmit={handleAddSel} className="settings-inline-add-form">
+              <input
+                type="text"
+                value={newSellerInput}
+                onChange={(e) => setNewSellerInput(e.target.value)}
+                placeholder="เช่น บจก. เอสเอสพี, หจก. นนทบุรี"
+                className="filter-input-element"
+              />
+              <button type="submit" className="button-primary" style={{ padding: '8px 16px', whiteSpace: 'nowrap' }}>
+                เพิ่ม
+              </button>
+            </form>
+
+            <div className="settings-inline-list">
+              {sellers.length > 0 ? (
+                sellers.map(seller => (
+                  <div key={seller} className="settings-list-row">
+                    <span className="settings-item-name">{seller}</span>
+                    <div className="settings-item-actions">
+                      <button className="btn-mini-action" onClick={() => handleEditSelPrompt(seller)} type="button">
+                        ✏️
+                      </button>
+                      <button className="btn-mini-action btn-mini-delete" onClick={() => handleDeleteSelCheck(seller)} type="button">
+                        🗑️
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="table-empty-row">ไม่มีข้อมูลผู้ขาย</div>
               )}
             </div>
           </div>

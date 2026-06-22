@@ -91,6 +91,10 @@ export default function App() {
     handleAddAgency,
     handleEditAgency,
     handleDeleteAgency,
+    sellers,
+    handleAddSeller,
+    handleEditSeller,
+    handleDeleteSeller
   } = useInventory();
 
   // --- Sub-components / Props ---
@@ -364,6 +368,10 @@ export default function App() {
             onAddAgency={handleAddAgency}
             onEditAgency={handleEditAgency}
             onDeleteAgency={handleDeleteAgency}
+            sellers={sellers}
+            onAddSeller={handleAddSeller}
+            onEditSeller={handleEditSeller}
+            onDeleteSeller={handleDeleteSeller}
           />
         )}
 
@@ -398,6 +406,7 @@ export default function App() {
           positions={positions}
           onSubmit={handleSubmitForm}
           onClose={closeForm}
+          sellers={sellers}
         />
       )}
 
