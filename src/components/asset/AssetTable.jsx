@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 
-export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onRepairAsset, onPrintAsset, onViewRepairHistory, initialSearchQuery = '' }) {
+export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onRepairAsset, onPrintAsset, onViewRepairHistory, onManageCustodian, initialSearchQuery = '' }) {
   // Filter & Search states
   const [search, setSearch] = useState(initialSearchQuery);
   const [filterStatus, setFilterStatus] = useState('ทั้งหมด');
@@ -249,6 +249,9 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onRepai
                         </button>
                         <button className="btn-table-history" onClick={() => onViewRepairHistory(item)} title="ประวัติการซ่อมแซม">
                           📜 ประวัติซ่อม
+                        </button>
+                        <button className="btn-table-custodian" onClick={() => onManageCustodian(item)} title="ผู้ดูแลรับผิดชอบ">
+                          👤 ผู้รับผิดชอบ
                         </button>
                         <button className="btn-table-edit" onClick={() => onEditAsset(item)} title="แก้ไขข้อมูล">
                           ✏️ แก้ไข

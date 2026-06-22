@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import BaseLayout from './components/BaseLayout';
 import AssetForm from './components/asset/AssetForm';
 import AssetTable from './components/asset/AssetTable';
+import CustodianHistoryModal from './components/asset/CustodianHistoryModal';
 import BentoDashboard from './components/BentoDashboard';
 import CenteredLanding from './components/CenteredLanding';
 import SettingsPanel from './components/SettingsPanel';
@@ -15,6 +17,9 @@ import useAppLayout from './hooks/useAppLayout';
 import useInventory from './hooks/useInventory';
 
 export default function App() {
+  const [activeCustodianAsset, setActiveCustodianAsset] = useState(null);
+  const [isCustodianModalOpen, setIsCustodianModalOpen] = useState(false);
+
   const {
     activeLayout,
     isDarkMode,
@@ -295,6 +300,10 @@ export default function App() {
               onRepairAsset={openRepairForm}
               onPrintAsset={openPrintAsset}
               onViewRepairHistory={(asset) => openRepairForm(asset, 'history')}
+              onManageCustodian={(item) => {
+                setActiveCustodianAsset(item);
+                setIsCustodianModalOpen(true);
+              }}
               initialSearchQuery={searchQueryFromLanding}
             />
           </div>
@@ -435,6 +444,20 @@ export default function App() {
           repairRequest={printingRepairRequest}
           asset={assets.find(a => a.id === printingRepairRequest.asset_id)}
           onClose={() => setPrintingRepairRequest(null)}
+        />
+      )}
+
+      {isCustodianModalOpen && (
+        <CustodianHistoryModal
+          asset={activeCustodianAsset}
+          custodians={custodians}
+          agencies={agencies}
+          positions={positions}
+          onSubmit={(updatedAsset) => {
+            handleSubmitForm(updatedAsset);
+            setIsCustodianModalOpen(false);
+          }}
+          onClose={() => setIsCustodianModalOpen(false)}
         />
       )}
 

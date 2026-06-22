@@ -59,14 +59,14 @@ export default function InventoryPrint({ asset, onClose }) {
         let displayAcquiredDate = `พ.ศ. 25${yearBE}`;
         let displayYear = `25${yearBE}`;
 
-        if (asset.delivery_date) {
-            displayAcquiredDate = formatThaiDateString(asset.delivery_date);
-            const dateParts = asset.delivery_date.split('-');
+        if (asset.delivery_document_date) {
+            displayAcquiredDate = formatThaiDateString(asset.delivery_document_date);
+            const dateParts = asset.delivery_document_date.split('-');
             if (dateParts.length === 3) {
                 const yr = parseInt(dateParts[0]) || 0;
                 displayYear = yr < 2400 ? String(yr + 543) : String(yr);
             } else {
-                const slashParts = asset.delivery_date.split('/');
+                const slashParts = asset.delivery_document_date.split('/');
                 if (slashParts.length === 3) {
                     displayYear = slashParts[2];
                 }
