@@ -25,11 +25,15 @@ export default function useInventory() {
         let parsed = JSON.parse(saved);
         let migrated = false;
         parsed = parsed.map(asset => {
-          if (asset.approval_document !== undefined && asset.delivery_document_no === undefined) {
+          let tempAsset = { ...asset };
+          let assetUpdated = false;
+
+          if (tempAsset.approval_document !== undefined && tempAsset.delivery_document_no === undefined) {
             migrated = true;
+            assetUpdated = true;
             let docNo = '';
             let docDate = '';
-            const docStr = asset.approval_document || '';
+            const docStr = tempAsset.approval_document || '';
             const noMatch = docStr.match(/เลขที่\s*(.*?)\s*ลงวันที่/);
             if (noMatch) {
               docNo = noMatch[1];
@@ -59,27 +63,62 @@ export default function useInventory() {
               }
             }
             let sName = 'บจก. เอสเอสพี คอมพิวเตอร์';
-            if (asset.asset_type === 'LAND_BUILDING') {
+            if (tempAsset.asset_type === 'LAND_BUILDING') {
               sName = 'สำนักงานที่ดินจังหวัดนนทบุรี';
-            } else if (asset.category === 'ครุภัณฑ์ยานพาหนะและขนส่ง') {
+            } else if (tempAsset.category === 'ครุภัณฑ์ยานพาหนะและขนส่ง') {
               sName = 'บจก. ยานยนต์รุ่งเรือง';
-            } else if (asset.category === 'ครุภัณฑ์สำนักงาน') {
+            } else if (tempAsset.category === 'ครุภัณฑ์สำนักงาน') {
               sName = 'บจก. ดีลักซ์ ซิสเต็มส์';
-            } else if (asset.maintenances && asset.maintenances.length > 0) {
-              const m = asset.maintenances[0];
+            } else if (tempAsset.maintenances && tempAsset.maintenances.length > 0) {
+              const m = tempAsset.maintenances[0];
               if (m.contractor && m.contractor.includes('นนทบุรี')) {
                 sName = 'หจก. นนทบุรีการค้า';
               }
             }
-            const { approval_document, ...rest } = asset;
-            return {
-              ...rest,
-              delivery_document_no: docNo,
-              delivery_document_date: docDate,
-              seller_name: sName
-            };
+            delete tempAsset.approval_document;
+            tempAsset.delivery_document_no = docNo;
+            tempAsset.delivery_document_date = docDate;
+            tempAsset.seller_name = sName;
           }
-          return asset;
+
+          if (tempAsset.warranty_detail !== undefined && tempAsset.warranty_start_date === undefined) {
+            migrated = true;
+            assetUpdated = true;
+            let startDate = tempAsset.delivery_date || tempAsset.delivery_document_date || '';
+            let endDate = '';
+            let company = tempAsset.seller_name || '';
+            const warrantyStr = tempAsset.warranty_detail || '';
+            
+            const dateMatch = warrantyStr.match(/สิ้นสุด\s*([^\s]+\s+[^\s]+\s+[^\s]+)\s*โดย/);
+            if (dateMatch) {
+              const dateText = dateMatch[1].trim();
+              const thaiMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+              const dateParts = dateText.split(/\s+/);
+              if (dateParts.length === 3) {
+                const day = parseInt(dateParts[0]);
+                const monthIndex = thaiMonths.indexOf(dateParts[1]);
+                const yearBE = parseInt(dateParts[2]);
+                if (!isNaN(day) && monthIndex !== -1 && !isNaN(yearBE)) {
+                  const yearCE = yearBE - 543;
+                  const monthStr = String(monthIndex + 1).padStart(2, '0');
+                  const dayStr = String(day).padStart(2, '0');
+                  endDate = `${yearCE}-${monthStr}-${dayStr}`;
+                }
+              }
+            } else if (warrantyStr.includes("รับประกัน 1 ปี") && startDate) {
+              const dateParts = startDate.split('-');
+              if (dateParts.length === 3) {
+                const y = parseInt(dateParts[0]) + 1;
+                endDate = `${y}-${dateParts[1]}-${dateParts[2]}`;
+              }
+            }
+            delete tempAsset.warranty_detail;
+            tempAsset.warranty_start_date = startDate;
+            tempAsset.warranty_end_date = endDate;
+            tempAsset.warranty_company = company;
+          }
+
+          return assetUpdated ? tempAsset : asset;
         });
         if (migrated) {
           localStorage.setItem('inventory_assets', JSON.stringify(parsed));

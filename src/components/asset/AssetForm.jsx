@@ -62,7 +62,9 @@ export default function AssetForm({
   const [chassisNumber, setChassisNumber] = useState(asset ? asset.chassis_number || '' : '');
   const [vehicleRegistration, setVehicleRegistration] = useState(asset ? asset.vehicle_registration || '' : '');
   const [color, setColor] = useState(asset ? asset.color || '' : '');
-  const [warrantyDetail, setWarrantyDetail] = useState(asset ? asset.warranty_detail || '' : '');
+  const [warrantyStartDate, setWarrantyStartDate] = useState(asset ? asset.warranty_start_date || '' : '');
+  const [warrantyEndDate, setWarrantyEndDate] = useState(asset ? asset.warranty_end_date || '' : '');
+  const [warrantyCompany, setWarrantyCompany] = useState(asset ? asset.warranty_company || '' : '');
 
   // Status
   const [status, setStatus] = useState(asset ? asset.status || 'ใช้งาน' : 'ใช้งาน');
@@ -198,7 +200,9 @@ export default function AssetForm({
       chassis_number: assetType === 'EQUIPMENT' ? chassisNumber : '',
       vehicle_registration: assetType === 'EQUIPMENT' ? vehicleRegistration : '',
       color: assetType === 'EQUIPMENT' ? color : '',
-      warranty_detail: assetType === 'EQUIPMENT' ? warrantyDetail : '',
+      warranty_start_date: assetType === 'EQUIPMENT' ? warrantyStartDate : '',
+      warranty_end_date: assetType === 'EQUIPMENT' ? warrantyEndDate : '',
+      warranty_company: assetType === 'EQUIPMENT' ? warrantyCompany : '',
 
       // Calculated stats
       depreciation_rate_percent: depreciationRate,
@@ -688,14 +692,35 @@ export default function AssetForm({
                     </div>
                   </div>
 
-                  <div className="form-group">
-                    <label>ข้อมูลรับประกัน (วันสิ้นสุดการรับประกัน / บริษัทผู้ดูแล)</label>
-                    <input
-                      type="text"
-                      value={warrantyDetail}
-                      onChange={(e) => setWarrantyDetail(e.target.value)}
-                      placeholder="เช่น หมดประกันวันที่ 12 มี.ค. 2570 โดย บมจ. เดลล์"
-                    />
+                  <div className="form-row">
+                    <div className="form-group col">
+                      <label>วันที่รับประกัน</label>
+                      <input
+                        type="date"
+                        value={warrantyStartDate}
+                        onChange={(e) => setWarrantyStartDate(e.target.value)}
+                      />
+                    </div>
+                    <div className="form-group col">
+                      <label>วันที่สิ้นสุดการรับประกัน</label>
+                      <input
+                        type="date"
+                        value={warrantyEndDate}
+                        onChange={(e) => setWarrantyEndDate(e.target.value)}
+                      />
+                    </div>
+                    <div className="form-group col">
+                      <label>บริษัทที่รับประกัน</label>
+                      <select
+                        value={warrantyCompany}
+                        onChange={(e) => setWarrantyCompany(e.target.value)}
+                      >
+                        <option value="">-- เลือกบริษัทรับประกัน --</option>
+                        {sellers.map(s => (
+                          <option key={s} value={s}>{s}</option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
                 </>
               )}

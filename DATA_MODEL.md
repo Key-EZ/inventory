@@ -44,7 +44,9 @@
 | `chassis_number` | `String` | หมายเลขตัวถัง/เลขแคสซี (Chassis Number) |
 | `vehicle_registration` | `String` | หมายเลขทะเบียนยานพาหนะ (เช่น "กข-5642 นนทบุรี") |
 | `color` | `String` | สีพัสดุ (เช่น "สีบรอนซ์เงิน") |
-| `warranty_detail` | `String` | ข้อมูลการรับประกันและวันสิ้นสุดสัญญา (เช่น "หมดรับประกัน 12 มี.ค. 2570 บจก. เอชพี") |
+| `warranty_start_date` | `String` (Format: `YYYY-MM-DD`) | วันที่เริ่มรับประกันครุภัณฑ์ |
+| `warranty_end_date` | `String` (Format: `YYYY-MM-DD`) | วันที่สิ้นสุดการรับประกันครุภัณฑ์ |
+| `warranty_company` | `String` | ชื่อบริษัทหรือคู่สัญญาที่รับประกันพัสดุ (เลือกจากที่ตั้งค่าในระบบ) |
 
 ---
 
@@ -154,7 +156,9 @@ erDiagram
   "chassis_number": "MR053K41208945",
   "vehicle_registration": "กข-5642 นนทบุรี",
   "color": "สีบรอนซ์เงิน",
-  "warranty_detail": "สิ้นสุด 12 ส.ค. 2567 โดย บริษัท โตโยต้า",
+  "warranty_start_date": "2021-08-12",
+  "warranty_end_date": "2024-08-12",
+  "warranty_company": "บจก. ยานยนต์รุ่งเรือง",
   "depreciation_rate_percent": 20.00,
   "accumulated_depreciation": 1334695.89,
   "book_value": 55304.11,

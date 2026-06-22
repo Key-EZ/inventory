@@ -227,6 +227,9 @@ export default function ReportPanel({ assets = [], locations = [] }) {
         "Serial Number",
         "หมายเลขทะเบียนรถ",
         "สีพัสดุ",
+        "วันที่เริ่มรับประกัน",
+        "วันที่สิ้นสุดการรับประกัน",
+        "บริษัทรับประกัน",
         "สถานะ"
       ];
       rows = pd2Assets.map(item => [
@@ -246,6 +249,9 @@ export default function ReportPanel({ assets = [], locations = [] }) {
         item.serial_number || '',
         item.vehicle_registration || '',
         item.color || '',
+        item.warranty_start_date || '',
+        item.warranty_end_date || '',
+        item.warranty_company || '',
         item.status || ''
       ]);
     } else {
@@ -761,8 +767,15 @@ export default function ReportPanel({ assets = [], locations = [] }) {
                         <div className="card-cell-val">{item.color || '-'}</div>
                       </div>
                       <div className="grid-cell span-2">
-                        <span className="card-cell-label">การรับประกัน (วันสิ้นสุด/สัญญา)</span>
-                        <div className="card-cell-val">{item.warranty_detail || '-'}</div>
+                        <span className="card-cell-label">การรับประกัน</span>
+                        <div className="card-cell-val">
+                          {item.warranty_start_date ? (
+                            `เริ่ม ${formatThaiDateString(item.warranty_start_date)} ถึง ${item.warranty_end_date ? formatThaiDateString(item.warranty_end_date) : 'ไม่ระบุ'}`
+                          ) : (
+                            item.warranty_end_date ? `สิ้นสุด ${formatThaiDateString(item.warranty_end_date)}` : '-'
+                          )}
+                          {item.warranty_company && ` (โดย ${item.warranty_company})`}
+                        </div>
                       </div>
                       <div className="grid-cell">
                         <span className="card-cell-label">สถานะพัสดุ</span>

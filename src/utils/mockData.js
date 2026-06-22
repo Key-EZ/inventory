@@ -67,7 +67,9 @@ const initialAssetsRaw = [
     chassis_number: "",
     vehicle_registration: "",
     color: "สีเทา Space Gray",
-    warranty_detail: "สิ้นสุด 15 มี.ค. 2570 โดย บริษัท เดลล์ ประเทศไทย จำกัด",
+    warranty_start_date: "2024-03-15",
+    warranty_end_date: "2027-03-15",
+    warranty_company: "บจก. เอสเอสพี คอมพิวเตอร์",
     maintenances: [
       {
         id: "maint-201",
@@ -98,7 +100,9 @@ const initialAssetsRaw = [
     chassis_number: "",
     vehicle_registration: "",
     color: "สีดำพนักตาข่าย",
-    warranty_detail: "สิ้นสุด 10 ม.ค. 2571 โดย บมจ. โมเดอร์นฟอร์มกรุ๊ป",
+    warranty_start_date: "2025-01-10",
+    warranty_end_date: "2028-01-10",
+    warranty_company: "บจก. ดีลักซ์ ซิสเต็มส์",
     maintenances: []
   },
   {
@@ -120,7 +124,9 @@ const initialAssetsRaw = [
     chassis_number: "",
     vehicle_registration: "",
     color: "สีขาว",
-    warranty_detail: "สิ้นสุด 20 มิ.ย. 2571 โดย บจก. ไดกิ้น อินดัสทรีส์",
+    warranty_start_date: "2023-06-20",
+    warranty_end_date: "2028-06-20",
+    warranty_company: "บจก. ดีลักซ์ ซิสเต็มส์",
     maintenances: [
       {
         id: "maint-202",
@@ -151,7 +157,9 @@ const initialAssetsRaw = [
     chassis_number: "",
     vehicle_registration: "",
     color: "สีลายไม้สักทอง",
-    warranty_detail: "สิ้นสุดแล้ว (รับประกัน 1 ปี)",
+    warranty_start_date: "2022-02-18",
+    warranty_end_date: "2023-02-18",
+    warranty_company: "หจก. นนทบุรีการค้า",
     maintenances: []
   },
   {
@@ -173,7 +181,9 @@ const initialAssetsRaw = [
     chassis_number: "MR053K41208945",
     vehicle_registration: "กข-5642 นนทบุรี",
     color: "สีบรอนซ์เงิน",
-    warranty_detail: "สิ้นสุด 12 ส.ค. 2567 โดย บริษัท โตโยต้า มอเตอร์ ประเทศไทย",
+    warranty_start_date: "2021-08-12",
+    warranty_end_date: "2024-08-12",
+    warranty_company: "บจก. ยานยนต์รุ่งเรือง",
     maintenances: [
       {
         id: "maint-301",
@@ -212,7 +222,9 @@ const initialAssetsRaw = [
     chassis_number: "",
     vehicle_registration: "",
     color: "สีขาว-เทา",
-    warranty_detail: "สิ้นสุด 20 มี.ค. 2570 โดย บริษัท เอชพี ประเทศไทย จำกัด",
+    warranty_start_date: "2025-03-20",
+    warranty_end_date: "2027-03-20",
+    warranty_company: "บจก. เอสเอสพี คอมพิวเตอร์",
     maintenances: []
   }
 ];
@@ -250,7 +262,9 @@ export function getSeedAssets() {
       chassis_number: asset.chassis_number || '',
       vehicle_registration: asset.vehicle_registration || '',
       color: asset.color || '',
-      warranty_detail: asset.warranty_detail || '',
+      warranty_start_date: asset.warranty_start_date || '',
+      warranty_end_date: asset.warranty_end_date || '',
+      warranty_company: asset.warranty_company || '',
 
       // Depreciations
       depreciation_rate_percent: dep.depreciation_rate_percent,
