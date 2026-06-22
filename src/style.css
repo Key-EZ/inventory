@@ -1286,7 +1286,7 @@ body {
   justify-content: center;
 }
 
-.btn-table-edit, .btn-table-delete, .btn-table-print, .btn-table-repair, .btn-table-history {
+.btn-table-edit, .btn-table-delete, .btn-table-print, .btn-table-repair, .btn-table-history, .btn-table-custodian {
   background: none;
   border: 1px solid var(--border-color);
   padding: 6px 12px;
@@ -1351,6 +1351,17 @@ body {
   background-color: #3b82f6;
   color: white;
   border-color: #3b82f6;
+}
+
+.btn-table-custodian {
+  color: #8b5cf6;
+  background-color: var(--bg-secondary);
+}
+
+.btn-table-custodian:hover {
+  background-color: #8b5cf6;
+  color: white;
+  border-color: #8b5cf6;
 }
 
 .table-empty-row {

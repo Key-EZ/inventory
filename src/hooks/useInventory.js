@@ -9,7 +9,8 @@ import {
   defaultLocations,
   defaultLandBuildingCategories,
   defaultEquipmentCategories,
-  defaultAgencies
+  defaultAgencies,
+  defaultSellers
 } from '../utils/mockData';
 
 const SEED_DATE_1 = '2026-06-17T08:30:00.000Z';
@@ -21,7 +22,108 @@ export default function useInventory() {
     const saved = localStorage.getItem('inventory_assets');
     if (saved) {
       try {
-        return JSON.parse(saved);
+        let parsed = JSON.parse(saved);
+        let migrated = false;
+        parsed = parsed.map(asset => {
+          let tempAsset = { ...asset };
+          let assetUpdated = false;
+
+          if (tempAsset.approval_document !== undefined && tempAsset.delivery_document_no === undefined) {
+            migrated = true;
+            assetUpdated = true;
+            let docNo = '';
+            let docDate = '';
+            const docStr = tempAsset.approval_document || '';
+            const noMatch = docStr.match(/เลขที่\s*(.*?)\s*ลงวันที่/);
+            if (noMatch) {
+              docNo = noMatch[1];
+            } else {
+              const fallbackNoMatch = docStr.match(/เลขที่\s*(.*)/);
+              if (fallbackNoMatch) {
+                docNo = fallbackNoMatch[1];
+              } else {
+                docNo = docStr;
+              }
+            }
+            const dateMatch = docStr.match(/ลงวันที่\s*(.+)$/);
+            if (dateMatch) {
+              const dateText = dateMatch[1].trim();
+              const thaiMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+              const dateParts = dateText.split(/\s+/);
+              if (dateParts.length === 3) {
+                const day = parseInt(dateParts[0]);
+                const monthIndex = thaiMonths.indexOf(dateParts[1]);
+                const yearBE = parseInt(dateParts[2]);
+                if (!isNaN(day) && monthIndex !== -1 && !isNaN(yearBE)) {
+                  const yearCE = yearBE - 543;
+                  const monthStr = String(monthIndex + 1).padStart(2, '0');
+                  const dayStr = String(day).padStart(2, '0');
+                  docDate = `${yearCE}-${monthStr}-${dayStr}`;
+                }
+              }
+            }
+            let sName = 'บจก. เอสเอสพี คอมพิวเตอร์';
+            if (tempAsset.asset_type === 'LAND_BUILDING') {
+              sName = 'สำนักงานที่ดินจังหวัดนนทบุรี';
+            } else if (tempAsset.category === 'ครุภัณฑ์ยานพาหนะและขนส่ง') {
+              sName = 'บจก. ยานยนต์รุ่งเรือง';
+            } else if (tempAsset.category === 'ครุภัณฑ์สำนักงาน') {
+              sName = 'บจก. ดีลักซ์ ซิสเต็มส์';
+            } else if (tempAsset.maintenances && tempAsset.maintenances.length > 0) {
+              const m = tempAsset.maintenances[0];
+              if (m.contractor && m.contractor.includes('นนทบุรี')) {
+                sName = 'หจก. นนทบุรีการค้า';
+              }
+            }
+            delete tempAsset.approval_document;
+            tempAsset.delivery_document_no = docNo;
+            tempAsset.delivery_document_date = docDate;
+            tempAsset.seller_name = sName;
+          }
+
+          if (tempAsset.warranty_detail !== undefined && tempAsset.warranty_start_date === undefined) {
+            migrated = true;
+            assetUpdated = true;
+            let startDate = tempAsset.delivery_date || tempAsset.delivery_document_date || '';
+            let endDate = '';
+            let company = tempAsset.seller_name || '';
+            const warrantyStr = tempAsset.warranty_detail || '';
+            
+            const dateMatch = warrantyStr.match(/สิ้นสุด\s*([^\s]+\s+[^\s]+\s+[^\s]+)\s*โดย/);
+            if (dateMatch) {
+              const dateText = dateMatch[1].trim();
+              const thaiMonths = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+              const dateParts = dateText.split(/\s+/);
+              if (dateParts.length === 3) {
+                const day = parseInt(dateParts[0]);
+                const monthIndex = thaiMonths.indexOf(dateParts[1]);
+                const yearBE = parseInt(dateParts[2]);
+                if (!isNaN(day) && monthIndex !== -1 && !isNaN(yearBE)) {
+                  const yearCE = yearBE - 543;
+                  const monthStr = String(monthIndex + 1).padStart(2, '0');
+                  const dayStr = String(day).padStart(2, '0');
+                  endDate = `${yearCE}-${monthStr}-${dayStr}`;
+                }
+              }
+            } else if (warrantyStr.includes("รับประกัน 1 ปี") && startDate) {
+              const dateParts = startDate.split('-');
+              if (dateParts.length === 3) {
+                const y = parseInt(dateParts[0]) + 1;
+                endDate = `${y}-${dateParts[1]}-${dateParts[2]}`;
+              }
+            }
+            delete tempAsset.warranty_detail;
+            tempAsset.warranty_start_date = startDate;
+            tempAsset.warranty_end_date = endDate;
+            tempAsset.warranty_company = company;
+          }
+
+          return assetUpdated ? tempAsset : asset;
+        });
+        if (migrated) {
+          localStorage.setItem('inventory_assets', JSON.stringify(parsed));
+        }
+        return parsed;
       } catch (e) {
         console.error('Error parsing saved assets, seeding instead', e);
       }
@@ -107,6 +209,19 @@ export default function useInventory() {
     }
     localStorage.setItem('inventory_locations', JSON.stringify(defaultLocations));
     return defaultLocations;
+  });
+
+  const [sellers, setSellers] = useState(() => {
+    const saved = localStorage.getItem('inventory_sellers');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.warn('Failed to parse sellers', e);
+      }
+    }
+    localStorage.setItem('inventory_sellers', JSON.stringify(defaultSellers));
+    return defaultSellers;
   });
 
   const [landingBadgeText, setLandingBadgeText] = useState(() => {
@@ -337,6 +452,12 @@ export default function useInventory() {
     if (window.confirm(`คุณต้องการลบข้อมูลครุภัณฑ์ "${assetName}" ใช่หรือไม่?`)) {
       const filtered = assets.filter(a => a.id !== id);
       saveAssetsToStateAndStorage(filtered);
+
+      // Filter out and remove all repair requests associated with the deleted asset
+      const filteredRequests = repairRequests.filter(req => req.asset_id !== id);
+      setRepairRequests(filteredRequests);
+      localStorage.setItem('inventory_repair_requests', JSON.stringify(filteredRequests));
+
       addAuditLog('ครุภัณฑ์', `ลบครุภัณฑ์: ${assetName} (${assetCode})`);
     }
   };
@@ -714,6 +835,29 @@ export default function useInventory() {
     addAuditLog('ตั้งค่าระบบ', `ลบหน่วยงานเจ้าของงบประมาณ: ${agency}`);
   };
 
+  // --- Seller CRUD ---
+  const saveSellers = (list) => {
+    setSellers(list);
+    localStorage.setItem('inventory_sellers', JSON.stringify(list));
+  };
+
+  const handleAddSeller = (seller) => {
+    saveSellers([...sellers, seller]);
+    addAuditLog('ตั้งค่าระบบ', `เพิ่มรายชื่อผู้ขายใหม่: ${seller}`);
+  };
+
+  const handleEditSeller = (oldSeller, newSeller) => {
+    saveSellers(sellers.map(s => s === oldSeller ? newSeller : s));
+    const updatedAssets = assets.map(a => a.seller_name === oldSeller ? { ...a, seller_name: newSeller } : a);
+    saveAssetsToStateAndStorage(updatedAssets);
+    addAuditLog('ตั้งค่าระบบ', `แก้ไขรายชื่อผู้ขายจาก "${oldSeller}" เป็น "${newSeller}"`);
+  };
+
+  const handleDeleteSeller = (seller) => {
+    saveSellers(sellers.filter(s => s !== seller));
+    addAuditLog('ตั้งค่าระบบ', `ลบรายชื่อผู้ขาย: ${seller}`);
+  };
+
   return {
     assets,
     divisions,
@@ -764,6 +908,10 @@ export default function useInventory() {
     handleDeleteEquipmentCategory,
     handleAddAgency,
     handleEditAgency,
-    handleDeleteAgency
+    handleDeleteAgency,
+    sellers,
+    handleAddSeller,
+    handleEditSeller,
+    handleDeleteSeller
   };
 }

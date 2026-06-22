@@ -180,7 +180,9 @@ export default function ReportPanel({ assets = [], locations = [] }) {
         "ชื่อพัสดุ",
         "ที่ตั้งของพัสดุ",
         "ลักษณะการได้กรรมสิทธิ์",
-        "หนังสืออนุมัติ",
+        "เลขที่ใบส่งของ/สัญญา",
+        "วันเดือนปีเอกสาร",
+        "ผู้ขาย",
         "ราคาต่อหน่วย",
         "เจ้าของงบประมาณ",
         "ส่วนราชการดูแลรับผิดชอบ",
@@ -195,7 +197,9 @@ export default function ReportPanel({ assets = [], locations = [] }) {
         item.name || '',
         item.location || '',
         item.acquisition_method || '',
-        item.approval_document || '',
+        item.delivery_document_no || '',
+        item.delivery_document_date || '',
+        item.seller_name || '',
         item.unit_price || 0,
         item.budget_owner || '',
         item.responsible_department || '',
@@ -211,7 +215,9 @@ export default function ReportPanel({ assets = [], locations = [] }) {
         "หมวดหมู่ครุภัณฑ์",
         "ชื่อครุภัณฑ์",
         "ยี่ห้อ",
-        "เลขที่ใบอนุมัติ",
+        "เลขที่ใบส่งของ/สัญญา",
+        "วันเดือนปีเอกสาร",
+        "ผู้ขาย",
         "ราคาต่อหน่วย",
         "อัตราค่าเสื่อม (%)",
         "ค่าเสื่อมสะสม",
@@ -221,6 +227,9 @@ export default function ReportPanel({ assets = [], locations = [] }) {
         "Serial Number",
         "หมายเลขทะเบียนรถ",
         "สีพัสดุ",
+        "วันที่เริ่มรับประกัน",
+        "วันที่สิ้นสุดการรับประกัน",
+        "บริษัทรับประกัน",
         "สถานะ"
       ];
       rows = pd2Assets.map(item => [
@@ -228,7 +237,9 @@ export default function ReportPanel({ assets = [], locations = [] }) {
         item.category || '',
         item.name || '',
         item.manufacturer_brand || '',
-        item.approval_document || '',
+        item.delivery_document_no || '',
+        item.delivery_document_date || '',
+        item.seller_name || '',
         item.unit_price || 0,
         item.depreciation_rate_percent || 0,
         item.accumulated_depreciation || 0,
@@ -238,6 +249,9 @@ export default function ReportPanel({ assets = [], locations = [] }) {
         item.serial_number || '',
         item.vehicle_registration || '',
         item.color || '',
+        item.warranty_start_date || '',
+        item.warranty_end_date || '',
+        item.warranty_company || '',
         item.status || ''
       ]);
     } else {
@@ -552,9 +566,19 @@ export default function ReportPanel({ assets = [], locations = [] }) {
                         <span className="card-cell-label">ลักษณะการได้กรรมสิทธิ์</span>
                         <div className="card-cell-val">{item.acquisition_method}</div>
                       </div>
+                      <div className="grid-cell">
+                        <span className="card-cell-label">เลขที่ใบส่งของ/สัญญา</span>
+                        <div className="card-cell-val">{item.delivery_document_no || '-'}</div>
+                      </div>
+                      <div className="grid-cell">
+                        <span className="card-cell-label">วันเดือนปีเอกสาร</span>
+                        <div className="card-cell-val">
+                          {item.delivery_document_date ? formatThaiDateString(item.delivery_document_date) : '-'}
+                        </div>
+                      </div>
                       <div className="grid-cell span-2">
-                        <span className="card-cell-label">ข้อมูลหนังสืออนุมัติ</span>
-                        <div className="card-cell-val">{item.approval_document || '-'}</div>
+                        <span className="card-cell-label">ผู้ขาย / คู่สัญญา</span>
+                        <div className="card-cell-val">{item.seller_name || '-'}</div>
                       </div>
                       <div className="grid-cell">
                         <span className="card-cell-label">ราคาต่อหน่วย (บาท)</span>
@@ -743,8 +767,15 @@ export default function ReportPanel({ assets = [], locations = [] }) {
                         <div className="card-cell-val">{item.color || '-'}</div>
                       </div>
                       <div className="grid-cell span-2">
-                        <span className="card-cell-label">การรับประกัน (วันสิ้นสุด/สัญญา)</span>
-                        <div className="card-cell-val">{item.warranty_detail || '-'}</div>
+                        <span className="card-cell-label">การรับประกัน</span>
+                        <div className="card-cell-val">
+                          {item.warranty_start_date ? (
+                            `เริ่ม ${formatThaiDateString(item.warranty_start_date)} ถึง ${item.warranty_end_date ? formatThaiDateString(item.warranty_end_date) : 'ไม่ระบุ'}`
+                          ) : (
+                            item.warranty_end_date ? `สิ้นสุด ${formatThaiDateString(item.warranty_end_date)}` : '-'
+                          )}
+                          {item.warranty_company && ` (โดย ${item.warranty_company})`}
+                        </div>
                       </div>
                       <div className="grid-cell">
                         <span className="card-cell-label">สถานะพัสดุ</span>
@@ -755,9 +786,19 @@ export default function ReportPanel({ assets = [], locations = [] }) {
                         <span className="card-cell-label">ลักษณะการได้กรรมสิทธิ์</span>
                         <div className="card-cell-val">{item.acquisition_method}</div>
                       </div>
+                      <div className="grid-cell">
+                        <span className="card-cell-label">เลขที่ใบส่งของ/สัญญา</span>
+                        <div className="card-cell-val">{item.delivery_document_no || '-'}</div>
+                      </div>
+                      <div className="grid-cell">
+                        <span className="card-cell-label">วันเดือนปีเอกสาร</span>
+                        <div className="card-cell-val">
+                          {item.delivery_document_date ? formatThaiDateString(item.delivery_document_date) : '-'}
+                        </div>
+                      </div>
                       <div className="grid-cell span-2">
-                        <span className="card-cell-label">หนังสืออนุมัติ</span>
-                        <div className="card-cell-val">{item.approval_document || '-'}</div>
+                        <span className="card-cell-label">ผู้ขาย / คู่สัญญา</span>
+                        <div className="card-cell-val">{item.seller_name || '-'}</div>
                       </div>
                       <div className="grid-cell">
                         <span className="card-cell-label">ราคาทุนต่อหน่วย</span>

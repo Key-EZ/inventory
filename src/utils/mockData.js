@@ -9,7 +9,9 @@ const initialAssetsRaw = [
     name: "ที่ดินที่ทำการสำนักงานเทศบาลนครนนทบุรี",
     location: "ถนนรัตนาธิเบศร์ ตำบลบางกระสอ อำเภอเมืองนนทบุรี",
     acquisition_method: "รับโอน",
-    approval_document: "นส.อนุมัติเลขที่ นบ 0023/154 ลงวันที่ 12 มี.ค. 2564",
+    delivery_document_no: "นบ 0023/154",
+    delivery_document_date: "2021-03-12",
+    seller_name: "สำนักงานที่ดินจังหวัดนนทบุรี",
     unit_price: 15000000.00,
     budget_owner: "เทศบาลนครนนทบุรี",
     responsible_department: "สำนักปลัดเทศบาล",
@@ -25,7 +27,9 @@ const initialAssetsRaw = [
     name: "อาคารหอประชุมอเนกประสงค์ 3 ชั้น",
     location: "ลานกิจกรรมกลาง เทศบาลนครนนทบุรี",
     acquisition_method: "จ้าง",
-    approval_document: "สัญญาจ้างเลขที่ 15/2565 ลงวันที่ 10 ก.พ. 2565",
+    delivery_document_no: "15/2565",
+    delivery_document_date: "2022-02-10",
+    seller_name: "หจก. นนทบุรีการค้า",
     unit_price: 8400000.00,
     budget_owner: "งบพัฒนาท้องถิ่น",
     responsible_department: "กองช่าง",
@@ -51,7 +55,9 @@ const initialAssetsRaw = [
     name: "เครื่องคอมพิวเตอร์พกพา (Notebook)",
     location: "ห้องทำงานเทคโนโลยีสารสนเทศ",
     acquisition_method: "ซื้อ",
-    approval_document: "ใบสั่งซื้อเลขที่ PO-670315 ลงวันที่ 15 มี.ค. 2567",
+    delivery_document_no: "PO-670315",
+    delivery_document_date: "2024-03-15",
+    seller_name: "บจก. เอสเอสพี คอมพิวเตอร์",
     unit_price: 32000.00,
     budget_owner: "งบดำเนินงานสำนักปลัด",
     responsible_department: "ฝ่ายพัฒนาระบบ",
@@ -61,7 +67,9 @@ const initialAssetsRaw = [
     chassis_number: "",
     vehicle_registration: "",
     color: "สีเทา Space Gray",
-    warranty_detail: "สิ้นสุด 15 มี.ค. 2570 โดย บริษัท เดลล์ ประเทศไทย จำกัด",
+    warranty_start_date: "2024-03-15",
+    warranty_end_date: "2027-03-15",
+    warranty_company: "บจก. เอสเอสพี คอมพิวเตอร์",
     maintenances: [
       {
         id: "maint-201",
@@ -80,7 +88,9 @@ const initialAssetsRaw = [
     name: "เก้าอี้ทำงานสำนักงานเพื่อสุขภาพ",
     location: "ห้องธุรการทั่วไป",
     acquisition_method: "ซื้อ",
-    approval_document: "อนุมัติจัดซื้อเลขที่ นบ 0023/108 ลงวันที่ 10 ม.ค. 2568",
+    delivery_document_no: "นบ 0023/108",
+    delivery_document_date: "2025-01-10",
+    seller_name: "บจก. ดีลักซ์ ซิสเต็มส์",
     unit_price: 6500.00,
     budget_owner: "งบดำเนินงานปกติ",
     responsible_department: "ฝ่ายธุรการทั่วไป",
@@ -90,7 +100,9 @@ const initialAssetsRaw = [
     chassis_number: "",
     vehicle_registration: "",
     color: "สีดำพนักตาข่าย",
-    warranty_detail: "สิ้นสุด 10 ม.ค. 2571 โดย บมจ. โมเดอร์นฟอร์มกรุ๊ป",
+    warranty_start_date: "2025-01-10",
+    warranty_end_date: "2028-01-10",
+    warranty_company: "บจก. ดีลักซ์ ซิสเต็มส์",
     maintenances: []
   },
   {
@@ -100,7 +112,9 @@ const initialAssetsRaw = [
     name: "เครื่องปรับอากาศ 18000 BTU Inverter",
     location: "ห้องทำงานผู้ว่าราชการ",
     acquisition_method: "ซื้อ",
-    approval_document: "สัญญาเลขที่ e-bidding 45/2566 ลงวันที่ 20 มิ.ย. 2566",
+    delivery_document_no: "e-bidding 45/2566",
+    delivery_document_date: "2023-06-20",
+    seller_name: "บจก. ดีลักซ์ ซิสเต็มส์",
     unit_price: 28900.00,
     budget_owner: "งบลงทุนครุภัณฑ์",
     responsible_department: "ฝ่ายธุรการทั่วไป",
@@ -110,7 +124,9 @@ const initialAssetsRaw = [
     chassis_number: "",
     vehicle_registration: "",
     color: "สีขาว",
-    warranty_detail: "สิ้นสุด 20 มิ.ย. 2571 โดย บจก. ไดกิ้น อินดัสทรีส์",
+    warranty_start_date: "2023-06-20",
+    warranty_end_date: "2028-06-20",
+    warranty_company: "บจก. ดีลักซ์ ซิสเต็มส์",
     maintenances: [
       {
         id: "maint-202",
@@ -129,7 +145,9 @@ const initialAssetsRaw = [
     name: "โต๊ะประชุมไม้ ขนาด 12 ที่นั่ง",
     location: "ห้องประชุมใหญ่ ชั้น 3",
     acquisition_method: "จ้าง",
-    approval_document: "ใบสั่งจ้างเลขที่ QT-20220218 ลงวันที่ 18 ก.พ. 2565",
+    delivery_document_no: "QT-20220218",
+    delivery_document_date: "2022-02-18",
+    seller_name: "หจก. นนทบุรีการค้า",
     unit_price: 24500.00,
     budget_owner: "งบครุภัณฑ์สำนักงาน",
     responsible_department: "ฝ่ายการเงินและบัญชี",
@@ -139,7 +157,9 @@ const initialAssetsRaw = [
     chassis_number: "",
     vehicle_registration: "",
     color: "สีลายไม้สักทอง",
-    warranty_detail: "สิ้นสุดแล้ว (รับประกัน 1 ปี)",
+    warranty_start_date: "2022-02-18",
+    warranty_end_date: "2023-02-18",
+    warranty_company: "หจก. นนทบุรีการค้า",
     maintenances: []
   },
   {
@@ -149,7 +169,9 @@ const initialAssetsRaw = [
     name: "รถยนต์อเนกประสงค์ (SUV) 2,400 ซีซี",
     location: "โรงจอดรถยนต์กลาง",
     acquisition_method: "ซื้อ",
-    approval_document: "สัญญาจัดซื้อเลขที่ e-bidding 12/2564 ลงวันที่ 12 ส.ค. 2564",
+    delivery_document_no: "e-bidding 12/2564",
+    delivery_document_date: "2021-08-12",
+    seller_name: "บจก. ยานยนต์รุ่งเรือง",
     unit_price: 1390000.00,
     budget_owner: "งบลงทุนจัดหายานพาหนะ",
     responsible_department: "ฝ่ายธุรการทั่วไป",
@@ -159,7 +181,9 @@ const initialAssetsRaw = [
     chassis_number: "MR053K41208945",
     vehicle_registration: "กข-5642 นนทบุรี",
     color: "สีบรอนซ์เงิน",
-    warranty_detail: "สิ้นสุด 12 ส.ค. 2567 โดย บริษัท โตโยต้า มอเตอร์ ประเทศไทย",
+    warranty_start_date: "2021-08-12",
+    warranty_end_date: "2024-08-12",
+    warranty_company: "บจก. ยานยนต์รุ่งเรือง",
     maintenances: [
       {
         id: "maint-301",
@@ -186,7 +210,9 @@ const initialAssetsRaw = [
     name: "เครื่องพิมพ์มัลติฟังก์ชัน เลเซอร์",
     location: "ห้องทำงานเทคโนโลยีสารสนเทศ",
     acquisition_method: "ซื้อ",
-    approval_document: "ใบสั่งจัดซื้อเลขที่ IV-20250320 ลงวันที่ 20 มี.ค. 2568",
+    delivery_document_no: "IV-20250320",
+    delivery_document_date: "2025-03-20",
+    seller_name: "บจก. เอสเอสพี คอมพิวเตอร์",
     unit_price: 18500.00,
     budget_owner: "งบดำเนินงานสอยเขียน",
     responsible_department: "ฝ่ายพัฒนาระบบ",
@@ -196,7 +222,9 @@ const initialAssetsRaw = [
     chassis_number: "",
     vehicle_registration: "",
     color: "สีขาว-เทา",
-    warranty_detail: "สิ้นสุด 20 มี.ค. 2570 โดย บริษัท เอชพี ประเทศไทย จำกัด",
+    warranty_start_date: "2025-03-20",
+    warranty_end_date: "2027-03-20",
+    warranty_company: "บจก. เอสเอสพี คอมพิวเตอร์",
     maintenances: []
   }
 ];
@@ -214,7 +242,9 @@ export function getSeedAssets() {
       name: asset.name,
       location: asset.location,
       acquisition_method: asset.acquisition_method,
-      approval_document: asset.approval_document,
+      delivery_document_no: asset.delivery_document_no || '',
+      delivery_document_date: asset.delivery_document_date || '',
+      seller_name: asset.seller_name || '',
       unit_price: asset.unit_price,
       budget_owner: asset.budget_owner,
       responsible_department: asset.responsible_department,
@@ -232,7 +262,9 @@ export function getSeedAssets() {
       chassis_number: asset.chassis_number || '',
       vehicle_registration: asset.vehicle_registration || '',
       color: asset.color || '',
-      warranty_detail: asset.warranty_detail || '',
+      warranty_start_date: asset.warranty_start_date || '',
+      warranty_end_date: asset.warranty_end_date || '',
+      warranty_company: asset.warranty_company || '',
 
       // Depreciations
       depreciation_rate_percent: dep.depreciation_rate_percent,
@@ -374,4 +406,13 @@ export const defaultAgencies = [
   "กองสาธารณสุขและสิ่งแวดล้อม",
   "กองการศึกษา",
   "กองช่างสุขาภิบาล"
+];
+
+export const defaultSellers = [
+  "บจก. เอสเอสพี คอมพิวเตอร์",
+  "บจก. ดีลักซ์ ซิสเต็มส์",
+  "หจก. นนทบุรีการค้า",
+  "บจก. ยานยนต์รุ่งเรือง",
+  "บจก. นนท์ไอที โซลูชั่น",
+  "สำนักงานที่ดินจังหวัดนนทบุรี"
 ];

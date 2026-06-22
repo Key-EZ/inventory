@@ -18,12 +18,14 @@
 | `category` | `String` | Required | หมวดหมู่ย่อยของพัสดุ (เช่น "ครุภัณฑ์สำนักงาน", "ครุภัณฑ์คอมพิวเตอร์") |
 | `asset_code` | `String` (9 หลัก) | Unique, Format: `XXX-YY-ZZZZ` | รหัสคุมพัสดุราชการ (กลุ่ม1: รหัสประเภท, กลุ่ม2: ปี พ.ศ. ที่ได้มา, กลุ่ม3: ลำดับพัสดุ) |
 | `name` | `String` | Required | ชื่อพัสดุ/ทรัพย์สิน (เช่น "เครื่องปรับอากาศ 18000 BTU") |
-| `location` | `String` | Required | สถานที่ตั้งพัสดุ (เช่น "ห้องธุรการทั่วไป") |
+| `location` | `String` | สถานที่ตั้งพัสดุ (เช่น "ห้องธุรการทั่วไป") |
 | `acquisition_method` | `String` (Enum) | `'ซื้อ'` \| `'จ้าง'` \| `'รับโอน'` \| `'บริจาค'` | ลักษณะการได้กรรมสิทธิ์พัสดุ |
-| `approval_document` | `String` | Required | เลขที่และวันเดือนปี ของหนังสืออนุมัติ/สัญญาจัดหา |
+| `delivery_document_no` | `String` | Required | เลขที่ของใบส่งของหรือหนังสืออนุมัติ/สัญญาจัดหา (เช่น "นบ 0023/154", "PO-670315") |
+| `delivery_document_date` | `String` (Format: `YYYY-MM-DD`) | Required | วันเดือนปีที่ระบุในใบส่งของหรือหนังสืออนุมัติ/สัญญาจัดหา (เช่น "2021-03-12") |
+| `seller_name` | `String` | Required | ชื่อผู้ขายหรือคู่สัญญาจัดหา (เลือกจากที่ตั้งค่าในระบบ เช่น "บจก. เอสเอสพี คอมพิวเตอร์") |
 | `unit_price` | `Number` (Float) | Min: 0 | ราคาทุนต่อหน่วย (บาท) |
 | `budget_owner` | `String` | Optional | ชื่อเจ้าของงบประมาณ (เช่น "เงินงบประมาณประจำปี 2568") |
-| `responsible_department` | `String` | Required | ชื่อส่วนราชการหรือฝ่ายที่ดูแลรับผิดชอบ (เช่น "กองช่าง", "ฝ่ายธุรการทั่วไป") |
+| `responsible_department` | `String` | ชื่อส่วนราชการหรือฝ่ายที่ดูแลรับผิดชอบ (เช่น "กองช่าง", "ฝ่ายธุรการทั่วไป") |
 | `status` | `String` (Enum) | `'ใช้งาน'` \| `'ชำรุด'` \| `'กำลังซ่อม'` \| `'รอจำหน่าย'` \| `'จำหน่ายแล้ว'` | สถานะทางกายภาพของพัสดุ |
 
 #### ฟิลด์เฉพาะแบบ พ.ด.1 (ที่ดินและสิ่งก่อสร้าง - `asset_type: 'LAND_BUILDING'`)
@@ -42,7 +44,9 @@
 | `chassis_number` | `String` | หมายเลขตัวถัง/เลขแคสซี (Chassis Number) |
 | `vehicle_registration` | `String` | หมายเลขทะเบียนยานพาหนะ (เช่น "กข-5642 นนทบุรี") |
 | `color` | `String` | สีพัสดุ (เช่น "สีบรอนซ์เงิน") |
-| `warranty_detail` | `String` | ข้อมูลการรับประกันและวันสิ้นสุดสัญญา (เช่น "หมดรับประกัน 12 มี.ค. 2570 บจก. เอชพี") |
+| `warranty_start_date` | `String` (Format: `YYYY-MM-DD`) | วันที่เริ่มรับประกันครุภัณฑ์ |
+| `warranty_end_date` | `String` (Format: `YYYY-MM-DD`) | วันที่สิ้นสุดการรับประกันครุภัณฑ์ |
+| `warranty_company` | `String` | ชื่อบริษัทหรือคู่สัญญาที่รับประกันพัสดุ (เลือกจากที่ตั้งค่าในระบบ) |
 
 ---
 
@@ -139,7 +143,9 @@ erDiagram
   "name": "รถยนต์อเนกประสงค์ (SUV) 2,400 ซีซี",
   "location": "โรงจอดรถยนต์กลาง",
   "acquisition_method": "ซื้อ",
-  "approval_document": "สัญญาจัดซื้อเลขที่ e-bidding 12/2564 ลงวันที่ 12 ส.ค. 2564",
+  "delivery_document_no": "e-bidding 12/2564",
+  "delivery_document_date": "2021-08-12",
+  "seller_name": "บจก. ยานยนต์รุ่งเรือง",
   "unit_price": 1390000.00,
   "budget_owner": "งบลงทุนจัดหายานพาหนะ",
   "responsible_department": "ฝ่ายธุรการทั่วไป",
@@ -150,7 +156,9 @@ erDiagram
   "chassis_number": "MR053K41208945",
   "vehicle_registration": "กข-5642 นนทบุรี",
   "color": "สีบรอนซ์เงิน",
-  "warranty_detail": "สิ้นสุด 12 ส.ค. 2567 โดย บริษัท โตโยต้า",
+  "warranty_start_date": "2021-08-12",
+  "warranty_end_date": "2024-08-12",
+  "warranty_company": "บจก. ยานยนต์รุ่งเรือง",
   "depreciation_rate_percent": 20.00,
   "accumulated_depreciation": 1334695.89,
   "book_value": 55304.11,

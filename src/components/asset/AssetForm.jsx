@@ -2,8 +2,6 @@ import { useState } from 'react';
 import { calculateDepreciation } from '../../utils/depreciation';
 import { defaultDepartments } from '../../utils/mockData';
 
-
-
 const generateNewAssetId = () => `asset-${Date.now()}`;
 
 const formatAssetCode = (value) => {
@@ -27,11 +25,12 @@ export default function AssetForm({
   agencies = [],
   positions = [],
   onSubmit,
-  onClose
+  onClose,
+  sellers = []
 }) {
   const isEdit = !!asset;
 
-  // Tabs: 'general', 'custodian_history', 'spec', 'financial'
+  // Tabs: 'general', 'spec', 'financial'
   const [activeTab, setActiveTab] = useState('general');
 
   // Form states (Grouped object)
@@ -42,33 +41,32 @@ export default function AssetForm({
     name: asset ? asset.name || '' : '',
     location: asset ? asset.location || '' : '',
     acquisitionMethod: asset ? asset.acquisition_method || 'ซื้อ' : 'ซื้อ',
-    approvalDocument: asset ? asset.approval_document || '' : '',
-    deliveryDate: asset ? asset.delivery_date || '' : '',
+    deliveryDocumentNo: asset ? asset.delivery_document_no || '' : '',
+    deliveryDocumentDate: asset ? asset.delivery_document_date || '' : '',
+    sellerName: asset ? asset.seller_name || '' : (sellers[0] || ''),
     unitPrice: asset ? asset.unit_price || 0 : 0,
     responsibleDepartment: asset ? asset.responsible_department || '' : '',
+    status: asset ? asset.status || 'ใช้งาน' : 'ใช้งาน',
+    
+    // LAND_BUILDING specific (Ph.D. 1)
     documentOfTitle: asset ? asset.document_of_title || '' : '',
     areaSize: asset ? asset.area_size || '' : '',
     buildingStyle: asset ? asset.building_style || '' : '',
+
+    // EQUIPMENT specific (Ph.D. 2)
     manufacturerBrand: asset ? asset.manufacturer_brand || '' : '',
     serialNumber: asset ? asset.serial_number || '' : '',
     engineNumber: asset ? asset.engine_number || '' : '',
     chassisNumber: asset ? asset.chassis_number || '' : '',
     vehicleRegistration: asset ? asset.vehicle_registration || '' : '',
     color: asset ? asset.color || '' : '',
-    warrantyDetail: asset ? asset.warranty_detail || '' : '',
-    status: asset ? asset.status || 'ใช้งาน' : 'ใช้งาน',
+    warrantyStartDate: asset ? asset.warranty_start_date || '' : '',
+    warrantyEndDate: asset ? asset.warranty_end_date || '' : '',
+    warrantyCompany: asset ? asset.warranty_company || '' : '',
   });
 
   const budgetOwner = asset ? asset.budget_owner || '' : '';
   const maintenances = asset ? asset.maintenances || [] : [];
-
-  // Custodian History CRUD states
-  const [custodianHistory, setCustodianHistory] = useState(asset ? asset.custodian_history || [] : []);
-  const [custHistoryYear, setCustHistoryYear] = useState('');
-  const [custHistoryBudgetOwner, setCustHistoryBudgetOwner] = useState('');
-  const [custHistoryCustodian, setCustHistoryCustodian] = useState('');
-  const [custHistorySectionHead, setCustHistorySectionHead] = useState('');
-  const [editingCustHistoryId, setEditingCustHistoryId] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -90,65 +88,6 @@ export default function AssetForm({
   const accumulatedDepreciation = calc.accumulatedDepreciation;
   const bookValue = calc.bookValue;
 
-
-
-  // --- Custodian History Operations ---
-  const handleAddOrEditCustodianHistory = () => {
-    if (!custHistoryYear.trim() || !custHistoryBudgetOwner.trim() || !custHistorySectionHead.trim()) {
-      alert('กรุณากรอกข้อมูลผู้ใช้-ดูแล-รับผิดชอบพัสดุให้ครบถ้วน');
-      return;
-    }
-
-    if (editingCustHistoryId) {
-      // Edit
-      setCustodianHistory(custodianHistory.map(ch => ch.id === editingCustHistoryId ? {
-        id: editingCustHistoryId,
-        year: custHistoryYear.trim(),
-        budget_owner: custHistoryBudgetOwner.trim(),
-        custodian_name: custHistoryCustodian ? custHistoryCustodian.trim() : '',
-        section_head: custHistorySectionHead.trim()
-      } : ch));
-      setEditingCustHistoryId(null);
-    } else {
-      // Add new
-      const newCustHist = {
-        id: `custhist-${Date.now()}`,
-        year: custHistoryYear.trim(),
-        budget_owner: custHistoryBudgetOwner.trim(),
-        custodian_name: custHistoryCustodian ? custHistoryCustodian.trim() : '',
-        section_head: custHistorySectionHead.trim()
-      };
-      setCustodianHistory([...custodianHistory, newCustHist]);
-    }
-
-    // Reset entry inputs
-    setCustHistoryYear('');
-    setCustHistoryBudgetOwner('');
-    setCustHistoryCustodian('');
-    setCustHistorySectionHead('');
-  };
-
-  const handleEditCustHistoryClick = (item) => {
-    setEditingCustHistoryId(item.id);
-    setCustHistoryYear(item.year || '');
-    setCustHistoryBudgetOwner(item.budget_owner || '');
-    setCustHistoryCustodian(item.custodian_name || '');
-    setCustHistorySectionHead(item.section_head || '');
-  };
-
-  const handleDeleteCustHistoryClick = (id) => {
-    if (window.confirm('คุณแน่ใจว่าต้องการลบประวัติผู้รับผิดชอบดูแลพัสดุรายการนี้ใช่หรือไม่?')) {
-      setCustodianHistory(custodianHistory.filter(ch => ch.id !== id));
-      if (editingCustHistoryId === id) {
-        setEditingCustHistoryId(null);
-        setCustHistoryYear('');
-        setCustHistoryBudgetOwner('');
-        setCustHistoryCustodian('');
-        setCustHistorySectionHead('');
-      }
-    }
-  };
-
   // Submit Handler
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -165,8 +104,11 @@ export default function AssetForm({
       }
     }
 
+    // Preserve custodian history
+    const custodianHistory = asset?.custodian_history || [];
+
     // Determine overall budget_owner from the latest custodian history entry, if any
-    let finalBudgetOwner = budgetOwner || '';
+    let finalBudgetOwner = asset?.budget_owner || '';
     if (custodianHistory.length > 0) {
       const sorted = [...custodianHistory].sort((a, b) => {
         const yA = parseInt(a.year) || 0;
@@ -184,8 +126,9 @@ export default function AssetForm({
       name: formData.name,
       location: formData.location,
       acquisition_method: formData.acquisitionMethod,
-      approval_document: formData.approvalDocument,
-      delivery_date: formData.deliveryDate,
+      delivery_document_no: formData.deliveryDocumentNo,
+      delivery_document_date: formData.deliveryDocumentDate,
+      seller_name: formData.sellerName,
       unit_price: parseFloat(formData.unitPrice) || 0,
       budget_owner: finalBudgetOwner,
       responsible_department: formData.responsibleDepartment,
@@ -203,7 +146,9 @@ export default function AssetForm({
       chassis_number: formData.assetType === 'EQUIPMENT' ? formData.chassisNumber : '',
       vehicle_registration: formData.assetType === 'EQUIPMENT' ? formData.vehicleRegistration : '',
       color: formData.assetType === 'EQUIPMENT' ? formData.color : '',
-      warranty_detail: formData.assetType === 'EQUIPMENT' ? formData.warrantyDetail : '',
+      warranty_start_date: formData.assetType === 'EQUIPMENT' ? formData.warrantyStartDate : '',
+      warranty_end_date: formData.assetType === 'EQUIPMENT' ? formData.warrantyEndDate : '',
+      warranty_company: formData.assetType === 'EQUIPMENT' ? formData.warrantyCompany : '',
 
       // Calculated stats
       depreciation_rate_percent: depreciationRate,
@@ -238,17 +183,17 @@ export default function AssetForm({
           </button>
           <button
             type="button"
-            className={`tab-btn ${activeTab === 'custodian_history' ? 'active' : ''}`}
-            onClick={() => setActiveTab('custodian_history')}
-          >
-            2. ผู้รับผิดชอบพัสดุ ({custodianHistory.length})
-          </button>
-          <button
-            type="button"
             className={`tab-btn ${activeTab === 'spec' ? 'active' : ''}`}
             onClick={() => setActiveTab('spec')}
           >
-            3. รายละเอียดเฉพาะ ({formData.assetType === 'LAND_BUILDING' ? 'พ.ด.1' : 'พ.ด.2'})
+            2. รายละเอียดเฉพาะ ({formData.assetType === 'LAND_BUILDING' ? 'พ.ด.1' : 'พ.ด.2'})
+          </button>
+          <button
+            type="button"
+            className={`tab-btn ${activeTab === 'financial' ? 'active' : ''}`}
+            onClick={() => setActiveTab('financial')}
+          >
+            3. ค่าเสื่อมราคา
           </button>
         </div>
 
@@ -355,41 +300,7 @@ export default function AssetForm({
                   />
                 </div>
                 <div className="form-group col">
-                  <label>ใบส่งของ *</label>
-                  <input
-                    type="text"
-                    name="approvalDocument"
-                    value={formData.approvalDocument}
-                    onChange={handleChange}
-                    placeholder="เช่น เลขที่ใบส่งของ หรือ PO"
-                    required
-                  />
-                </div>
-                <div className="form-group col">
-                  <label>วันเดือนปี *</label>
-                  <input
-                    type="date"
-                    name="deliveryDate"
-                    value={formData.deliveryDate}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 2: Custodian History */}
-          {activeTab === 'custodian_history' && (
-            <div className="tab-panel animate-fade-in">
-              <div className="info-alert">
-                <strong>👤 ชื่อผู้ใช้-ดูแล-รับผิดชอบพัสดุ:</strong> บันทึกประวัติเจ้าหน้าที่ผู้ได้รับมอบหมายให้ปกปักรักษา รับผิดชอบดูแล หรือผู้ใช้งานพัสดุ/ครุภัณฑ์ชิ้นนี้
-              </div>
-
-              {/* Main Asset location & department assignment */}
-              <div className="form-row" style={{ marginBottom: '20px' }}>
-                <div className="form-group col">
-                  <label>ที่ตั้งพัสดุ*</label>
+                  <label>ที่ตั้งพัสดุ *</label>
                   <select
                     name="location"
                     value={formData.location}
@@ -418,154 +329,47 @@ export default function AssetForm({
                 </div>
               </div>
 
-              {/* Add/Edit Sub-Form */}
-              <div className="maint-entry-box">
-                <h4>{editingCustHistoryId ? '✏️ แก้ไขข้อมูลผู้รับผิดชอบ' : '➕ เพิ่มผู้รับผิดชอบดูแล'}</h4>
-                <div className="maint-form-grid">
-                  <div className="form-group">
-                    <label>ปี พ.ศ. *</label>
-                    <input
-                      type="text"
-                      value={custHistoryYear}
-                      onChange={(e) => setCustHistoryYear(e.target.value)}
-                      placeholder="เช่น 2569"
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label>ชื่อส่วนราชการ *</label>
-                    {agencies.length > 0 ? (
-                      <select
-                        value={custHistoryBudgetOwner}
-                        onChange={(e) => setCustHistoryBudgetOwner(e.target.value)}
-                        required
-                      >
-                        <option value="">-- เลือกส่วนราชการ --</option>
-                        {agencies.map(agency => (
-                          <option key={agency} value={agency}>{agency}</option>
-                        ))}
-                      </select>
-                    ) : (
-                      <select disabled value="">
-                        <option value="">-- ไม่มีข้อมูลส่วนราชการในระบบ --</option>
-                      </select>
-                    )}
-                  </div>
-                  <div className="form-group">
-                    <label>ชื่อผู้รับผิดชอบดูแล</label>
-                    {custodians.length > 0 ? (
-                      <select
-                        value={custHistoryCustodian}
-                        onChange={(e) => setCustHistoryCustodian(e.target.value)}
-                      >
-                        <option value="">-- เลือกผู้รับผิดชอบดูแล (ถ้ามี) --</option>
-                        {custodians.map(c => (
-                          <option key={c.id} value={c.name}>{c.name} ({c.position || '-'})</option>
-                        ))}
-                      </select>
-                    ) : (
-                      <select disabled value="">
-                        <option value="">-- ไม่มีข้อมูลรายชื่อผู้ดูแลในระบบ --</option>
-                      </select>
-                    )}
-                  </div>
-                  <div className="form-group">
-                    <label>ชื่อหัวหน้าส่วน *</label>
-                    {positions.length > 0 ? (
-                      <select
-                        value={custHistorySectionHead}
-                        onChange={(e) => setCustHistorySectionHead(e.target.value)}
-                        required
-                      >
-                        <option value="">-- เลือกตำแหน่งหัวหน้าส่วน --</option>
-                        {positions.map(pos => (
-                          <option key={pos} value={pos}>{pos}</option>
-                        ))}
-                      </select>
-                    ) : (
-                      <select disabled value="">
-                        <option value="">-- ไม่มีข้อมูลรายชื่อตำแหน่งในระบบ --</option>
-                      </select>
-                    )}
-                  </div>
+              <div className="form-row">
+                <div className="form-group col">
+                  <label>เลขที่ใบส่งของ/สัญญา *</label>
+                  <input
+                    type="text"
+                    name="deliveryDocumentNo"
+                    value={formData.deliveryDocumentNo}
+                    onChange={handleChange}
+                    placeholder="เช่น เลขที่ใบส่งของ หรือ PO"
+                    required
+                  />
                 </div>
-                <button
-                  type="button"
-                  className="button-primary maint-add-btn"
-                  onClick={handleAddOrEditCustodianHistory}
-                >
-                  {editingCustHistoryId ? 'บันทึกการแก้ไข' : 'บันทึกรายการเพิ่ม'}
-                </button>
-                {editingCustHistoryId && (
-                  <button
-                    type="button"
-                    className="button-secondary maint-cancel-btn"
-                    onClick={() => {
-                      setEditingCustHistoryId(null);
-                      setCustHistoryYear('');
-                      setCustHistoryBudgetOwner('');
-                      setCustHistoryCustodian('');
-                      setCustHistorySectionHead('');
-                    }}
+                <div className="form-group col">
+                  <label>วันเดือนปีในเอกสาร *</label>
+                  <input
+                    type="date"
+                    name="deliveryDocumentDate"
+                    value={formData.deliveryDocumentDate}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div className="form-group col">
+                  <label>ผู้ขาย / คู่สัญญา *</label>
+                  <select
+                    name="sellerName"
+                    value={formData.sellerName}
+                    onChange={handleChange}
+                    required
                   >
-                    ยกเลิกแก้ไข
-                  </button>
-                )}
-              </div>
-
-              {/* Custodian History Table */}
-              <div className="maint-table-container">
-                <table className="maint-log-table">
-                  <thead>
-                    <tr>
-                      <th style={{ width: '8%' }}>ครั้งที่</th>
-                      <th style={{ width: '12%' }}>ปี พ.ศ.</th>
-                      <th style={{ width: '25%' }}>ชื่อส่วนราชการ</th>
-                      <th style={{ width: '25%' }}>ชื่อผู้รับผิดชอบดูแล</th>
-                      <th style={{ width: '20%' }}>ชื่อหัวหน้าส่วน</th>
-                      <th style={{ width: '10%' }} className="text-center">จัดการ</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {custodianHistory.length > 0 ? (
-                      custodianHistory.map((item, idx) => (
-                        <tr key={item.id}>
-                          <td className="text-center">{idx + 1}</td>
-                          <td className="text-center">{item.year}</td>
-                          <td>{item.budget_owner}</td>
-                          <td>{item.custodian_name || '-'}</td>
-                          <td>{item.section_head}</td>
-                          <td className="text-center">
-                            <div className="maint-row-actions">
-                              <span
-                                className="action-maint-edit"
-                                onClick={() => handleEditCustHistoryClick(item)}
-                                title="แก้ไขรายการ"
-                              >
-                                ✏️
-                              </span>
-                              <span
-                                className="action-maint-delete"
-                                onClick={() => handleDeleteCustHistoryClick(item.id)}
-                                title="ลบรายการ"
-                              >
-                                🗑️
-                              </span>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="6" className="text-center text-muted py-8 font-italic">ยังไม่มีรายการผู้รับผิดชอบดูแลสำหรับทรัพย์สินนี้</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+                    <option value="">-- เลือกผู้ขาย --</option>
+                    {sellers.map(s => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </div>
           )}
 
-          {/* TAB 3: Specific Fields */}
+          {/* TAB 2: Specific Fields */}
           {activeTab === 'spec' && (
             <div className="tab-panel">
               {formData.assetType === 'LAND_BUILDING' ? (
@@ -626,7 +430,7 @@ export default function AssetForm({
                       </select>
                     </div>
                     <div className="form-group col">
-                      <label>หมายเลขประจำพัสดุจากโรงงาน (Serial Number)</label>
+                      <label>Serial Number</label>
                       <input
                         type="text"
                         name="serialNumber"
@@ -683,18 +487,78 @@ export default function AssetForm({
                     </div>
                   </div>
 
-                  <div className="form-group">
-                    <label>ข้อมูลรับประกัน (วันสิ้นสุดการรับประกัน / บริษัทผู้ดูแล)</label>
-                    <input
-                      type="text"
-                      name="warrantyDetail"
-                      value={formData.warrantyDetail}
-                      onChange={handleChange}
-                      placeholder="เช่น หมดประกันวันที่ 12 มี.ค. 2570 โดย บมจ. เดลล์"
-                    />
+                  <div className="form-row">
+                    <div className="form-group col">
+                      <label>วันที่รับประกัน</label>
+                      <input
+                        type="date"
+                        name="warrantyStartDate"
+                        value={formData.warrantyStartDate}
+                        onChange={handleChange}
+                      />
+                    </div>
+                    <div className="form-group col">
+                      <label>วันที่สิ้นสุดการรับประกัน</label>
+                      <input
+                        type="date"
+                        name="warrantyEndDate"
+                        value={formData.warrantyEndDate}
+                        onChange={handleChange}
+                      />
+                    </div>
+                    <div className="form-group col">
+                      <label>บริษัทที่รับประกัน</label>
+                      <select
+                        name="warrantyCompany"
+                        value={formData.warrantyCompany}
+                        onChange={handleChange}
+                      >
+                        <option value="">-- เลือกบริษัทรับประกัน --</option>
+                        {sellers.map(s => (
+                          <option key={s} value={s}>{s}</option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
                 </>
               )}
+            </div>
+          )}
+
+          {/* TAB 3: Calculated Financial status */}
+          {activeTab === 'financial' && (
+            <div className="tab-panel">
+              <div className="info-alert">
+                <strong>💡 การประเมินราคาและค่าเสื่อมราคาประจำปี:</strong> ค่าเสื่อมสะสมจะคิดคำนวณอัตโนมัติตามหลักบัญชีท้องถิ่น โดยถอดปี พ.ศ. ได้มาจากกลุ่มที่ 2 ของรหัสพัสดุ (เช่น 001-<strong>67</strong>-0001 = ได้มาระหว่างปี พ.ศ. 2567)
+              </div>
+              <div className="form-row bg-accent-row">
+                <div className="form-group col">
+                  <label>รหัสพัสดุหลัก</label>
+                  <div className="read-only-box font-bold">{formData.assetCode || 'ยังไม่ได้กำหนด'}</div>
+                </div>
+                <div className="form-group col">
+                  <label>อัตราค่าเสื่อมราคาต่อปี</label>
+                  <div className="read-only-box">{depreciationRate}% ต่อปี</div>
+                </div>
+              </div>
+              <div className="form-row bg-accent-row">
+                <div className="form-group col">
+                  <label>ราคาทุนเริ่มต้นต่อหน่วย</label>
+                  <div className="read-only-box">฿{formData.unitPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} บาท</div>
+                </div>
+                <div className="form-group col">
+                  <label>ค่าเสื่อมราคาสะสม</label>
+                  <div className="read-only-box highlight-depreciation">
+                    -฿{accumulatedDepreciation.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} บาท
+                  </div>
+                </div>
+                <div className="form-group col">
+                  <label>มูลค่าคงเหลือสุทธิ (Book Value)</label>
+                  <div className="read-only-box highlight-bookvalue">
+                    ฿{bookValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} บาท
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
@@ -707,20 +571,20 @@ export default function AssetForm({
                   className="btn-prev"
                   type="button"
                   onClick={() => {
-                    if (activeTab === 'custodian_history') setActiveTab('general');
-                    if (activeTab === 'spec') setActiveTab('custodian_history');
+                    if (activeTab === 'spec') setActiveTab('general');
+                    if (activeTab === 'financial') setActiveTab('spec');
                   }}
                 >
                   ย้อนกลับ
                 </button>
               )}
-              {activeTab !== 'spec' ? (
+              {activeTab !== 'financial' ? (
                 <button
                   className="btn-next-tab button-primary"
                   type="button"
                   onClick={() => {
-                    if (activeTab === 'general') setActiveTab('custodian_history');
-                    else if (activeTab === 'custodian_history') setActiveTab('spec');
+                    if (activeTab === 'general') setActiveTab('spec');
+                    else if (activeTab === 'spec') setActiveTab('financial');
                   }}
                 >
                   ถัดไป

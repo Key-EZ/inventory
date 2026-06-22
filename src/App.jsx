@@ -1,20 +1,25 @@
+import { useState } from 'react';
 import BaseLayout from './components/BaseLayout';
 import AssetForm from './components/asset/AssetForm';
 import AssetTable from './components/asset/AssetTable';
+import CustodianHistoryModal from './components/asset/CustodianHistoryModal';
 import BentoDashboard from './components/BentoDashboard';
 import CenteredLanding from './components/CenteredLanding';
 import SettingsPanel from './components/SettingsPanel';
 import ReportPanel from './components/report/ReportPanel';
-import InventoryPrint from './components/report/InventoryPrint';
+import InventoryPrint from './components/template/InventoryPrint';
 import GetRepair from './components/repair/GetRepair';
 import RepairJobs from './components/repair/RepairJobs';
 import AuditLogPanel from './components/AuditLogPanel';
-import RepairRequestPrint from './components/repair/RepairRequestPrint';
+import RepairRequestPrint from './components/template/RepairRequestPrint';
 
 import useAppLayout from './hooks/useAppLayout';
 import useInventory from './hooks/useInventory';
 
 export default function App() {
+  const [activeCustodianAsset, setActiveCustodianAsset] = useState(null);
+  const [isCustodianModalOpen, setIsCustodianModalOpen] = useState(false);
+
   const {
     activeLayout,
     isDarkMode,
@@ -91,6 +96,10 @@ export default function App() {
     handleAddAgency,
     handleEditAgency,
     handleDeleteAgency,
+    sellers,
+    handleAddSeller,
+    handleEditSeller,
+    handleDeleteSeller
   } = useInventory();
 
   // --- Sub-components / Props ---
@@ -291,6 +300,10 @@ export default function App() {
               onRepairAsset={openRepairForm}
               onPrintAsset={openPrintAsset}
               onViewRepairHistory={(asset) => openRepairForm(asset, 'history')}
+              onManageCustodian={(item) => {
+                setActiveCustodianAsset(item);
+                setIsCustodianModalOpen(true);
+              }}
               initialSearchQuery={searchQueryFromLanding}
             />
           </div>
@@ -364,6 +377,10 @@ export default function App() {
             onAddAgency={handleAddAgency}
             onEditAgency={handleEditAgency}
             onDeleteAgency={handleDeleteAgency}
+            sellers={sellers}
+            onAddSeller={handleAddSeller}
+            onEditSeller={handleEditSeller}
+            onDeleteSeller={handleDeleteSeller}
           />
         )}
 
@@ -398,6 +415,7 @@ export default function App() {
           positions={positions}
           onSubmit={handleSubmitForm}
           onClose={closeForm}
+          sellers={sellers}
         />
       )}
 
@@ -426,6 +444,20 @@ export default function App() {
           repairRequest={printingRepairRequest}
           asset={assets.find(a => a.id === printingRepairRequest.asset_id)}
           onClose={() => setPrintingRepairRequest(null)}
+        />
+      )}
+
+      {isCustodianModalOpen && (
+        <CustodianHistoryModal
+          asset={activeCustodianAsset}
+          custodians={custodians}
+          agencies={agencies}
+          positions={positions}
+          onSubmit={(updatedAsset) => {
+            handleSubmitForm(updatedAsset);
+            setIsCustodianModalOpen(false);
+          }}
+          onClose={() => setIsCustodianModalOpen(false)}
         />
       )}
 
