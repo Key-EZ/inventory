@@ -323,6 +323,75 @@ export default function InventoryPrint({ asset, onClose }) {
                     </tbody>
                 </table>
             </div>
+
+            {/* หน้าที่ 2: ประวัติการซ่อมบำรุงรักษา */}
+            <div className="a4-landscape-page page-break-before-always">
+                {/* ส่วนหัวเอกสาร หน้า 2 */}
+                <div className="print-header-title" style={{ marginBottom: '10px' }}>
+                    ประวัติการซ่อมบำรุงรักษา (หน้า ๒)
+                </div>
+                <div className="print-header-subtitle" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px', fontSize: '15px', fontWeight: '500' }}>
+                    <div>
+                        <strong>ประเภทพัสดุ:</strong> <span className="dotted-line" style={{ width: '180px' }}>{data.category}</span>
+                    </div>
+                    <div>
+                        <strong>ชื่อพัสดุ:</strong> <span className="dotted-line" style={{ width: '280px' }}>{data.assetName}</span>
+                    </div>
+                    <div>
+                        <strong>รหัสพัสดุ:</strong> <span className="dotted-line" style={{ width: '160px' }}>{data.assetCode}</span>
+                    </div>
+                </div>
+                <table className="card-maint-table" style={{ border: '1.5px solid #000000', width: '100%', borderCollapse: 'collapse' }}>
+                    <thead>
+                        <tr style={{ backgroundColor: '#f9f5f1ff' }}>
+                            <th style={{ width: '12%', border: '1px solid #000000', padding: '10px 8px', textAlign: 'center', fontWeight: 'bold', fontSize: '15px' }}>วัน เดือน ปี</th>
+                            <th style={{ width: '22%', border: '1px solid #000000', padding: '10px 8px', textAlign: 'center', fontWeight: 'bold', fontSize: '15px' }}>เลขที่หนังสืออนุมัติ</th>
+                            <th style={{ width: '40%', border: '1px solid #000000', padding: '10px 8px', textAlign: 'center', fontWeight: 'bold', fontSize: '15px' }}>รายการซ่อมแซมหรือเปลี่ยนอะไหล่โดยละเอียด</th>
+                            <th style={{ width: '11%', border: '1px solid #000000', padding: '10px 8px', textAlign: 'center', fontWeight: 'bold', fontSize: '15px' }}>จำนวนเงิน (บาท)</th>
+                            <th style={{ width: '15%', border: '1px solid #000000', padding: '10px 8px', textAlign: 'center', fontWeight: 'bold', fontSize: '15px' }}>ผู้รับจ้าง/ช่างซ่อม</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {asset.maintenances && asset.maintenances.length > 0 ? (
+                            asset.maintenances.map((maint, idx) => (
+                                <tr key={maint.id || idx}>
+                                    <td style={{ border: '1px solid #000000', padding: '12px 8px', textAlign: 'center', fontSize: '14px' }}>
+                                        {maint.approval_date ? formatThaiDateString(maint.approval_date) : '-'}
+                                    </td>
+                                    <td style={{ border: '1px solid #000000', padding: '12px 8px', fontSize: '14px' }}>
+                                        {maint.document_number || '-'}
+                                    </td>
+                                    <td style={{ border: '1px solid #000000', padding: '12px 8px', fontSize: '14px' }}>
+                                        {maint.description || '-'}
+                                    </td>
+                                    <td style={{ border: '1px solid #000000', padding: '12px 8px', textAlign: 'right', fontSize: '14px' }}>
+                                        {(maint.cost || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                    </td>
+                                    <td style={{ border: '1px solid #000000', padding: '12px 8px', fontSize: '14px' }}>
+                                        {maint.contractor || '-'}
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan="5" style={{ border: '1px solid #000000', padding: '20px', textAlign: 'center', color: '#020000ff', fontSize: '15px' }}>
+                                    ไม่มีประวัติการซ่อมบำรุงรักษาสำหรับพัสดุรายการนี้
+                                </td>
+                            </tr>
+                        )}
+                        {/* Fill empty rows to make it look like a standard official ledger form (at least 8 rows total) */}
+                        {Array.from({ length: Math.max(0, 8 - (asset.maintenances ? asset.maintenances.length : 0)) }).map((_, idx) => (
+                            <tr key={`empty-${idx}`}>
+                                <td style={{ border: '1px solid #000000', padding: '18px 8px' }}>&nbsp;</td>
+                                <td style={{ border: '1px solid #000000', padding: '18px 8px' }}>&nbsp;</td>
+                                <td style={{ border: '1px solid #000000', padding: '18px 8px' }}>&nbsp;</td>
+                                <td style={{ border: '1px solid #000000', padding: '18px 8px' }}>&nbsp;</td>
+                                <td style={{ border: '1px solid #000000', padding: '18px 8px' }}>&nbsp;</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 }
