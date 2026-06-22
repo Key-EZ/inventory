@@ -5,11 +5,11 @@ import BentoDashboard from './components/BentoDashboard';
 import CenteredLanding from './components/CenteredLanding';
 import SettingsPanel from './components/SettingsPanel';
 import ReportPanel from './components/report/ReportPanel';
-import InventoryPrint from './components/report/InventoryPrint';
+import InventoryPrint from './components/template/InventoryPrint';
 import GetRepair from './components/repair/GetRepair';
 import RepairJobs from './components/repair/RepairJobs';
 import AuditLogPanel from './components/AuditLogPanel';
-import RepairRequestPrint from './components/repair/RepairRequestPrint';
+import RepairRequestPrint from './components/template/RepairRequestPrint';
 
 import useAppLayout from './hooks/useAppLayout';
 import useInventory from './hooks/useInventory';
