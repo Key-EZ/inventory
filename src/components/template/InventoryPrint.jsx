@@ -1,5 +1,44 @@
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { formatThaiDateString } from '../../utils/dateUtils';
+
+function AutoFitText({ text, maxFontSize = 13.5, minFontSize = 8, style = {} }) {
+    const containerRef = useRef(null);
+    const [fontSize, setFontSize] = useState(maxFontSize);
+
+    useEffect(() => {
+        const el = containerRef.current;
+        if (!el) return;
+
+        // Reset to max size to measure
+        el.style.fontSize = `${maxFontSize}px`;
+        
+        let currentSize = maxFontSize;
+        // Shrink font size until it fits the container width
+        while (el.scrollWidth > el.clientWidth && currentSize > minFontSize) {
+            currentSize -= 0.5;
+            el.style.fontSize = `${currentSize}px`;
+        }
+        setFontSize(currentSize);
+    }, [text, maxFontSize, minFontSize]);
+
+    return (
+        <span
+            ref={containerRef}
+            style={{
+                display: 'block',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                width: '100%',
+                fontSize: `${fontSize}px`,
+                ...style
+            }}
+            title={text}
+        >
+            {text}
+        </span>
+    );
+}
 
 export default function InventoryPrint({ asset, onClose }) {
     useEffect(() => {
@@ -168,24 +207,38 @@ export default function InventoryPrint({ asset, onClose }) {
                         : 'ทะเบียนพัสดุครุภัณฑ์ ปศุสัตว์และสัตว์พาหนะ'}
                 </div>
                 {/* ข้อมูลหน่วยงาน แถวเดียว นอกตาราง */}
-                <div className="print-header-metadata" style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '8px', fontSize: '14px', fontFamily: 'Sarabun, sans-serif' }}>
-                    <div style={{ width: '25%' }}>
-                        ประเภท <span className="dotted-line" style={{
-                            width: '70%',
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            verticalAlign: 'bottom',
-                            fontSize: data.category && data.category.length > 25 ? '10px' : (data.category && data.category.length > 18 ? '12px' : '14px')
-                        }}>{data.category}</span>
+                <div className="print-header-metadata" style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '8px', fontSize: '14px', fontFamily: 'Sarabun, sans-serif', alignItems: 'flex-end' }}>
+                    <div style={{ width: '25%', display: 'flex', alignItems: 'flex-end' }}>
+                        <span style={{ whiteSpace: 'nowrap' }}>ประเภท</span>
+                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                            <AutoFitText text={data.category} />
+                        </span>
                     </div>
-                    <div style={{ width: '50%', textAlign: 'center', fontSize: data.category && data.category.length > 25 ? '10px' : (data.category && data.category.length > 18 ? '12px' : '14px') }}>
-                        สำนักงาน <span className="dotted-line" style={{ width: '35%' }}>{data.agency}</span>
-                        อำเภอ <span className="dotted-line" style={{ width: '18%' }}>{data.amphoe}</span>
-                        จังหวัด <span className="dotted-line" style={{ width: '18%' }}>{data.province}</span>
+                    <div style={{ width: '50%', display: 'flex', justifyContent: 'center', alignItems: 'flex-end', gap: '8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'flex-end', flexGrow: 1.5, minWidth: 0 }}>
+                            <span style={{ whiteSpace: 'nowrap' }}>สำนักงาน</span>
+                            <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                <AutoFitText text={data.agency} />
+                            </span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'flex-end', flexGrow: 1, minWidth: 0 }}>
+                            <span style={{ whiteSpace: 'nowrap' }}>อำเภอ</span>
+                            <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                <AutoFitText text={data.amphoe} />
+                            </span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'flex-end', flexGrow: 1, minWidth: 0 }}>
+                            <span style={{ whiteSpace: 'nowrap' }}>จังหวัด</span>
+                            <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                <AutoFitText text={data.province} />
+                            </span>
+                        </div>
                     </div>
-                    <div style={{ width: '25%', textAlign: 'right', fontSize: data.category && data.category.length > 25 ? '10px' : (data.category && data.category.length > 18 ? '12px' : '14px') }}>
-                        เลขรหัสพัสดุ <span className="dotted-line" style={{ width: '50%' }}>{data.assetCode}</span>
+                    <div style={{ width: '25%', display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end' }}>
+                        <span style={{ whiteSpace: 'nowrap' }}>เลขรหัสพัสดุ</span>
+                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                            <AutoFitText text={data.assetCode} />
+                        </span>
                     </div>
                 </div>
 
@@ -195,36 +248,78 @@ export default function InventoryPrint({ asset, onClose }) {
                         <tr className="text-sm">
                             {/* ฝั่งซ้าย: ข้อมูลจำเพาะทางเทคนิค (พ.ด. 2) หรือรายละเอียดเฉพาะที่ดินและสิ่งก่อสร้าง (พ.ด. 1) */}
                             {asset?.asset_type === 'LAND_BUILDING' ? (
-                                <td colSpan="2" style={{ padding: 0, verticalAlign: 'top' }}>
+                                <td style={{ width: '25%', padding: 0, verticalAlign: 'top' }}>
                                     <table style={{ border: '1px solid black', borderCollapse: 'collapse' }} className="print-nested-spec-table">
                                         <tbody>
                                             <tr>
-                                                <td>ชื่อพัสดุ: <span className="dotted-line" style={{
-                                                    width: '70%',
-                                                    whiteSpace: 'nowrap',
-                                                    overflow: 'hidden',
-                                                    textOverflow: 'ellipsis',
-                                                    verticalAlign: 'bottom',
-                                                    fontSize: data.assetName && data.assetName.length > 25 ? '10px' : (data.assetName && data.assetName.length > 18 ? '12px' : '14px')
-                                                }}>{data.assetName}</span></td>
+                                                <td>
+                                                    <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
+                                                        <span style={{ whiteSpace: 'nowrap' }}>ชื่อพัสดุ:</span>
+                                                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                            <AutoFitText text={data.assetName} />
+                                                        </span>
+                                                    </div>
+                                                </td>
                                             </tr>
                                             <tr>
-                                                <td>เอกสารสิทธิ์ (โฉนด/น.ส.3): <span style={{ width: '48%' }}>{asset.document_of_title || '-'}</span></td>
+                                                <td>
+                                                    <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
+                                                        <span style={{ whiteSpace: 'nowrap' }}>เอกสารสิทธิ์ (โฉนด/น.ส.3):</span>
+                                                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                            <AutoFitText text={asset.document_of_title || '-'} />
+                                                        </span>
+                                                    </div>
+                                                </td>
                                             </tr>
                                             <tr>
-                                                <td>ขนาดเนื้อที่: <span style={{ width: '70%' }}>{asset.area_size || '-'}</span></td>
+                                                <td>
+                                                    <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
+                                                        <span style={{ whiteSpace: 'nowrap' }}>ขนาดเนื้อที่:</span>
+                                                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                            <AutoFitText text={asset.area_size || '-'} />
+                                                        </span>
+                                                    </div>
+                                                </td>
                                             </tr>
                                             <tr>
-                                                <td>ลักษณะโรงเรือน/สิ่งก่อสร้าง: <span style={{ width: '45%' }}>{asset.building_style || '-'}</span></td>
+                                                <td>
+                                                    <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
+                                                        <span style={{ whiteSpace: 'nowrap' }}>ลักษณะโรงเรือน/สิ่งก่อสร้าง:</span>
+                                                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                            <AutoFitText text={asset.building_style || '-'} />
+                                                        </span>
+                                                    </div>
+                                                </td>
                                             </tr>
                                             <tr>
-                                                <td>สถานะพัสดุ: <span style={{ width: '70%' }}>{asset.status || '-'}</span></td>
+                                                <td>
+                                                    <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
+                                                        <span style={{ whiteSpace: 'nowrap' }}>สถานะพัสดุ:</span>
+                                                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                            <AutoFitText text={asset.status || '-'} />
+                                                        </span>
+                                                    </div>
+                                                </td>
                                             </tr>
                                             <tr>
-                                                <td>ลักษณะการได้มา: <span style={{ width: '60%' }}>{asset.acquisition_method || '-'}</span></td>
+                                                <td>
+                                                    <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
+                                                        <span style={{ whiteSpace: 'nowrap' }}>ลักษณะการได้มา:</span>
+                                                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                            <AutoFitText text={asset.acquisition_method || '-'} />
+                                                        </span>
+                                                    </div>
+                                                </td>
                                             </tr>
                                             <tr>
-                                                <td>เอกสารอนุมัติ/สัญญา: <span style={{ width: '53%' }}>{asset.delivery_document_no ? `${asset.delivery_document_no} ลงวันที่ ${asset.delivery_document_date ? formatThaiDateString(asset.delivery_document_date) : '-'} (${asset.seller_name || '-'})` : '-'}</span></td>
+                                                <td>
+                                                    <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
+                                                        <span style={{ whiteSpace: 'nowrap' }}>เอกสารอนุมัติ/สัญญา:</span>
+                                                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                            <AutoFitText text={asset.delivery_document_no ? `${asset.delivery_document_no} ลงวันที่ ${asset.delivery_document_date ? formatThaiDateString(asset.delivery_document_date) : '-'} (${asset.seller_name || '-'})` : '-'} />
+                                                        </span>
+                                                    </div>
+                                                </td>
                                             </tr>
                                             <tr>
                                                 <td><span style={{ visibility: 'hidden' }}>-</span></td>
@@ -236,57 +331,141 @@ export default function InventoryPrint({ asset, onClose }) {
                                     </table>
                                 </td>
                             ) : (
-                                <td colSpan="2" style={{ padding: 0, verticalAlign: 'top' }}>
+                                <td style={{ width: '20%', padding: 0, verticalAlign: 'top' }}>
                                     <table style={{ border: '1px solid black', borderCollapse: 'collapse' }} className="print-nested-spec-table">
                                         <tbody>
                                             <tr>
-                                                <td>ชื่อพัสดุ: <span style={{
-                                                    width: '90%',
-                                                    whiteSpace: 'nowrap',
-                                                    overflow: 'hidden',
-                                                    textOverflow: 'ellipsis',
-                                                    verticalAlign: 'bottom',
-                                                    fontSize: data.assetName && data.assetName.length > 25 ? '10px' : (data.assetName && data.assetName.length > 18 ? '12px' : '14px')
-                                                }}>{data.assetName}</span></td>
+                                                <td>
+                                                    <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
+                                                        <span style={{ whiteSpace: 'nowrap' }}>ชื่อพัสดุ:</span>
+                                                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                            <AutoFitText text={data.assetName} />
+                                                        </span>
+                                                    </div>
+                                                </td>
                                             </tr>
                                             <tr>
-                                                <td>ใบส่งของ: <span style={{ width: '85%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', verticalAlign: 'bottom', fontSize: asset.delivery_document_no && asset.delivery_document_no.length > 25 ? '10px' : (asset.delivery_document_no && asset.delivery_document_no.length > 18 ? '12px' : '14px') }}>{asset.delivery_document_no}</span></td>
+                                                <td>
+                                                    <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
+                                                        <span style={{ whiteSpace: 'nowrap' }}>ใบส่งของ:</span>
+                                                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                            <AutoFitText text={asset.delivery_document_no || '-'} />
+                                                        </span>
+                                                    </div>
+                                                </td>
                                             </tr>
                                             <tr>
-                                                <td>ชื่อ/ยี่ห้อผู้ทำหรือผลิต: <span style={{ width: '85%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', verticalAlign: 'bottom', fontSize: asset.brand && asset.brand.length > 25 ? '10px' : (asset.brand && asset.brand.length > 18 ? '12px' : '14px') }}>{data.brand}</span></td>
+                                                <td>
+                                                    <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
+                                                        <span style={{ whiteSpace: 'nowrap' }}>ชื่อ/ยี่ห้อผู้ทำหรือผลิต:</span>
+                                                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                            <AutoFitText text={data.brand || '-'} />
+                                                        </span>
+                                                    </div>
+                                                </td>
                                             </tr>
                                             <tr>
-                                                <td>แบบ/ชนิด/ลักษณะ: <span style={{ width: '85%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', verticalAlign: 'bottom', fontSize: asset.model && asset.model.length > 25 ? '10px' : (asset.model && asset.model.length > 18 ? '12px' : '14px') }}>{data.model}</span></td>
+                                                <td>
+                                                    <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
+                                                        <span style={{ whiteSpace: 'nowrap' }}>แบบ/ชนิด/ลักษณะ:</span>
+                                                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                            <AutoFitText text={data.model || '-'} />
+                                                        </span>
+                                                    </div>
+                                                </td>
                                             </tr>
                                             <tr>
-                                                <td>หมายเลขตัวรถ: <span style={{ width: '85%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', verticalAlign: 'bottom', fontSize: asset.carNumber && asset.carNumber.length > 25 ? '10px' : (asset.carNumber && asset.carNumber.length > 18 ? '12px' : '14px') }}>{data.carNumber}</span></td>
+                                                <td>
+                                                    <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
+                                                        <span style={{ whiteSpace: 'nowrap' }}>หมายเลขตัวรถ:</span>
+                                                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                            <AutoFitText text={data.carNumber || '-'} />
+                                                        </span>
+                                                    </div>
+                                                </td>
                                             </tr>
                                             <tr>
-                                                <td>หมายเลขเครื่อง (ถ้ามี): <span style={{ width: '85%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', verticalAlign: 'bottom', fontSize: asset.engineNumber && asset.engineNumber.length > 25 ? '10px' : (asset.engineNumber && asset.engineNumber.length > 18 ? '12px' : '14px') }}>{data.engineNumber}</span></td>
+                                                <td>
+                                                    <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
+                                                        <span style={{ whiteSpace: 'nowrap' }}>หมายเลขเครื่อง (ถ้ามี):</span>
+                                                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                            <AutoFitText text={data.engineNumber || '-'} />
+                                                        </span>
+                                                    </div>
+                                                </td>
                                             </tr>
                                             <tr>
-                                                <td>หมายเลขกรอบ (ถ้ามี): <span style={{ width: '85%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', verticalAlign: 'bottom', fontSize: asset.chassisNumber && asset.chassisNumber.length > 25 ? '10px' : (asset.chassisNumber && asset.chassisNumber.length > 18 ? '12px' : '14px') }}>{data.chassisNumber}</span></td>
+                                                <td>
+                                                    <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
+                                                        <span style={{ whiteSpace: 'nowrap' }}>หมายเลขกรอบ (ถ้ามี):</span>
+                                                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                            <AutoFitText text={data.chassisNumber || '-'} />
+                                                        </span>
+                                                    </div>
+                                                </td>
                                             </tr>
                                             <tr>
-                                                <td>หมายเลขจดทะเบียน (ถ้ามี): <span style={{ width: '85%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', verticalAlign: 'bottom', fontSize: asset.registrationNumber && asset.registrationNumber.length > 25 ? '10px' : (asset.registrationNumber && asset.registrationNumber.length > 18 ? '12px' : '14px') }}>{data.registrationNumber}</span></td>
+                                                <td>
+                                                    <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
+                                                        <span style={{ whiteSpace: 'nowrap' }}>หมายเลขจดทะเบียน (ถ้ามี):</span>
+                                                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                            <AutoFitText text={data.registrationNumber || '-'} />
+                                                        </span>
+                                                    </div>
+                                                </td>
                                             </tr>
                                             <tr>
-                                                <td>สีของพัสดุ: <span style={{ width: '85%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', verticalAlign: 'bottom', fontSize: asset.color && asset.color.length > 25 ? '10px' : (asset.color && asset.color.length > 18 ? '12px' : '14px') }}>{data.color}</span></td>
+                                                <td>
+                                                    <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
+                                                        <span style={{ whiteSpace: 'nowrap' }}>สีของพัสดุ:</span>
+                                                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                            <AutoFitText text={data.color || '-'} />
+                                                        </span>
+                                                    </div>
+                                                </td>
                                             </tr>
                                             <tr>
-                                                <td>อื่นๆ (ถ้ามีระบุ): <span style={{ width: '85%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', verticalAlign: 'bottom', fontSize: asset.other_details && asset.other_details.length > 25 ? '10px' : (asset.other_details && asset.other_details.length > 18 ? '12px' : '14px') }}></span></td>
+                                                <td>
+                                                    <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
+                                                        <span style={{ whiteSpace: 'nowrap' }}>อื่นๆ (ถ้ามีระบุ):</span>
+                                                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                            <AutoFitText text={asset.other_details || '-'} />
+                                                        </span>
+                                                    </div>
+                                                </td>
                                             </tr>
                                             <tr>
-                                                <td style={{ textAlign: 'center' }}>เงื่อนไขการประกัน</td>
+                                                <td style={{ textAlign: 'center', fontWeight: 'bold' }}>เงื่อนไขการประกัน</td>
                                             </tr>
                                             <tr>
-                                                <td>พัสดุรับประกันถึงวันที่: <span style={{ width: '85%', fontSize: asset.warrantyUntil && asset.warrantyUntil.length > 25 ? '10px' : (asset.warrantyUntil && asset.warrantyUntil.length > 18 ? '12px' : '14px') }}>{data.warrantyUntil}</span><br /></td>
+                                                <td>
+                                                    <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
+                                                        <span style={{ whiteSpace: 'nowrap' }}>พัสดุรับประกันถึงวันที่:</span>
+                                                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                            <AutoFitText text={data.warrantyUntil || '-'} />
+                                                        </span>
+                                                    </div>
+                                                </td>
                                             </tr>
                                             <tr>
-                                                <td>พัสดุประกันไว้ที่บริษัท: <span style={{ width: '85%', fontSize: asset.warrantyCompany && asset.warrantyCompany.length > 25 ? '10px' : (asset.warrantyCompany && asset.warrantyCompany.length > 18 ? '12px' : '14px') }}>{data.warrantyCompany}</span><br /></td>
+                                                <td>
+                                                    <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
+                                                        <span style={{ whiteSpace: 'nowrap' }}>พัสดุประกันไว้ที่บริษัท:</span>
+                                                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                            <AutoFitText text={data.warrantyCompany || '-'} />
+                                                        </span>
+                                                    </div>
+                                                </td>
                                             </tr>
                                             <tr>
-                                                <td>วันที่ประกันพัสดุ: <span style={{ width: '85%' }}>{data.warrantyDate}</span></td>
+                                                <td>
+                                                    <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
+                                                        <span style={{ whiteSpace: 'nowrap' }}>วันที่ประกันพัสดุ:</span>
+                                                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                            <AutoFitText text={data.warrantyDate || '-'} />
+                                                        </span>
+                                                    </div>
+                                                </td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -294,57 +473,123 @@ export default function InventoryPrint({ asset, onClose }) {
                             )}
 
                             {/* ฝั่งกลาง: ราคาและการคำนวณค่าเสื่อม */}
-                            <td colSpan="2" style={{ padding: 0, verticalAlign: 'top' }}>
+                            <td style={{ width: '30%', padding: 0, verticalAlign: 'top' }}>
                                 <table style={{ border: '1px solid black', borderCollapse: 'collapse' }} className="print-nested-spec-table">
                                     <tbody>
                                         <tr>
-                                            <td>ซื้อ/จ้าง/ได้มา จาก: <span style={{ width: '65%' }}>{asset.seller_name || '-'}</span></td>
-                                        </tr>
-                                        <tr>
-                                            <td>ซื้อ/จ้าง/ได้มา เมื่อวันที่: <span style={{ width: '45%' }}>{data.acquiredDate}</span></td>
-                                        </tr>
-                                        <tr>
-                                            <td>ราคา: <span style={{ width: '70%', fontSize: data.price && data.price.length > 25 ? '10px' : (data.price && data.price.length > 18 ? '12px' : '14px') }}>{data.price}</span> บาท
-                                                ใช้งบประมาณของ: <span style={{ width: '55%' }}>{data.budgetSource}</span></td>
-                                        </tr>
-                                        <tr>
-                                            <td style={{ paddingBottom: '8px' }}>
-                                                <div className="depreciation-section">
-                                                    <strong className="text-center style-block" style={{ display: 'block', fontSize: '13px', marginBottom: '4px' }}>ค่าเสื่อมราคา</strong>
-                                                    <table className="depreciation-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
-                                                        <tbody>
-                                                            {data.depreciation.map((item, idx) => (
-                                                                <tr key={idx} style={{ border: 'none' }}>
-                                                                    <td className="depreciation-cell-borderless" style={{ border: 'none', padding: '1.5px 0', fontSize: '12.5px' }}>{item.year}:</td>
-                                                                    <td className="depreciation-cell-borderless" style={{ border: 'none', padding: '1.5px 0', fontSize: '12.5px' }}><span className="dotted-line" style={{ width: '30px' }}>{item.rate}</span> %</td>
-                                                                    <td className="depreciation-cell-borderless" style={{ border: 'none', padding: '1.5px 0', fontSize: '12.5px' }}>คงเหลือราคา <span className="dotted-line" style={{ width: '80px' }}>{item.balance}</span> บาท</td>
-                                                                </tr>
-                                                            ))}
-                                                        </tbody>
-                                                    </table>
+                                            <td>
+                                                <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
+                                                    <span style={{ whiteSpace: 'nowrap' }}>ซื้อ/จ้าง/ได้มา จาก:</span>
+                                                    <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                        <AutoFitText text={asset.seller_name || '-'} />
+                                                    </span>
                                                 </div>
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td colSpan="3" className='center-text' style={{ border: '1px solid black', borderCollapse: 'collapse' }}>การจำหน่าย</td>
-                                        </tr>
-                                        <tr> <td>วันที่จำหน่าย: <span>{data.disposalDate}</span></td>
-                                        </tr>
-                                        <tr> <td>วิธีจำหน่าย: <span>{data.disposalMethod}</span></td>
-                                        </tr>
-                                        <tr>  <td>เลขที่หนังสืออนุมัติ: <span>{data.disposalDocNo}</span></td>
-                                        </tr>
-                                        <tr> <td>ราคาจำหน่าย: <span>{data.disposalPrice}</span></td>
+                                            <td>
+                                                <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
+                                                    <span style={{ whiteSpace: 'nowrap' }}>ซื้อ/จ้าง/ได้มา เมื่อวันที่:</span>
+                                                    <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                        <AutoFitText text={data.acquiredDate || '-'} />
+                                                    </span>
+                                                </div>
+                                            </td>
                                         </tr>
                                         <tr>
-                                            <td>กำไร/ขาดทุน: <span>{data.profit}</span></td>
+                                            <td>
+                                                <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%', gap: '4px' }}>
+                                                    <span style={{ whiteSpace: 'nowrap' }}>ราคา:</span>
+                                                    <span className="dotted-line" style={{ width: '70px', flexShrink: 0 }}>
+                                                        <AutoFitText text={data.price} />
+                                                    </span>
+                                                    <span style={{ whiteSpace: 'nowrap' }}>บาท</span>
+                                                    <span style={{ whiteSpace: 'nowrap', marginLeft: '4px' }}>งบประมาณ:</span>
+                                                    <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0 }}>
+                                                        <AutoFitText text={data.budgetSource} />
+                                                    </span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style={{ fontWeight: 'bold', textAlign: 'center' }}>ค่าเสื่อมราคา</td>
+                                        </tr>
+                                        {data.depreciation.map((item, idx) => (
+                                            <tr key={idx}>
+                                                <td>
+                                                    <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%', gap: '4px' }}>
+                                                        <span style={{ whiteSpace: 'nowrap' }}>{item.year}:</span>
+                                                        <span className="dotted-line" style={{ width: '35px', textAlign: 'center', flexShrink: 0 }}>
+                                                            {item.rate}
+                                                        </span>
+                                                        <span style={{ whiteSpace: 'nowrap' }}>% คงเหลือราคา</span>
+                                                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0 }}>
+                                                            <AutoFitText text={item.balance} />
+                                                        </span>
+                                                        <span style={{ whiteSpace: 'nowrap' }}>บาท</span>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                        <tr>
+                                            <td className="center-text" style={{ fontWeight: 'bold', textAlign: 'center' }}>การจำหน่าย</td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
+                                                    <span style={{ whiteSpace: 'nowrap' }}>วันที่จำหน่าย:</span>
+                                                    <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                        <AutoFitText text={data.disposalDate || '-'} />
+                                                    </span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
+                                                    <span style={{ whiteSpace: 'nowrap' }}>วิธีจำหน่าย:</span>
+                                                    <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                        <AutoFitText text={data.disposalMethod || '-'} />
+                                                    </span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
+                                                    <span style={{ whiteSpace: 'nowrap' }}>เลขที่หนังสืออนุมัติ:</span>
+                                                    <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                        <AutoFitText text={data.disposalDocNo || '-'} />
+                                                    </span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
+                                                    <span style={{ whiteSpace: 'nowrap' }}>ราคาจำหน่าย:</span>
+                                                    <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                        <AutoFitText text={data.disposalPrice || '-'} />
+                                                    </span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
+                                                    <span style={{ whiteSpace: 'nowrap' }}>กำไร/ขาดทุน:</span>
+                                                    <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                        <AutoFitText text={data.profit || '-'} />
+                                                    </span>
+                                                </div>
+                                            </td>
                                         </tr>
                                     </tbody>
                                 </table>
                             </td>
 
                             {/* ฝั่งขวา: ประวัติผู้ใช้งานพัสดุ */}
-                            <td className="history-section" style={{ padding: 0, verticalAlign: 'top' }}>
+                            <td className="history-section" style={{ width: asset?.asset_type === 'LAND_BUILDING' ? '45%' : '50%', padding: 0, verticalAlign: 'top' }}>
                                 <table style={{ border: '1px solid black', borderCollapse: 'collapse', width: '100%' }} className="print-nested-spec-table">
                                     <tbody>
                                         <tr>
@@ -397,7 +642,7 @@ export default function InventoryPrint({ asset, onClose }) {
 
                         {/* แถวที่ 5: ตารางย่อยการหาผลประโยชน์ */}
                         <tr>
-                            <td colSpan="5" style={{ padding: '0' }}>
+                            <td colSpan="3" style={{ padding: '0' }}>
                                 <div className="benefit-section-title">
                                     <strong>การหาผลประโยชน์ในพัสดุ</strong>
                                 </div>
