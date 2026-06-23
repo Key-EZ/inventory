@@ -63,6 +63,7 @@ export default function AssetForm({
     warrantyStartDate: asset ? asset.warranty_start_date || '' : '',
     warrantyEndDate: asset ? asset.warranty_end_date || '' : '',
     warrantyCompany: asset ? asset.warranty_company || '' : '',
+    photo: asset ? asset.photo || '' : '',
   });
 
   const budgetOwner = asset ? asset.budget_owner || '' : '';
@@ -79,6 +80,34 @@ export default function AssetForm({
     setFormData(prev => ({
       ...prev,
       [name]: finalValue
+    }));
+  };
+
+  const handlePhotoChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const maxSize = 100 * 1024; // 100 KB
+    if (file.size > maxSize) {
+      alert(`ขนาดไฟล์ภาพต้องไม่เกิน 100 KB (ขนาดไฟล์ปัจจุบัน: ${(file.size / 1024).toFixed(1)} KB)`);
+      e.target.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setFormData(prev => ({
+        ...prev,
+        photo: event.target.result
+      }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemovePhoto = () => {
+    setFormData(prev => ({
+      ...prev,
+      photo: ''
     }));
   };
 
@@ -159,7 +188,10 @@ export default function AssetForm({
       maintenances: maintenances,
 
       // Custodian history list
-      custodian_history: custodianHistory
+      custodian_history: custodianHistory,
+
+      // Photo
+      photo: formData.photo
     };
 
     onSubmit(payload);
@@ -364,6 +396,32 @@ export default function AssetForm({
                       <option key={s} value={s}>{s}</option>
                     ))}
                   </select>
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group col">
+                  <label>รูปถ่ายพัสดุ (ไม่เกิน 100 KB)</label>
+                  <div className="photo-upload-wrapper">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handlePhotoChange}
+                      className="photo-file-input"
+                    />
+                    {formData.photo && (
+                      <div className="photo-preview-container">
+                        <img src={formData.photo} alt="Preview" className="photo-preview-img" />
+                        <button
+                          type="button"
+                          className="btn-remove-photo"
+                          onClick={handleRemovePhoto}
+                        >
+                          ลบรูปภาพ
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>

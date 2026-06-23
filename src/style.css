@@ -12,20 +12,20 @@
   --border-color: rgba(0, 0, 0, 0.08);
   --input-bg: #ffffff;
   --accent-blue: #0284c7;
-  
+
   /* Status Colors */
   --status-active-bg: #dcfce7;
   --status-active-text: #15803d;
   --status-active-bar: #22c55e;
-  
+
   --status-damaged-bg: #fef3c7;
   --status-damaged-text: #b45309;
   --status-damaged-bar: #f59e0b;
-  
+
   --status-pending-bg: #fee2e2;
   --status-pending-text: #b91c1c;
   --status-pending-bar: #ef4444;
-  
+
   --status-disposed-bg: #f1f5f9;
   --status-disposed-text: #475569;
   --status-disposed-bar: #64748b;
@@ -39,17 +39,17 @@
   --text-muted: #94a3b8;
   --border-color: rgba(255, 255, 255, 0.08);
   --input-bg: #0f172a;
-  
+
   /* Dark Status Colors */
   --status-active-bg: rgba(34, 197, 94, 0.15);
   --status-active-text: #4ade80;
-  
+
   --status-damaged-bg: rgba(245, 158, 11, 0.15);
   --status-damaged-text: #fbbf24;
-  
+
   --status-pending-bg: rgba(239, 68, 68, 0.15);
   --status-pending-text: #f87171;
-  
+
   --status-disposed-bg: rgba(148, 163, 184, 0.15);
   --status-disposed-text: #cbd5e1;
 }
@@ -84,8 +84,10 @@ body {
   .sidebar-layout-container {
     grid-template-columns: 1fr;
   }
+
   .layout-sidebar {
-    display: none !important; /* บนมือถือปรับเป็นเมนูซ่อน */
+    display: none !important;
+    /* บนมือถือปรับเป็นเมนูซ่อน */
   }
 }
 
@@ -155,7 +157,10 @@ body {
   .bento-grid-wrapper {
     grid-template-columns: repeat(2, 1fr);
   }
-  .col-span-4, .col-span-3, .col-span-2 {
+
+  .col-span-4,
+  .col-span-3,
+  .col-span-2 {
     grid-column: span 2 !important;
   }
 }
@@ -164,17 +169,35 @@ body {
   .bento-grid-wrapper {
     grid-template-columns: 1fr;
   }
-  .col-span-4, .col-span-3, .col-span-2, .col-span-1 {
+
+  .col-span-4,
+  .col-span-3,
+  .col-span-2,
+  .col-span-1 {
     grid-column: span 1 !important;
   }
 }
 
 /* Bento Spanning Utilities */
-.col-span-1 { grid-column: span 1; }
-.col-span-2 { grid-column: span 2; }
-.col-span-3 { grid-column: span 3; }
-.col-span-4 { grid-column: span 4; }
-.row-span-2 { grid-row: span 2; }
+.col-span-1 {
+  grid-column: span 1;
+}
+
+.col-span-2 {
+  grid-column: span 2;
+}
+
+.col-span-3 {
+  grid-column: span 3;
+}
+
+.col-span-4 {
+  grid-column: span 4;
+}
+
+.row-span-2 {
+  grid-row: span 2;
+}
 
 /* --- 3. Centered Landing Layout CSS --- */
 .centered-container {
@@ -318,7 +341,7 @@ body {
 .layout-toggle-btn.active {
   background-color: var(--bg-secondary);
   color: var(--text-primary);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .theme-toggle-btn {
@@ -657,8 +680,13 @@ body {
   font-weight: 700;
 }
 
-.stat-card-value.value-text { color: var(--accent-blue); }
-.stat-card-value.active-text { color: var(--status-active-text); }
+.stat-card-value.value-text {
+  color: var(--accent-blue);
+}
+
+.stat-card-value.active-text {
+  color: var(--status-active-text);
+}
 
 .landing-search-container {
   width: 100%;
@@ -776,10 +804,25 @@ body {
   border-radius: 20px;
 }
 
-.result-status-badge[data-status="ใช้งาน"] { background-color: var(--status-active-bg); color: var(--status-active-text); }
-.result-status-badge[data-status="ชำรุด"] { background-color: var(--status-damaged-bg); color: var(--status-damaged-text); }
-.result-status-badge[data-status="รอจำหน่าย"] { background-color: var(--status-pending-bg); color: var(--status-pending-text); }
-.result-status-badge[data-status="จำหน่ายแล้ว"] { background-color: var(--status-disposed-bg); color: var(--status-disposed-text); }
+.result-status-badge[data-status="ใช้งาน"] {
+  background-color: var(--status-active-bg);
+  color: var(--status-active-text);
+}
+
+.result-status-badge[data-status="ชำรุด"] {
+  background-color: var(--status-damaged-bg);
+  color: var(--status-damaged-text);
+}
+
+.result-status-badge[data-status="รอจำหน่าย"] {
+  background-color: var(--status-pending-bg);
+  color: var(--status-pending-text);
+}
+
+.result-status-badge[data-status="จำหน่ายแล้ว"] {
+  background-color: var(--status-disposed-bg);
+  color: var(--status-disposed-text);
+}
 
 .see-all-results-tip {
   text-align: center;
@@ -859,8 +902,15 @@ body {
 }
 
 @keyframes modal-enter {
-  from { transform: scale(0.95); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .modal-header-section {
@@ -1072,7 +1122,8 @@ body {
   background-color: var(--border-color);
 }
 
-.btn-next-tab, .btn-save {
+.btn-next-tab,
+.btn-save {
   min-width: 100px;
 }
 
@@ -1274,10 +1325,25 @@ body {
   white-space: nowrap;
 }
 
-.status-badge-active { background-color: var(--status-active-bg); color: var(--status-active-text); }
-.status-badge-damaged { background-color: var(--status-damaged-bg); color: var(--status-damaged-text); }
-.status-badge-pending { background-color: var(--status-pending-bg); color: var(--status-pending-text); }
-.status-badge-disposed { background-color: var(--status-disposed-bg); color: var(--status-disposed-text); }
+.status-badge-active {
+  background-color: var(--status-active-bg);
+  color: var(--status-active-text);
+}
+
+.status-badge-damaged {
+  background-color: var(--status-damaged-bg);
+  color: var(--status-damaged-text);
+}
+
+.status-badge-pending {
+  background-color: var(--status-pending-bg);
+  color: var(--status-pending-text);
+}
+
+.status-badge-disposed {
+  background-color: var(--status-disposed-bg);
+  color: var(--status-disposed-text);
+}
 
 /* Actions column */
 .table-actions {
@@ -1286,7 +1352,12 @@ body {
   justify-content: center;
 }
 
-.btn-table-edit, .btn-table-delete, .btn-table-print, .btn-table-repair, .btn-table-history, .btn-table-custodian {
+.btn-table-edit,
+.btn-table-delete,
+.btn-table-print,
+.btn-table-repair,
+.btn-table-history,
+.btn-table-custodian {
   background: none;
   border: 1px solid var(--border-color);
   padding: 6px 12px;
@@ -1489,7 +1560,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0,0,0,0.4);
+  background-color: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(2px);
   z-index: 140;
 }
@@ -1670,11 +1741,13 @@ body {
   border-color: #0d9488;
   color: #0d9488;
 }
+
 .ledger-tab-btn.pd2-btn.active {
   background-color: rgba(217, 119, 6, 0.1);
   border-color: #d97706;
   color: #d97706;
 }
+
 .ledger-tab-btn.pd3-btn.active {
   background-color: rgba(234, 88, 12, 0.1);
   border-color: #ea580c;
@@ -1703,9 +1776,17 @@ body {
   transform: translateY(-2px);
 }
 
-.report-panel-container.ledger-pd1 .report-stat-card:hover { border-color: #0d9488; }
-.report-panel-container.ledger-pd2 .report-stat-card:hover { border-color: #d97706; }
-.report-panel-container.ledger-pd3 .report-stat-card:hover { border-color: #ea580c; }
+.report-panel-container.ledger-pd1 .report-stat-card:hover {
+  border-color: #0d9488;
+}
+
+.report-panel-container.ledger-pd2 .report-stat-card:hover {
+  border-color: #d97706;
+}
+
+.report-panel-container.ledger-pd3 .report-stat-card:hover {
+  border-color: #ea580c;
+}
 
 .stat-label {
   font-size: 0.8rem;
@@ -1731,10 +1812,21 @@ body {
 }
 
 /* Accents on numbers */
-.card-count .stat-value { color: var(--primary-color); }
-.card-cost .stat-value { color: var(--accent-blue); }
-.card-depreciation .stat-value { color: var(--status-pending-text); }
-.card-bookvalue .stat-value { color: var(--status-active-text); }
+.card-count .stat-value {
+  color: var(--primary-color);
+}
+
+.card-cost .stat-value {
+  color: var(--accent-blue);
+}
+
+.card-depreciation .stat-value {
+  color: var(--status-pending-text);
+}
+
+.card-bookvalue .stat-value {
+  color: var(--status-active-text);
+}
 
 /* 3. Filter Section */
 .report-filter-card {
@@ -1772,14 +1864,29 @@ body {
   gap: 6px;
 }
 
-.ledger-pd1 .btn-print-report { background-color: #0d9488; }
-.ledger-pd1 .btn-print-report:hover { background-color: #0f766e; }
+.ledger-pd1 .btn-print-report {
+  background-color: #0d9488;
+}
 
-.ledger-pd2 .btn-print-report { background-color: #d97706; }
-.ledger-pd2 .btn-print-report:hover { background-color: #b45309; }
+.ledger-pd1 .btn-print-report:hover {
+  background-color: #0f766e;
+}
 
-.ledger-pd3 .btn-print-report { background-color: #ea580c; }
-.ledger-pd3 .btn-print-report:hover { background-color: #c2410c; }
+.ledger-pd2 .btn-print-report {
+  background-color: #d97706;
+}
+
+.ledger-pd2 .btn-print-report:hover {
+  background-color: #b45309;
+}
+
+.ledger-pd3 .btn-print-report {
+  background-color: #ea580c;
+}
+
+.ledger-pd3 .btn-print-report:hover {
+  background-color: #c2410c;
+}
 
 /* 4. Report printable sheet */
 .printable-report-sheet {
@@ -1787,11 +1894,12 @@ body {
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
   padding: 24px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 }
 
 .print-header-only {
-  display: none; /* Hidden in screen view, only active on paper */
+  display: none;
+  /* Hidden in screen view, only active on paper */
 }
 
 /* Ledger Title Bar */
@@ -1806,12 +1914,20 @@ body {
   font-size: 1.05rem;
 }
 
-.pd1-bar { background-color: #0d9488; }
-.pd2-bar { background-color: #d97706; }
-.pd3-bar { background-color: #ea580c; }
+.pd1-bar {
+  background-color: #0d9488;
+}
+
+.pd2-bar {
+  background-color: #d97706;
+}
+
+.pd3-bar {
+  background-color: #ea580c;
+}
 
 .item-count-badge {
-  background-color: rgba(255,255,255,0.2);
+  background-color: rgba(255, 255, 255, 0.2);
   padding: 2px 10px;
   border-radius: 20px;
   font-size: 0.8rem;
@@ -1915,6 +2031,7 @@ body {
 
 /* --- A4 Landscape Print Stylesheet --- */
 @media print {
+
   /* Set A4 Page in Landscape mode */
   @page {
     size: A4 landscape;
@@ -1922,7 +2039,8 @@ body {
   }
 
   /* Reset layout and hide elements */
-  body, html {
+  body,
+  html {
     background-color: #ffffff !important;
     color: #000000 !important;
     font-size: 11pt !important;
@@ -1932,9 +2050,9 @@ body {
     display: block !important;
   }
 
-  .layout-sidebar, 
-  .layout-header, 
-  .no-print, 
+  .layout-sidebar,
+  .layout-header,
+  .no-print,
   .theme-toggle-btn,
   .report-ledger-tabs,
   .report-stats-grid,
@@ -1946,8 +2064,8 @@ body {
     display: none !important;
   }
 
-  .layout-main-area, 
-  .layout-content, 
+  .layout-main-area,
+  .layout-content,
   .printable-report-sheet {
     padding: 0 !important;
     margin: 0 !important;
@@ -2108,18 +2226,21 @@ body {
   gap: 10px;
 }
 
-.action-maint-edit, .action-maint-delete {
+.action-maint-edit,
+.action-maint-delete {
   cursor: pointer;
   transition: opacity var(--transition-fast);
 }
 
-.action-maint-edit:hover, .action-maint-delete:hover {
+.action-maint-edit:hover,
+.action-maint-delete:hover {
   opacity: 0.7;
 }
 
 /* --- Official Card Print Layout Styling --- */
 .print-only-cards-section {
-  display: none; /* Hidden on screen by default */
+  display: none;
+  /* Hidden on screen by default */
 }
 
 .official-card-wrapper {
@@ -2128,11 +2249,16 @@ body {
   border-radius: 8px;
   overflow: hidden;
   margin-bottom: 24px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 }
 
-.theme-pd1-border { border-color: #0d9488 !important; }
-.theme-pd2-border { border-color: #d97706 !important; }
+.theme-pd1-border {
+  border-color: #0d9488 !important;
+}
+
+.theme-pd2-border {
+  border-color: #d97706 !important;
+}
 
 .official-card-header {
   padding: 14px 20px;
@@ -2142,8 +2268,13 @@ body {
   align-items: center;
 }
 
-.bg-pd1-header { background-color: #0d9488; }
-.bg-pd2-header { background-color: #d97706; }
+.bg-pd1-header {
+  background-color: #0d9488;
+}
+
+.bg-pd2-header {
+  background-color: #d97706;
+}
 
 .official-card-header h3 {
   font-size: 1.1rem;
@@ -2231,7 +2362,8 @@ body {
   padding: 12px 14px;
   border-bottom: 1px solid var(--border-color);
   color: var(--text-primary);
-  height: 38px; /* Force consistent blank row height for printing */
+  height: 38px;
+  /* Force consistent blank row height for printing */
 }
 
 /* Page Break utilities */
@@ -2242,11 +2374,13 @@ body {
 /* --- media print overrides for cards --- */
 @media print {
   .ledger-table-wrapper {
-    display: none !important; /* Hide summary tables in print */
+    display: none !important;
+    /* Hide summary tables in print */
   }
 
   .print-only-cards-section {
-    display: block !important; /* Show cards instead */
+    display: block !important;
+    /* Show cards instead */
   }
 
   .print-card-page-break {
@@ -2295,7 +2429,9 @@ body {
   }
 
   /* Color resets for print */
-  .cost-color, .text-depreciation, .text-bookvalue {
+  .cost-color,
+  .text-depreciation,
+  .text-bookvalue {
     color: #000000 !important;
   }
 }
@@ -2305,14 +2441,17 @@ body {
   background-color: var(--status-pending-bg);
   color: var(--status-pending-text);
 }
+
 .ledger-status-badge.repair-status-progress {
   background-color: var(--status-damaged-bg);
   color: var(--status-damaged-text);
 }
+
 .ledger-status-badge.repair-status-completed {
   background-color: var(--status-active-bg);
   color: var(--status-active-text);
 }
+
 .ledger-status-badge.repair-status-rejected {
   background-color: var(--status-disposed-bg);
   color: var(--status-disposed-text);
@@ -2493,6 +2632,7 @@ body.modal-print-open {
   background-color: #d1fae5;
   color: #065f46;
 }
+
 .dark .status-badge.audit-badge-asset {
   background-color: #065f46;
   color: #d1fae5;
@@ -2502,6 +2642,7 @@ body.modal-print-open {
   background-color: #dbeafe;
   color: #1e40af;
 }
+
 .dark .status-badge.audit-badge-repair {
   background-color: #1e40af;
   color: #dbeafe;
@@ -2511,6 +2652,7 @@ body.modal-print-open {
   background-color: #f3e8ff;
   color: #6b21a8;
 }
+
 .dark .status-badge.audit-badge-settings {
   background-color: #6b21a8;
   color: #f3e8ff;
@@ -2520,6 +2662,7 @@ body.modal-print-open {
   background-color: #fee2e2;
   color: #991b1b;
 }
+
 .dark .status-badge.audit-badge-system {
   background-color: #991b1b;
   color: #fee2e2;
@@ -2529,6 +2672,7 @@ body.modal-print-open {
   background-color: #f3f4f6;
   color: #374151;
 }
+
 .dark .status-badge.audit-badge-default {
   background-color: #374151;
   color: #f3f4f6;
@@ -2550,7 +2694,8 @@ body.modal-print-open {
   right: 0;
   bottom: 0;
   display: flex;
-  flex-direction: column; /* Stack top tabs and main content */
+  flex-direction: column;
+  /* Stack top tabs and main content */
   background-color: var(--bg-primary);
   color: var(--text-primary);
   z-index: 1050;
@@ -2639,7 +2784,9 @@ body.modal-print-open {
   color: var(--text-muted);
 }
 
-.memo-config-sidebar input, .memo-config-sidebar select, .memo-config-sidebar textarea {
+.memo-config-sidebar input,
+.memo-config-sidebar select,
+.memo-config-sidebar textarea {
   width: 100%;
   padding: 8px 12px;
   border-radius: 6px;
@@ -2656,7 +2803,8 @@ body.modal-print-open {
   overflow-y: auto;
   height: 100%;
   box-sizing: border-box;
-  background-color: #6b7280; /* dark background to make A4 stand out */
+  background-color: #6b7280;
+  /* dark background to make A4 stand out */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2676,12 +2824,14 @@ body.modal-print-open {
   color: #000000;
   width: 210mm;
   min-height: 297mm;
-  padding: 25mm 20mm; /* A4 page standard margins */
+  padding: 25mm 20mm;
+  /* A4 page standard margins */
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
   box-sizing: border-box;
   font-family: 'Sarabun', 'TH Sarabun PSK', sans-serif;
   line-height: 1.5;
-  font-size: 16px; /* 16px for Sarabun represents standard font scale */
+  font-size: 16px;
+  /* 16px for Sarabun represents standard font scale */
 }
 
 /* Memorandum specific typography and elements */
@@ -2786,4 +2936,133 @@ body.modal-print-open {
     min-height: auto !important;
     page-break-after: avoid;
   }
+
+  body.modal-print-open .a4-Vertical-page {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 5px !important;
+    margin: 0 !important;
+    width: 100% !important;
+    min-height: auto !important;
+    page-break-after: avoid;
+  }
 }
+
+/* --- Photo Upload Styles --- */
+.photo-upload-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.photo-file-input {
+  width: 100%;
+  padding: 8px;
+  border: 1px dashed var(--border-color);
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.photo-preview-container {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background-color: var(--bg-primary);
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  width: fit-content;
+}
+
+.photo-preview-img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.btn-remove-photo {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.btn-remove-photo:hover {
+  background-color: #dc2626;
+}
+
+/* Style for InventoryPrint photo */
+.photo-placeholder {
+  margin-top: 15px;
+  border: 1px dashed #000000;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: #000000;
+  background-color: #f8fafc;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.photo-placeholder img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* In print media, we want the photo to print cleanly */
+@media print {
+  .photo-placeholder {
+    border: 1px solid #000000 !important;
+  }
+}
+
+/* Ledger tag top-right of page */
+.print-ledger-tag {
+  position: absolute;
+  top: 15mm;
+  right: 20mm;
+  text-align: right;
+  font-family: 'Sarabun', sans-serif;
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 1.4;
+  color: #000000;
+}
+
+.print-ledger-tag-sub {
+  font-size: 14px;
+  font-weight: normal;
+  margin-top: 4px;
+}
+
+/* Nested spec table for A4 printable ledger grid */
+.print-nested-spec-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.print-nested-spec-table td {
+  border-bottom: 1px solid #000000 !important;
+  padding: 4.8px 8px !important;
+  font-size: 13.5px !important;
+  line-height: 1.4 !important;
+  text-align: left !important;
+}
+
+.print-nested-spec-table tr:last-child td {
+  border-bottom: none !important;
+}

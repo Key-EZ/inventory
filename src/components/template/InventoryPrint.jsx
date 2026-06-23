@@ -101,10 +101,10 @@ export default function InventoryPrint({ asset, onClose }) {
 
         return {
             category: asset.category || (asset.asset_type === 'LAND_BUILDING' ? 'ที่ดินและสิ่งก่อสร้าง' : 'ครุภัณฑ์'),
-            agency: "เทศบาลตำบลเสาธงหิน",
-            office: asset.responsible_department || "สำนักงาน",
-            amphoe: "บางใหญ่",
-            province: "นนทบุรี",
+            agency: localStorage.getItem('print_ledger_agency') || "เทศบาลตำบลเสาธงหิน",
+            office: localStorage.getItem('print_ledger_office') || asset.responsible_department || "สำนักงาน",
+            amphoe: localStorage.getItem('print_ledger_amphoe') || "บางใหญ่",
+            province: localStorage.getItem('print_ledger_province') || "นนทบุรี",
             assetCode: asset.asset_code || "-",
             assetName: asset.name || "-",
             acquiredFrom: asset.acquisition_method || "-",
@@ -156,139 +156,244 @@ export default function InventoryPrint({ asset, onClose }) {
             {/* หน้าเอกสารควบคุมสัดส่วน */}
             <div className="a4-landscape-page">
                 {/* ส่วนหัวเอกสาร */}
+                <div className="print-ledger-tag">
+                    <div>{asset?.asset_type === 'LAND_BUILDING' ? 'พ.ด. ๑' : 'พ.ด. ๒'}</div>
+                    <div className="print-ledger-tag-sub">
+                        1
+                    </div>
+                </div>
                 <div className="print-header-title">
                     {asset?.asset_type === 'LAND_BUILDING'
                         ? 'ทะเบียนที่ดินและสิ่งก่อสร้าง'
                         : 'ทะเบียนพัสดุครุภัณฑ์ ปศุสัตว์และสัตว์พาหนะ'}
                 </div>
+                {/* ข้อมูลหน่วยงาน แถวเดียว นอกตาราง */}
+                <div className="print-header-metadata" style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '8px', fontSize: '14px', fontFamily: 'Sarabun, sans-serif' }}>
+                    <div style={{ width: '25%' }}>
+                        ประเภท <span className="dotted-line" style={{
+                            width: '70%',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            verticalAlign: 'bottom',
+                            fontSize: data.category && data.category.length > 25 ? '10px' : (data.category && data.category.length > 18 ? '12px' : '14px')
+                        }}>{data.category}</span>
+                    </div>
+                    <div style={{ width: '50%', textAlign: 'center', fontSize: data.category && data.category.length > 25 ? '10px' : (data.category && data.category.length > 18 ? '12px' : '14px') }}>
+                        สำนักงาน <span className="dotted-line" style={{ width: '35%' }}>{data.agency}</span>
+                        อำเภอ <span className="dotted-line" style={{ width: '18%' }}>{data.amphoe}</span>
+                        จังหวัด <span className="dotted-line" style={{ width: '18%' }}>{data.province}</span>
+                    </div>
+                    <div style={{ width: '25%', textAlign: 'right', fontSize: data.category && data.category.length > 25 ? '10px' : (data.category && data.category.length > 18 ? '12px' : '14px') }}>
+                        เลขรหัสพัสดุ <span className="dotted-line" style={{ width: '50%' }}>{data.assetCode}</span>
+                    </div>
+                </div>
+
                 <table className="form-table">
                     <tbody>
-                        {/* แถวที่ 1: ข้อมูลหน่วยงาน */}
-                        <tr>
-                            <td colSpan="2" style={{ width: '40%' }}>
-                                ประเภท <span className="dotted-line" style={{ width: '72%' }}>{data.category}</span>
-                            </td>
-                            <td colSpan="2" style={{ width: '40%' }}>
-                                ส่วนราชการ: <span className="dotted-line" style={{ width: '70%' }}>{data.agency}</span><br />
-                                สำนักงาน: <span className="dotted-line" style={{ width: '73%' }}>{data.office}</span><br />
-                                อำเภอ: <span className="dotted-line" style={{ width: '30%' }}>{data.amphoe}</span>
-                                <strong>จังหวัด:</strong> <span className="dotted-line" style={{ width: '35%' }}>{data.province}</span>
-                            </td>
-                            <td style={{ width: '20%' }}>
-                                <strong>รหัสพัสดุ</strong> <span className="dotted-line" style={{ width: '90%' }}>{data.assetCode}</span>
-                            </td>
-                        </tr>
 
-                        {/* แถวที่ 2: ชื่อและแหล่งที่มา */}
-                        <tr>
-                            <td colSpan="2">
-                                <strong>ชื่อพัสดุ:</strong> <span className="dotted-line" style={{ width: '80%' }}>{data.assetName}</span>
-                            </td>
-                            <td colSpan="2">
-                                <strong>ซื้อ/จ้าง/ได้มา จาก:</strong> <span className="dotted-line" style={{ width: '65%' }}>{data.acquiredFrom}</span>
-                            </td>
-                            <td>
-                                <strong>ชื่อผู้ใช้-ดูแล-รับผิดชอบ:</strong>
-                                <div className="user-responsibility-box"></div>
-                            </td>
-                        </tr>
-
-                        {/* แถวที่ 3: รายละเอียดสเปค และ ข้อมูลราคา/ค่าเสื่อม */}
                         <tr className="text-sm">
                             {/* ฝั่งซ้าย: ข้อมูลจำเพาะทางเทคนิค (พ.ด. 2) หรือรายละเอียดเฉพาะที่ดินและสิ่งก่อสร้าง (พ.ด. 1) */}
                             {asset?.asset_type === 'LAND_BUILDING' ? (
-                                <td colSpan="2" className="lh-1-6">
-                                    เอกสารสิทธิ์ (โฉนด/น.ส.3): <span className="dotted-line" style={{ width: '50%' }}>{asset.document_of_title || '-'}</span><br />
-                                    ขนาดเนื้อที่: <span className="dotted-line" style={{ width: '70%' }}>{asset.area_size || '-'}</span><br />
-                                    ลักษณะโรงเรือน/สิ่งก่อสร้าง: <span className="dotted-line" style={{ width: '45%' }}>{asset.building_style || '-'}</span><br />
-                                    สถานะพัสดุ: <span className="dotted-line" style={{ width: '70%' }}>{asset.status || '-'}</span><br />
-                                    ลักษณะการได้มา: <span className="dotted-line" style={{ width: '60%' }}>{asset.acquisition_method || '-'}</span><br />
-                                    เอกสารอนุมัติ/สัญญา: <span className="dotted-line" style={{ width: '53%' }}>{asset.delivery_document_no ? `${asset.delivery_document_no} ลงวันที่ ${asset.delivery_document_date ? formatThaiDateString(asset.delivery_document_date) : '-'} (${asset.seller_name || '-'})` : '-'}</span><br />
-                                    <span style={{ visibility: 'hidden' }}>-</span><br />
-                                    <span style={{ visibility: 'hidden' }}>-</span><br />
-                                    <span style={{ visibility: 'hidden' }}>-</span>
+                                <td colSpan="2" style={{ padding: 0, verticalAlign: 'top' }}>
+                                    <table style={{ border: '1px solid black', borderCollapse: 'collapse' }} className="print-nested-spec-table">
+                                        <tbody>
+                                            <tr>
+                                                <td>ชื่อพัสดุ: <span className="dotted-line" style={{
+                                                    width: '70%',
+                                                    whiteSpace: 'nowrap',
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis',
+                                                    verticalAlign: 'bottom',
+                                                    fontSize: data.assetName && data.assetName.length > 25 ? '10px' : (data.assetName && data.assetName.length > 18 ? '12px' : '14px')
+                                                }}>{data.assetName}</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>เอกสารสิทธิ์ (โฉนด/น.ส.3): <span style={{ width: '48%' }}>{asset.document_of_title || '-'}</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>ขนาดเนื้อที่: <span style={{ width: '70%' }}>{asset.area_size || '-'}</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>ลักษณะโรงเรือน/สิ่งก่อสร้าง: <span style={{ width: '45%' }}>{asset.building_style || '-'}</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>สถานะพัสดุ: <span style={{ width: '70%' }}>{asset.status || '-'}</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>ลักษณะการได้มา: <span style={{ width: '60%' }}>{asset.acquisition_method || '-'}</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>เอกสารอนุมัติ/สัญญา: <span style={{ width: '53%' }}>{asset.delivery_document_no ? `${asset.delivery_document_no} ลงวันที่ ${asset.delivery_document_date ? formatThaiDateString(asset.delivery_document_date) : '-'} (${asset.seller_name || '-'})` : '-'}</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td><span style={{ visibility: 'hidden' }}>-</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td><span style={{ visibility: 'hidden' }}>-</span></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </td>
                             ) : (
-                                <td colSpan="2" className="lh-1-6">
-                                    ใบส่งของ: <span className="dotted-line" style={{ width: '75%' }}>{asset.delivery_document_no ? `${asset.delivery_document_no} ลงวันที่ ${asset.delivery_document_date ? formatThaiDateString(asset.delivery_document_date) : '-'} (${asset.seller_name || '-'})` : '-'}</span><br />
-                                    ชื่อ/ยี่ห้อผู้ทำหรือผลิต: <span className="dotted-line" style={{ width: '55%' }}>{data.brand}</span><br />
-                                    แบบ/ชนิด/ลักษณะ: <span className="dotted-line" style={{ width: '60%' }}>{data.model}</span><br />
-                                    หมายเลขตัวรถ: <span className="dotted-line" style={{ width: '70%' }}>{data.carNumber}</span><br />
-                                    หมายเลขเครื่อง (ถ้ามี): <span className="dotted-line" style={{ width: '58%' }}>{data.engineNumber}</span><br />
-                                    หมายเลขกรอบ (ถ้ามี): <span className="dotted-line" style={{ width: '58%' }}>{data.chassisNumber}</span><br />
-                                    หมายเลขจดทะเบียน (ถ้ามี): <span className="dotted-line" style={{ width: '53%' }}>{data.registrationNumber}</span><br />
-                                    สีของพัสดุ: <span className="dotted-line" style={{ width: '75%' }}>{data.color}</span><br />
-                                    อื่นๆ (ถ้ามีระบุ): <span className="dotted-line" style={{ width: '70%' }}>{data.other}</span>
+                                <td colSpan="2" style={{ padding: 0, verticalAlign: 'top' }}>
+                                    <table style={{ border: '1px solid black', borderCollapse: 'collapse' }} className="print-nested-spec-table">
+                                        <tbody>
+                                            <tr>
+                                                <td>ชื่อพัสดุ: <span style={{
+                                                    width: '90%',
+                                                    whiteSpace: 'nowrap',
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis',
+                                                    verticalAlign: 'bottom',
+                                                    fontSize: data.assetName && data.assetName.length > 25 ? '10px' : (data.assetName && data.assetName.length > 18 ? '12px' : '14px')
+                                                }}>{data.assetName}</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>ใบส่งของ: <span style={{ width: '85%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', verticalAlign: 'bottom', fontSize: asset.delivery_document_no && asset.delivery_document_no.length > 25 ? '10px' : (asset.delivery_document_no && asset.delivery_document_no.length > 18 ? '12px' : '14px') }}>{asset.delivery_document_no}</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>ชื่อ/ยี่ห้อผู้ทำหรือผลิต: <span style={{ width: '85%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', verticalAlign: 'bottom', fontSize: asset.brand && asset.brand.length > 25 ? '10px' : (asset.brand && asset.brand.length > 18 ? '12px' : '14px') }}>{data.brand}</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>แบบ/ชนิด/ลักษณะ: <span style={{ width: '85%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', verticalAlign: 'bottom', fontSize: asset.model && asset.model.length > 25 ? '10px' : (asset.model && asset.model.length > 18 ? '12px' : '14px') }}>{data.model}</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>หมายเลขตัวรถ: <span style={{ width: '85%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', verticalAlign: 'bottom', fontSize: asset.carNumber && asset.carNumber.length > 25 ? '10px' : (asset.carNumber && asset.carNumber.length > 18 ? '12px' : '14px') }}>{data.carNumber}</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>หมายเลขเครื่อง (ถ้ามี): <span style={{ width: '85%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', verticalAlign: 'bottom', fontSize: asset.engineNumber && asset.engineNumber.length > 25 ? '10px' : (asset.engineNumber && asset.engineNumber.length > 18 ? '12px' : '14px') }}>{data.engineNumber}</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>หมายเลขกรอบ (ถ้ามี): <span style={{ width: '85%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', verticalAlign: 'bottom', fontSize: asset.chassisNumber && asset.chassisNumber.length > 25 ? '10px' : (asset.chassisNumber && asset.chassisNumber.length > 18 ? '12px' : '14px') }}>{data.chassisNumber}</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>หมายเลขจดทะเบียน (ถ้ามี): <span style={{ width: '85%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', verticalAlign: 'bottom', fontSize: asset.registrationNumber && asset.registrationNumber.length > 25 ? '10px' : (asset.registrationNumber && asset.registrationNumber.length > 18 ? '12px' : '14px') }}>{data.registrationNumber}</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>สีของพัสดุ: <span style={{ width: '85%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', verticalAlign: 'bottom', fontSize: asset.color && asset.color.length > 25 ? '10px' : (asset.color && asset.color.length > 18 ? '12px' : '14px') }}>{data.color}</span></td>
+                                            </tr>
+                                            <tr>
+                                                <td>อื่นๆ (ถ้ามีระบุ): <span style={{ width: '85%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', verticalAlign: 'bottom', fontSize: asset.other_details && asset.other_details.length > 25 ? '10px' : (asset.other_details && asset.other_details.length > 18 ? '12px' : '14px') }}></span></td>
+                                            </tr>
+                                            <tr>
+                                                <td style={{ textAlign: 'center' }}>เงื่อนไขการประกัน</td>
+                                            </tr>
+                                            <tr>
+                                                <td>พัสดุรับประกันถึงวันที่: <span style={{ width: '85%', fontSize: asset.warrantyUntil && asset.warrantyUntil.length > 25 ? '10px' : (asset.warrantyUntil && asset.warrantyUntil.length > 18 ? '12px' : '14px') }}>{data.warrantyUntil}</span><br /></td>
+                                            </tr>
+                                            <tr>
+                                                <td>พัสดุประกันไว้ที่บริษัท: <span style={{ width: '85%', fontSize: asset.warrantyCompany && asset.warrantyCompany.length > 25 ? '10px' : (asset.warrantyCompany && asset.warrantyCompany.length > 18 ? '12px' : '14px') }}>{data.warrantyCompany}</span><br /></td>
+                                            </tr>
+                                            <tr>
+                                                <td>วันที่ประกันพัสดุ: <span style={{ width: '85%' }}>{data.warrantyDate}</span></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </td>
                             )}
 
                             {/* ฝั่งกลาง: ราคาและการคำนวณค่าเสื่อม */}
-                            <td colSpan="2">
-                                ซื้อ/จ้าง/ได้มา เมื่อวันที่: <span className="dotted-line" style={{ width: '45%' }}>{data.acquiredDate}</span><br />
-                                ใช้งบประมาณของ: <span className="dotted-line" style={{ width: '60%' }}>{data.budgetSource}</span><br />
-                                ราคา: <span className="dotted-line" style={{ width: '80%' }}>{data.price}</span> บาท
-
-                                <div className="depreciation-section">
-                                    <strong className="text-center style-block">ค่าเสื่อมราคา</strong>
-                                    <table className="depreciation-table">
-                                        <tbody>
-                                            {data.depreciation.map((item, idx) => (
-                                                <tr key={idx}>
-                                                    <td className="depreciation-cell-borderless">{item.year}:</td>
-                                                    <td className="depreciation-cell-borderless"><span className="dotted-line" style={{ width: '30px' }}>{item.rate}</span> %</td>
-                                                    <td className="depreciation-cell-borderless">คงเหลือราคา <span className="dotted-line" style={{ width: '60px' }}>{item.balance}</span> บาท</td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
+                            <td colSpan="2" style={{ padding: 0, verticalAlign: 'top' }}>
+                                <table style={{ border: '1px solid black', borderCollapse: 'collapse' }} className="print-nested-spec-table">
+                                    <tbody>
+                                        <tr>
+                                            <td>ซื้อ/จ้าง/ได้มา จาก: <span style={{ width: '65%' }}>{asset.seller_name || '-'}</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>ซื้อ/จ้าง/ได้มา เมื่อวันที่: <span style={{ width: '45%' }}>{data.acquiredDate}</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>ราคา: <span style={{ width: '70%', fontSize: data.price && data.price.length > 25 ? '10px' : (data.price && data.price.length > 18 ? '12px' : '14px') }}>{data.price}</span> บาท
+                                                ใช้งบประมาณของ: <span style={{ width: '55%' }}>{data.budgetSource}</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td style={{ paddingBottom: '8px' }}>
+                                                <div className="depreciation-section">
+                                                    <strong className="text-center style-block" style={{ display: 'block', fontSize: '13px', marginBottom: '4px' }}>ค่าเสื่อมราคา</strong>
+                                                    <table className="depreciation-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                                        <tbody>
+                                                            {data.depreciation.map((item, idx) => (
+                                                                <tr key={idx} style={{ border: 'none' }}>
+                                                                    <td className="depreciation-cell-borderless" style={{ border: 'none', padding: '1.5px 0', fontSize: '12.5px' }}>{item.year}:</td>
+                                                                    <td className="depreciation-cell-borderless" style={{ border: 'none', padding: '1.5px 0', fontSize: '12.5px' }}><span className="dotted-line" style={{ width: '30px' }}>{item.rate}</span> %</td>
+                                                                    <td className="depreciation-cell-borderless" style={{ border: 'none', padding: '1.5px 0', fontSize: '12.5px' }}>คงเหลือราคา <span className="dotted-line" style={{ width: '80px' }}>{item.balance}</span> บาท</td>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td colSpan="3" className='center-text' style={{ border: '1px solid black', borderCollapse: 'collapse' }}>การจำหน่าย</td>
+                                        </tr>
+                                        <tr> <td>วันที่จำหน่าย: <span>{data.disposalDate}</span></td>
+                                        </tr>
+                                        <tr> <td>วิธีจำหน่าย: <span>{data.disposalMethod}</span></td>
+                                        </tr>
+                                        <tr>  <td>เลขที่หนังสืออนุมัติ: <span>{data.disposalDocNo}</span></td>
+                                        </tr>
+                                        <tr> <td>ราคาจำหน่าย: <span>{data.disposalPrice}</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>กำไร/ขาดทุน: <span>{data.profit}</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </td>
 
                             {/* ฝั่งขวา: ประวัติผู้ใช้งานพัสดุ */}
-                            <td className="history-section">
-                                <table className="history-table nested-table">
-                                    <thead>
-                                        <tr className="history-header-bg">
-                                            <th style={{ width: '20%' }}>พ.ศ.</th>
-                                            <th style={{ width: '40%' }}>ชื่อส่วนราชการ</th>
-                                            <th style={{ width: '40%' }}>ชื่อผู้ใช้/หัวหน้า</th>
-                                        </tr>
-                                    </thead>
+                            <td className="history-section" style={{ padding: 0, verticalAlign: 'top' }}>
+                                <table style={{ border: '1px solid black', borderCollapse: 'collapse', width: '100%' }} className="print-nested-spec-table">
                                     <tbody>
-                                        {data.history.map((hist, idx) => (
-                                            <tr key={idx} className="history-row">
-                                                <td className="history-cell-center">{hist.year}</td>
-                                                <td className="history-cell">{hist.department}</td>
-                                                <td className="history-cell-head">
-                                                    {hist.head || hist.user}
-                                                </td>
-                                            </tr>
-                                        ))}
+                                        <tr>
+                                            <td style={{ fontWeight: 'bold' }}>
+                                                ชื่อผู้ใช้-ดูแล-รับผิดชอบ
+                                                <div className="user-responsibility-box"></div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style={{ padding: 0 }}>
+                                                <table className="history-table nested-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                                    <thead>
+                                                        <tr className="history-header-bg">
+                                                            <th style={{ width: '20%', borderRight: '1px solid black', borderBottom: '1px solid black', padding: '4.8px 8px', fontSize: '13.5px' }}>พ.ศ.</th>
+                                                            <th style={{ width: '40%', borderRight: '1px solid black', borderBottom: '1px solid black', padding: '4.8px 8px', fontSize: '13.5px' }}>ชื่อส่วนราชการ</th>
+                                                            <th style={{ width: '40%', borderBottom: '1px solid black', padding: '4.8px 8px', fontSize: '13.5px' }}>ชื่อผู้ใช้/หัวหน้า</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {data.history.map((hist, idx) => (
+                                                            <tr key={idx} className="history-row">
+                                                                <td className="history-cell-center" style={{ borderRight: '1px solid black', borderBottom: '1px solid black', padding: '4.8px 8px', fontSize: '13.5px', textAlign: 'center' }}>{hist.year}</td>
+                                                                <td className="history-cell" style={{ borderRight: '1px solid black', borderBottom: '1px solid black', padding: '4.8px 8px', fontSize: '13.5px' }}>{hist.department}</td>
+                                                                <td className="history-cell-head" style={{ borderBottom: '1px solid black', padding: '4.8px 8px', fontSize: '13.5px' }}>
+                                                                    {hist.head || hist.user}
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style={{ padding: '8px', textAlign: 'center' }}>
+                                                <div className="photo-placeholder" style={{ margin: 0 }}>
+                                                    {asset.photo ? (
+                                                        <img src={asset.photo} alt={asset.name} />
+                                                    ) : (
+                                                        '[ รูปถ่ายพัสดุถ้ามี ]'
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
                                     </tbody>
                                 </table>
-                                <div className="photo-placeholder">
-                                    [ รูปถ่ายพัสดุถ้ามี ]
-                                </div>
                             </td>
                         </tr>
 
-                        {/* แถวที่ 4: การประกันภัย และ การจำหน่าย */}
-                        <tr className="text-sm">
-                            <td colSpan="2">
-                                <strong>เงื่อนไขการประกัน</strong><br />
-                                พัสดุรับประกันถึงวันที่: <span className="dotted-line" style={{ width: '55%' }}>{data.warrantyUntil}</span><br />
-                                พัสดุประกันไว้ที่บริษัท: <span className="dotted-line" style={{ width: '53%' }}>{data.warrantyCompany}</span><br />
-                                วันที่ประกันพัสดุ: <span className="dotted-line" style={{ width: '60%' }}>{data.warrantyDate}</span>
-                            </td>
-                            <td colSpan="3">
-                                <strong>การจำหน่าย</strong><br />
-                                วันที่จำหน่าย: <span className="dotted-line" style={{ width: '25%' }}>{data.disposalDate}</span>
-                                วิธีจำหน่าย: <span className="dotted-line" style={{ width: '45%' }}>{data.disposalMethod}</span><br />
-                                เลขที่หนังสืออนุมัติ: <span className="dotted-line" style={{ width: '35%' }}>{data.disposalDocNo}</span>
-                                ราคาจำหน่าย: <span className="dotted-line" style={{ width: '20%' }}>{data.disposalPrice}</span> บาท<br />
-                                กำไร/ขาดทุน: <span className="dotted-line" style={{ width: '40%' }}>{data.profit}</span> บาท
-                            </td>
-                        </tr>
+                        {/* แถวที่ 4: การจำหน่าย (ย้ายไปอยู่ในตารางย่อยฝั่งกลางแล้ว) */}
 
                         {/* แถวที่ 5: ตารางย่อยการหาผลประโยชน์ */}
                         <tr>
@@ -392,6 +497,6 @@ export default function InventoryPrint({ asset, onClose }) {
                     </tbody>
                 </table>
             </div>
-        </div>
+        </div >
     );
 }

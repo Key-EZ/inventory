@@ -25,7 +25,7 @@ export default function MemoPrintLayoutVertical({
   notes,
 }) {
   return (
-    <div className="a4-portrait-page">
+    <div className="a4-portrait-page a4-Vertical-page">
       {/* Memorandum Header Title */}
       <div style={{ display: 'flex', alignItems: 'flex-start', position: 'relative' }}>
         <img

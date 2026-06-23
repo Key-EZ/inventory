@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import MemoPrintLayoutVertical from '../templateforprint/MemoPrintLayoutVertical';
+import MemoPrintLayoutVertical from './MemoPrintLayoutVertical';
 
 export default function RepairRequestPrint({ repairRequest, asset, onClose }) {
   // Sync printable state class to body

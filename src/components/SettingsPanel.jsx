@@ -102,7 +102,11 @@ export default function SettingsPanel({
     clerkName: localStorage.getItem('print_rr_clerkName') || 'นายอดิศร วงศ์เจริญ',
     clerkPosition: localStorage.getItem('print_rr_clerkPosition') || 'ปลัดเทศบาลตำบลเสาธงหิน',
     mayorName: localStorage.getItem('print_rr_mayorName') || 'นายเกรียงไกร ไตรธรรม',
-    mayorPosition: localStorage.getItem('print_rr_mayorPosition') || 'นายกเทศมนตรีตำบลเสาธงหิน'
+    mayorPosition: localStorage.getItem('print_rr_mayorPosition') || 'นายกเทศมนตรีตำบลเสาธงหิน',
+    ledgerAgency: localStorage.getItem('print_ledger_agency') || 'เทศบาลตำบลเสาธงหิน',
+    ledgerOffice: localStorage.getItem('print_ledger_office') || '',
+    ledgerAmphoe: localStorage.getItem('print_ledger_amphoe') || 'บางใหญ่',
+    ledgerProvince: localStorage.getItem('print_ledger_province') || 'นนทบุรี'
   }));
 
   const handlePrintConfigChange = (e) => {
@@ -143,9 +147,14 @@ export default function SettingsPanel({
   const handleSaveRepairPrintSettings = (e) => {
     e.preventDefault();
     Object.entries(printConfig).forEach(([key, value]) => {
-      localStorage.setItem(`print_rr_${key}`, value);
+      if (['ledgerAgency', 'ledgerOffice', 'ledgerAmphoe', 'ledgerProvince'].includes(key)) {
+        const snakeKey = key.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+        localStorage.setItem(`print_${snakeKey}`, value);
+      } else {
+        localStorage.setItem(`print_rr_${key}`, value);
+      }
     });
-    alert('บันทึกการตั้งค่าข้อมูลใบแจ้งซ่อมสำเร็จ');
+    alert('บันทึกการตั้งค่าข้อมูลการพิมพ์เรียบร้อยแล้ว');
   };
 
   const handleSubmitCust = (e) => {
@@ -486,7 +495,7 @@ export default function SettingsPanel({
           className={`tab-btn ${activeTab === 'repair_print' ? 'active' : ''}`}
           onClick={() => setActiveTab('repair_print')}
         >
-          🔧 ตั้งค่าใบแจ้งซ่อม
+          🔧 ตั้งค่าการพิมพ์
         </button>
       </div>
 
@@ -1043,9 +1052,32 @@ export default function SettingsPanel({
 
       {activeTab === 'repair_print' && (
         <form onSubmit={handleSaveRepairPrintSettings} className="layout-card animate-fade-in" style={{ padding: '24px' }}>
-          <h3 style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '10px', marginBottom: '20px' }}>🔧 การตั้งค่าลายมือชื่อและข้อมูลใบแจ้งซ่อม</h3>
+          <h3 style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '10px', marginBottom: '20px' }}>🔧 การตั้งค่าข้อมูลและการพิมพ์เอกสาร</h3>
           
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', marginBottom: '24px' }}>
+            {/* Group 0: Ledger print configuration */}
+            <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '20px', borderRadius: '8px' }}>
+              <h4 style={{ color: 'var(--primary-color)', marginTop: 0, marginBottom: '16px' }}>📋 ข้อมูลทะเบียนคุมพัสดุ (พ.ด.1/พ.ด.2)</h4>
+              <div className="form-group" style={{ marginBottom: '12px' }}>
+                <label>ส่วนราชการหลัก</label>
+                <input type="text" name="ledgerAgency" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={printConfig.ledgerAgency} onChange={handlePrintConfigChange} />
+              </div>
+              <div className="form-group" style={{ marginBottom: '12px' }}>
+                <label>หน่วยงาน/สำนักงาน (เว้นว่างเพื่ออิงตามแผนกผู้ดูแล)</label>
+                <input type="text" name="ledgerOffice" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={printConfig.ledgerOffice} onChange={handlePrintConfigChange} placeholder="เช่น กองช่าง" />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <div className="form-group">
+                  <label>อำเภอ</label>
+                  <input type="text" name="ledgerAmphoe" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={printConfig.ledgerAmphoe} onChange={handlePrintConfigChange} />
+                </div>
+                <div className="form-group">
+                  <label>จังหวัด</label>
+                  <input type="text" name="ledgerProvince" className="filter-input-element" style={{ width: '100%', padding: '8px' }} value={printConfig.ledgerProvince} onChange={handlePrintConfigChange} />
+                </div>
+              </div>
+            </div>
+
             {/* Group 1: General document meta */}
             <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '20px', borderRadius: '8px' }}>
               <h4 style={{ color: 'var(--primary-color)', marginTop: 0, marginBottom: '16px' }}>📝 ข้อมูลเอกสารทั่วไป</h4>
