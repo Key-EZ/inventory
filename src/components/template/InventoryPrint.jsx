@@ -627,15 +627,15 @@ export default function InventoryPrint({ asset, onClose }) {
 
                             {/* ฝั่งขวา: ประวัติผู้ใช้งานพัสดุ */}
                             <td className="history-section" style={{ width: asset?.asset_type === 'LAND_BUILDING' ? '45%' : '50%', padding: 0, verticalAlign: 'top' }}>
-                                <table style={{ border: '1px solid black', borderCollapse: 'collapse', width: '100%' }} className="print-nested-spec-table">
+                                <table style={{ border: '1px solid black', borderCollapse: 'collapse', width: '100%', height: '100%' }} className="print-nested-spec-table">
                                     <tbody>
-                                        <tr>
+                                        <tr style={{ height: '1px' }}>
                                             <td style={{ fontWeight: 'bold' }}>
                                                 ชื่อผู้ใช้-ดูแล-รับผิดชอบ
                                                 <div className="user-responsibility-box"></div>
                                             </td>
                                         </tr>
-                                        <tr>
+                                        <tr style={{ height: '1px' }}>
                                             <td style={{ padding: 0 }}>
                                                 <table className="history-table nested-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                                                     <thead>
@@ -662,7 +662,7 @@ export default function InventoryPrint({ asset, onClose }) {
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td style={{ padding: '8px', textAlign: 'center' }}>
+                                            <td style={{ padding: '8px 8px 0px 8px', textAlign: 'center', verticalAlign: 'bottom' }}>
                                                 <div className="photo-placeholder" style={{ margin: 0 }}>
                                                     {asset.photo ? (
                                                         <img src={asset.photo} alt={asset.name} />
