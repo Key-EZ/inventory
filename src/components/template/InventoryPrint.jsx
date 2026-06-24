@@ -625,6 +625,7 @@ export default function InventoryPrint({ asset, onClose }) {
                                     </tbody>
                                 </table>
                             </td>
+
                             {/* ฝั่งขวา: ประวัติผู้ใช้งานพัสดุ */}
                             <td className={`history-section ${asset?.asset_type === 'LAND_BUILDING' ? 'print-col-right-building' : 'print-col-right-general'}`}>
                                 <table className="print-nested-spec-table print-nested-spec-table-stretch">
@@ -671,16 +672,12 @@ export default function InventoryPrint({ asset, onClose }) {
                                                 </table>
                                             </td>
                                         </tr>
+                                        <tr>
+
+                                        </tr>
                                     </tbody>
                                 </table>
                             </td>
-                            <div className="photo-placeholder print-photo-placeholder-wrap">
-                                {asset.photo ? (
-                                    <img src={asset.photo} alt={asset.name} />
-                                ) : (
-                                    '[ รูปถ่ายพัสดุถ้ามี ]'
-                                )}
-                            </div>
                         </tr>
 
                         {/* แถวที่ 4: การจำหน่าย (ย้ายไปอยู่ในตารางย่อยฝั่งกลางแล้ว) */}
@@ -714,8 +711,16 @@ export default function InventoryPrint({ asset, onClose }) {
                                     </tbody>
                                 </table>
                             </td>
+                            <td className="print-photo-container-cell">
+                                <div className="photo-placeholder print-photo-placeholder-wrap">
+                                    {asset.photo ? (
+                                        <img src={asset.photo} alt={asset.name} />
+                                    ) : (
+                                        '[ รูปถ่ายพัสดุถ้ามี ]'
+                                    )}
+                                </div>
+                            </td>
                         </tr>
-
                     </tbody>
                 </table>
             </div>
