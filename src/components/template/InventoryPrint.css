@@ -177,10 +177,8 @@
   vertical-align: bottom;
 }
 
-.photo-placeholder.print-photo-placeholder-wrap {
-  margin: 0 auto;
-  width: 400px;
-  height: 300px;
+.print-photo-placeholder-wrap {
+  margin: 0;
 }
 
 .print-benefit-section-td {
@@ -394,3 +392,33 @@
 .print-text-center {
   text-align: center;
 }
+
+/* Absolutely positioned print photo */
+.print-photo-absolute {
+  position: absolute !important;
+  bottom: 15mm !important;
+  right: 20mm !important;
+  width: 400px !important;
+  height: 300px !important;
+  border: 1px solid #000000 !important;
+  background-color: #ffffff !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 100 !important;
+}
+
+.print-photo-absolute img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+}
+
+@media print {
+  .print-photo-absolute {
+    bottom: 5px !important;
+    right: 10px !important;
+  }
+}
+

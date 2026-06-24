@@ -712,7 +712,7 @@ export default function InventoryPrint({ asset, onClose }) {
                                 </table>
                             </td>
                             <td className="print-photo-container-cell">
-                                <div className="photo-placeholder print-photo-placeholder-wrap">
+                                <div className="photo-placeholder print-photo-placeholder-wrap print-photo-absolute">
                                     {asset.photo ? (
                                         <img src={asset.photo} alt={asset.name} />
                                     ) : (
