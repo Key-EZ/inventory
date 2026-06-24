@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { formatThaiDateString } from '../../utils/dateUtils';
+import './InventoryPrint.css';
 
 function AutoFitText({ text, maxFontSize = 13.5, minFontSize = 8, className = '', style = {} }) {
     const containerRef = useRef(null);
@@ -221,78 +222,78 @@ export default function InventoryPrint({ asset, onClose }) {
             {/* หน้าเอกสารควบคุมสัดส่วน */}
             <div className="a4-landscape-page">
                 {/* ส่วนหัวเอกสาร */}
-                <table style={{ width: '100%', borderCollapse: 'collapse', margin: 0, padding: 0 }}>
+                <table className="print-header-tbl">
                     <tbody>
-                        <tr style={{ margin: 0, padding: 0 }}>
-                            <td style={{ width: '90%', padding: 0, margin: 0 }}>
-                                <div className="print-header-title" style={{ margin: 0, padding: 0 }}>
+                        <tr>
+                            <td className="print-header-title-cell">
+                                <div className="print-header-title">
                                     {asset?.asset_type === 'LAND_BUILDING'
                                         ? 'ทะเบียนที่ดินและสิ่งก่อสร้าง'
                                         : 'ทะเบียนพัสดุครุภัณฑ์ ปศุสัตว์และสัตว์พาหนะ'}
                                 </div>
                             </td>
-                            <td style={{ width: '10%', padding: 0, margin: 0, textAlign: 'right', verticalAlign: 'middle', fontWeight: 'bold' }}>
+                            <td className="print-header-tag-cell">
                                 <div>{asset?.asset_type === 'LAND_BUILDING' ? 'พ.ด. ๑' : 'พ.ด. ๒'}</div>
                             </td>
                         </tr>
-                        <tr style={{ margin: 0, padding: 0 }}>
-                            <td style={{ width: '95%', padding: 0, margin: 0 }}></td>
-                            <td style={{ width: '5%', verticalAlign: 'middle', border: '1px solid black', textAlign: 'center', padding: '2px 0', margin: 0 }}>
+                        <tr>
+                            <td className="print-header-empty-cell"></td>
+                            <td className="print-header-page-num-cell">
                                 <div>1</div>
                             </td>
                         </tr>
                     </tbody>
                 </table>
                 {/* ข้อมูลหน่วยงาน แถวเดียว นอกตาราง */}
-                <div className="print-header-metadata" style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '8px', fontSize: '14px', fontFamily: 'Sarabun, sans-serif', alignItems: 'flex-end' }}>
-                    <div style={{ width: '25%', display: 'flex', alignItems: 'flex-end' }}>
-                        <span style={{ whiteSpace: 'nowrap' }}>ประเภท</span>
-                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                <div className="print-header-metadata print-meta-row">
+                    <div className="print-meta-col-25-left">
+                        <span className="print-meta-field-label">ประเภท</span>
+                        <span className="print-meta-field-value dotted-line">
                             <AutoFitText text={data.category} />
                         </span>
                     </div>
-                    <div style={{ width: '50%', display: 'flex', justifyContent: 'center', alignItems: 'flex-end', gap: '8px' }}>
-                        <div style={{ display: 'flex', alignItems: 'flex-end', flexGrow: 1.5, minWidth: 0 }}>
-                            <span style={{ whiteSpace: 'nowrap' }}>สำนักงาน</span>
-                            <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                    <div className="print-meta-col-50-center">
+                        <div className="print-meta-cell-grow-1-5">
+                            <span className="print-meta-field-label">สำนักงาน</span>
+                            <span className="print-meta-field-value dotted-line">
                                 <AutoFitText text={data.agency} />
                             </span>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'flex-end', flexGrow: 1, minWidth: 0 }}>
-                            <span style={{ whiteSpace: 'nowrap' }}>อำเภอ</span>
-                            <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                        <div className="print-meta-cell-grow-1">
+                            <span className="print-meta-field-label">อำเภอ</span>
+                            <span className="print-meta-field-value dotted-line">
                                 <AutoFitText text={data.amphoe} />
                             </span>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'flex-end', flexGrow: 1, minWidth: 0 }}>
-                            <span style={{ whiteSpace: 'nowrap' }}>จังหวัด</span>
-                            <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                        <div className="print-meta-cell-grow-1">
+                            <span className="print-meta-field-label">จังหวัด</span>
+                            <span className="print-meta-field-value dotted-line">
                                 <AutoFitText text={data.province} />
                             </span>
                         </div>
                     </div>
-                    <div style={{ width: '25%', display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end' }}>
-                        <span style={{ whiteSpace: 'nowrap' }}>เลขรหัสพัสดุ</span>
-                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                    <div className="print-meta-col-25-right">
+                        <span className="print-meta-field-label">เลขรหัสพัสดุ</span>
+                        <span className="print-meta-field-value dotted-line">
                             <AutoFitText text={data.assetCode} />
                         </span>
                     </div>
                 </div>
 
-                <table className="form-table" style={{ border: '1px solid black', borderCollapse: 'collapse' }}>
+                <table className="form-table form-table-bordered">
                     <tbody>
 
                         <tr className="text-sm">
                             {/* ฝั่งซ้าย: ข้อมูลจำเพาะทางเทคนิค (พ.ด. 2) หรือรายละเอียดเฉพาะที่ดินและสิ่งก่อสร้าง (พ.ด. 1) */}
                             {asset?.asset_type === 'LAND_BUILDING' ? (
-                                <td style={{ width: '25%', padding: 0, verticalAlign: 'top' }}>
-                                    <table style={{ border: '1px solid black', borderCollapse: 'collapse' }} className="print-nested-spec-table">
+                                <td className="print-col-left-building">
+                                    <table className="print-nested-spec-table print-nested-spec-table-normal">
                                         <tbody>
                                             <tr>
                                                 <td>
-                                                    <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
-                                                        <span style={{ whiteSpace: 'nowrap' }}>ชื่อพัสดุ:</span>
-                                                        <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                    <div className="print-field-row-wrap">
+                                                        <span className="print-meta-field-label">ชื่อพัสดุ:</span>
+                                                        <span className="print-meta-field-value">
                                                             <AutoFitText text={data.assetName} />
                                                         </span>
                                                     </div>
@@ -300,9 +301,9 @@ export default function InventoryPrint({ asset, onClose }) {
                                             </tr>
                                             <tr>
                                                 <td>
-                                                    <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
-                                                        <span style={{ whiteSpace: 'nowrap' }}>เอกสารสิทธิ์ (โฉนด/น.ส.3):</span>
-                                                        <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                    <div className="print-field-row-wrap">
+                                                        <span className="print-meta-field-label">เอกสารสิทธิ์ (โฉนด/น.ส.3):</span>
+                                                        <span className="print-meta-field-value">
                                                             <AutoFitText text={asset.document_of_title || '-'} />
                                                         </span>
                                                     </div>
@@ -310,9 +311,9 @@ export default function InventoryPrint({ asset, onClose }) {
                                             </tr>
                                             <tr>
                                                 <td>
-                                                    <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
-                                                        <span style={{ whiteSpace: 'nowrap' }}>ขนาดเนื้อที่:</span>
-                                                        <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                    <div className="print-field-row-wrap">
+                                                        <span className="print-meta-field-label">ขนาดเนื้อที่:</span>
+                                                        <span className="print-meta-field-value">
                                                             <AutoFitText text={asset.area_size || '-'} />
                                                         </span>
                                                     </div>
@@ -320,9 +321,9 @@ export default function InventoryPrint({ asset, onClose }) {
                                             </tr>
                                             <tr>
                                                 <td>
-                                                    <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
-                                                        <span style={{ whiteSpace: 'nowrap' }}>ลักษณะโรงเรือน/สิ่งก่อสร้าง:</span>
-                                                        <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                    <div className="print-field-row-wrap">
+                                                        <span className="print-meta-field-label">ลักษณะโรงเรือน/สิ่งก่อสร้าง:</span>
+                                                        <span className="print-meta-field-value">
                                                             <AutoFitText text={asset.building_style || '-'} />
                                                         </span>
                                                     </div>
@@ -330,9 +331,9 @@ export default function InventoryPrint({ asset, onClose }) {
                                             </tr>
                                             <tr>
                                                 <td>
-                                                    <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
-                                                        <span style={{ whiteSpace: 'nowrap' }}>สถานะพัสดุ:</span>
-                                                        <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                    <div className="print-field-row-wrap">
+                                                        <span className="print-meta-field-label">สถานะพัสดุ:</span>
+                                                        <span className="print-meta-field-value">
                                                             <AutoFitText text={asset.status || '-'} />
                                                         </span>
                                                     </div>
@@ -340,9 +341,9 @@ export default function InventoryPrint({ asset, onClose }) {
                                             </tr>
                                             <tr>
                                                 <td>
-                                                    <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
-                                                        <span style={{ whiteSpace: 'nowrap' }}>ลักษณะการได้มา:</span>
-                                                        <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                    <div className="print-field-row-wrap">
+                                                        <span className="print-meta-field-label">ลักษณะการได้มา:</span>
+                                                        <span className="print-meta-field-value">
                                                             <AutoFitText text={asset.acquisition_method || '-'} />
                                                         </span>
                                                     </div>
@@ -350,32 +351,32 @@ export default function InventoryPrint({ asset, onClose }) {
                                             </tr>
                                             <tr>
                                                 <td>
-                                                    <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
-                                                        <span style={{ whiteSpace: 'nowrap' }}>เอกสารอนุมัติ/สัญญา:</span>
-                                                        <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                    <div className="print-field-row-wrap">
+                                                        <span className="print-meta-field-label">เอกสารอนุมัติ/สัญญา:</span>
+                                                        <span className="print-meta-field-value">
                                                             <AutoFitText text={asset.delivery_document_no ? `${asset.delivery_document_no} ลงวันที่ ${asset.delivery_document_date ? formatThaiDateString(asset.delivery_document_date) : '-'} (${asset.seller_name || '-'})` : '-'} />
                                                         </span>
                                                     </div>
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <td><span style={{ visibility: 'hidden' }}>-</span></td>
+                                                <td><span className="print-invisible">-</span></td>
                                             </tr>
                                             <tr>
-                                                <td><span style={{ visibility: 'hidden' }}>-</span></td>
+                                                <td><span className="print-invisible">-</span></td>
                                             </tr>
                                         </tbody>
                                     </table>
                                 </td>
                             ) : (
-                                <td style={{ width: '20%', padding: 0, verticalAlign: 'top' }}>
-                                    <table style={{ border: '1px solid black', borderCollapse: 'collapse' }} className="print-nested-spec-table">
+                                <td className="print-col-left-general">
+                                    <table className="print-nested-spec-table print-nested-spec-table-normal">
                                         <tbody>
                                             <tr>
                                                 <td>
-                                                    <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
-                                                        <span style={{ whiteSpace: 'nowrap' }}>ชื่อพัสดุ:</span>
-                                                        <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                    <div className="print-field-row-wrap">
+                                                        <span className="print-meta-field-label">ชื่อพัสดุ:</span>
+                                                        <span className="print-meta-field-value">
                                                             <AutoFitText text={data.assetName} />
                                                         </span>
                                                     </div>
@@ -383,9 +384,9 @@ export default function InventoryPrint({ asset, onClose }) {
                                             </tr>
                                             <tr>
                                                 <td>
-                                                    <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
-                                                        <span style={{ whiteSpace: 'nowrap' }}>ใบส่งของ:</span>
-                                                        <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                    <div className="print-field-row-wrap">
+                                                        <span className="print-meta-field-label">ใบส่งของ:</span>
+                                                        <span className="print-meta-field-value">
                                                             <AutoFitText text={asset.delivery_document_no || '-'} />
                                                         </span>
                                                     </div>
@@ -393,9 +394,9 @@ export default function InventoryPrint({ asset, onClose }) {
                                             </tr>
                                             <tr>
                                                 <td>
-                                                    <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
-                                                        <span style={{ whiteSpace: 'nowrap' }}>ชื่อ/ยี่ห้อผู้ทำหรือผลิต:</span>
-                                                        <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                    <div className="print-field-row-wrap">
+                                                        <span className="print-meta-field-label">ชื่อ/ยี่ห้อผู้ทำหรือผลิต:</span>
+                                                        <span className="print-meta-field-value">
                                                             <AutoFitText text={data.brand || '-'} />
                                                         </span>
                                                     </div>
@@ -403,9 +404,9 @@ export default function InventoryPrint({ asset, onClose }) {
                                             </tr>
                                             <tr>
                                                 <td>
-                                                    <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
-                                                        <span style={{ whiteSpace: 'nowrap' }}>แบบ/ชนิด/ลักษณะ:</span>
-                                                        <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                    <div className="print-field-row-wrap">
+                                                        <span className="print-meta-field-label">แบบ/ชนิด/ลักษณะ:</span>
+                                                        <span className="print-meta-field-value">
                                                             <AutoFitText text={data.model || '-'} />
                                                         </span>
                                                     </div>
@@ -413,9 +414,9 @@ export default function InventoryPrint({ asset, onClose }) {
                                             </tr>
                                             <tr>
                                                 <td>
-                                                    <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
-                                                        <span style={{ whiteSpace: 'nowrap' }}>หมายเลขตัวรถ:</span>
-                                                        <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                    <div className="print-field-row-wrap">
+                                                        <span className="print-meta-field-label">หมายเลขตัวรถ:</span>
+                                                        <span className="print-meta-field-value">
                                                             <AutoFitText text={data.carNumber || '-'} />
                                                         </span>
                                                     </div>
@@ -423,9 +424,9 @@ export default function InventoryPrint({ asset, onClose }) {
                                             </tr>
                                             <tr>
                                                 <td>
-                                                    <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
-                                                        <span style={{ whiteSpace: 'nowrap' }}>หมายเลขเครื่อง (ถ้ามี):</span>
-                                                        <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                    <div className="print-field-row-wrap">
+                                                        <span className="print-meta-field-label">หมายเลขเครื่อง (ถ้ามี):</span>
+                                                        <span className="print-meta-field-value">
                                                             <AutoFitText text={data.engineNumber || '-'} />
                                                         </span>
                                                     </div>
@@ -433,9 +434,9 @@ export default function InventoryPrint({ asset, onClose }) {
                                             </tr>
                                             <tr>
                                                 <td>
-                                                    <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
-                                                        <span style={{ whiteSpace: 'nowrap' }}>หมายเลขกรอบ (ถ้ามี):</span>
-                                                        <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                    <div className="print-field-row-wrap">
+                                                        <span className="print-meta-field-label">หมายเลขกรอบ (ถ้ามี):</span>
+                                                        <span className="print-meta-field-value">
                                                             <AutoFitText text={data.chassisNumber || '-'} />
                                                         </span>
                                                     </div>
@@ -443,9 +444,9 @@ export default function InventoryPrint({ asset, onClose }) {
                                             </tr>
                                             <tr>
                                                 <td>
-                                                    <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
-                                                        <span style={{ whiteSpace: 'nowrap' }}>หมายเลขจดทะเบียน (ถ้ามี):</span>
-                                                        <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                    <div className="print-field-row-wrap">
+                                                        <span className="print-meta-field-label">หมายเลขจดทะเบียน (ถ้ามี):</span>
+                                                        <span className="print-meta-field-value">
                                                             <AutoFitText text={data.registrationNumber || '-'} />
                                                         </span>
                                                     </div>
@@ -453,9 +454,9 @@ export default function InventoryPrint({ asset, onClose }) {
                                             </tr>
                                             <tr>
                                                 <td>
-                                                    <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
-                                                        <span style={{ whiteSpace: 'nowrap' }}>สีของพัสดุ:</span>
-                                                        <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                    <div className="print-field-row-wrap">
+                                                        <span className="print-meta-field-label">สีของพัสดุ:</span>
+                                                        <span className="print-meta-field-value">
                                                             <AutoFitText text={data.color || '-'} />
                                                         </span>
                                                     </div>
@@ -463,22 +464,22 @@ export default function InventoryPrint({ asset, onClose }) {
                                             </tr>
                                             <tr>
                                                 <td>
-                                                    <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
-                                                        <span style={{ whiteSpace: 'nowrap' }}>อื่นๆ (ถ้ามีระบุ):</span>
-                                                        <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                    <div className="print-field-row-wrap">
+                                                        <span className="print-meta-field-label">อื่นๆ (ถ้ามีระบุ):</span>
+                                                        <span className="print-meta-field-value">
                                                             <AutoFitText text={asset.other_details || '-'} />
                                                         </span>
                                                     </div>
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <td style={{ textAlign: 'center', fontWeight: 'bold' }}>เงื่อนไขการประกัน</td>
+                                                <td className="print-section-title-cell">เงื่อนไขการประกัน</td>
                                             </tr>
                                             <tr>
                                                 <td>
-                                                    <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
-                                                        <span style={{ whiteSpace: 'nowrap' }}>พัสดุรับประกันถึงวันที่:</span>
-                                                        <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                    <div className="print-field-row-wrap">
+                                                        <span className="print-meta-field-label">พัสดุรับประกันถึงวันที่:</span>
+                                                        <span className="print-meta-field-value">
                                                             <AutoFitText text={data.warrantyUntil || '-'} />
                                                         </span>
                                                     </div>
@@ -486,9 +487,9 @@ export default function InventoryPrint({ asset, onClose }) {
                                             </tr>
                                             <tr>
                                                 <td>
-                                                    <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
-                                                        <span style={{ whiteSpace: 'nowrap' }}>พัสดุประกันไว้ที่บริษัท:</span>
-                                                        <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                    <div className="print-field-row-wrap">
+                                                        <span className="print-meta-field-label">พัสดุประกันไว้ที่บริษัท:</span>
+                                                        <span className="print-meta-field-value">
                                                             <AutoFitText text={data.warrantyCompany || '-'} />
                                                         </span>
                                                     </div>
@@ -496,9 +497,9 @@ export default function InventoryPrint({ asset, onClose }) {
                                             </tr>
                                             <tr>
                                                 <td>
-                                                    <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
-                                                        <span style={{ whiteSpace: 'nowrap' }}>วันที่ประกันพัสดุ:</span>
-                                                        <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                    <div className="print-field-row-wrap">
+                                                        <span className="print-meta-field-label">วันที่ประกันพัสดุ:</span>
+                                                        <span className="print-meta-field-value">
                                                             <AutoFitText text={data.warrantyDate || '-'} />
                                                         </span>
                                                     </div>
@@ -510,14 +511,14 @@ export default function InventoryPrint({ asset, onClose }) {
                             )}
 
                             {/* ฝั่งกลาง: ราคาและการคำนวณค่าเสื่อม */}
-                            <td style={{ width: '30%', padding: 0, verticalAlign: 'top' }}>
-                                <table style={{ border: '1px solid black', borderCollapse: 'collapse' }} className="print-nested-spec-table">
+                            <td className="print-col-middle">
+                                <table className="print-nested-spec-table print-nested-spec-table-normal">
                                     <tbody>
                                         <tr>
                                             <td>
-                                                <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
-                                                    <span style={{ whiteSpace: 'nowrap' }}>ซื้อ/จ้าง/ได้มา จาก:</span>
-                                                    <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                <div className="print-field-row-wrap">
+                                                    <span className="print-meta-field-label">ซื้อ/จ้าง/ได้มา จาก:</span>
+                                                    <span className="print-meta-field-value">
                                                         <AutoFitText text={asset.seller_name || '-'} />
                                                     </span>
                                                 </div>
@@ -525,9 +526,9 @@ export default function InventoryPrint({ asset, onClose }) {
                                         </tr>
                                         <tr>
                                             <td>
-                                                <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
-                                                    <span style={{ whiteSpace: 'nowrap' }}>ซื้อ/จ้าง/ได้มา เมื่อวันที่:</span>
-                                                    <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                <div className="print-field-row-wrap">
+                                                    <span className="print-meta-field-label">ซื้อ/จ้าง/ได้มา เมื่อวันที่:</span>
+                                                    <span className="print-meta-field-value">
                                                         <AutoFitText text={data.acquiredDate || '-'} />
                                                     </span>
                                                 </div>
@@ -535,47 +536,47 @@ export default function InventoryPrint({ asset, onClose }) {
                                         </tr>
                                         <tr>
                                             <td>
-                                                <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%', gap: '4px' }}>
-                                                    <span style={{ whiteSpace: 'nowrap' }}>ราคา:</span>
-                                                    <span style={{ width: '70px', flexShrink: 0 }}>
+                                                <div className="print-field-row-wrap-gap">
+                                                    <span className="print-meta-field-label">ราคา:</span>
+                                                    <span className="print-cell-price-span">
                                                         <AutoFitText text={data.price} />
                                                     </span>
-                                                    <span style={{ whiteSpace: 'nowrap' }}>บาท</span>
-                                                    <span style={{ whiteSpace: 'nowrap', marginLeft: '4px' }}>งบประมาณ:</span>
-                                                    <span style={{ flexGrow: 1, minWidth: 0 }}>
+                                                    <span className="print-meta-field-label">บาท</span>
+                                                    <span className="print-meta-field-label print-ml-4">งบประมาณ:</span>
+                                                    <span className="print-meta-field-value">
                                                         <AutoFitText text={data.budgetSource} />
                                                     </span>
                                                 </div>
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td style={{ fontWeight: 'bold', textAlign: 'center' }}>ค่าเสื่อมราคา</td>
+                                            <td className="print-section-title-cell">ค่าเสื่อมราคา</td>
                                         </tr>
                                         {data.depreciation.map((item, idx) => (
                                             <tr key={idx}>
                                                 <td>
-                                                    <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%', gap: '4px' }}>
-                                                        <span style={{ whiteSpace: 'nowrap' }}>{item.year}:</span>
-                                                        <span style={{ width: '35px', textAlign: 'center', flexShrink: 0 }}>
+                                                    <div className="print-field-row-wrap-gap">
+                                                        <span className="print-meta-field-label">{item.year}:</span>
+                                                        <span className="print-cell-rate-span">
                                                             {item.rate}
                                                         </span>
-                                                        <span style={{ whiteSpace: 'nowrap' }}>% คงเหลือราคา</span>
-                                                        <span style={{ flexGrow: 1, minWidth: 0 }}>
+                                                        <span className="print-meta-field-label">% คงเหลือราคา</span>
+                                                        <span className="print-meta-field-value">
                                                             <AutoFitText text={item.balance} />
                                                         </span>
-                                                        <span style={{ whiteSpace: 'nowrap' }}>บาท</span>
+                                                        <span className="print-meta-field-label">บาท</span>
                                                     </div>
                                                 </td>
                                             </tr>
                                         ))}
                                         <tr>
-                                            <td className="center-text" style={{ fontWeight: 'bold', textAlign: 'center' }}>การจำหน่าย</td>
+                                            <td className="print-section-title-cell">การจำหน่าย</td>
                                         </tr>
                                         <tr>
                                             <td>
-                                                <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
-                                                    <span style={{ whiteSpace: 'nowrap' }}>วันที่จำหน่าย:</span>
-                                                    <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                <div className="print-field-row-wrap">
+                                                    <span className="print-meta-field-label">วันที่จำหน่าย:</span>
+                                                    <span className="print-meta-field-value">
                                                         <AutoFitText text={data.disposalDate || '-'} />
                                                     </span>
                                                 </div>
@@ -583,9 +584,9 @@ export default function InventoryPrint({ asset, onClose }) {
                                         </tr>
                                         <tr>
                                             <td>
-                                                <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
-                                                    <span style={{ whiteSpace: 'nowrap' }}>วิธีจำหน่าย:</span>
-                                                    <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                <div className="print-field-row-wrap">
+                                                    <span className="print-meta-field-label">วิธีจำหน่าย:</span>
+                                                    <span className="print-meta-field-value">
                                                         <AutoFitText text={data.disposalMethod || '-'} />
                                                     </span>
                                                 </div>
@@ -593,9 +594,9 @@ export default function InventoryPrint({ asset, onClose }) {
                                         </tr>
                                         <tr>
                                             <td>
-                                                <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
-                                                    <span style={{ whiteSpace: 'nowrap' }}>เลขที่หนังสืออนุมัติ:</span>
-                                                    <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                <div className="print-field-row-wrap">
+                                                    <span className="print-meta-field-label">เลขที่หนังสืออนุมัติ:</span>
+                                                    <span className="print-meta-field-value">
                                                         <AutoFitText text={data.disposalDocNo || '-'} />
                                                     </span>
                                                 </div>
@@ -603,9 +604,9 @@ export default function InventoryPrint({ asset, onClose }) {
                                         </tr>
                                         <tr>
                                             <td>
-                                                <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
-                                                    <span style={{ whiteSpace: 'nowrap' }}>ราคาจำหน่าย:</span>
-                                                    <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                <div className="print-field-row-wrap">
+                                                    <span className="print-meta-field-label">ราคาจำหน่าย:</span>
+                                                    <span className="print-meta-field-value">
                                                         <AutoFitText text={data.disposalPrice || '-'} />
                                                     </span>
                                                 </div>
@@ -613,9 +614,9 @@ export default function InventoryPrint({ asset, onClose }) {
                                         </tr>
                                         <tr>
                                             <td>
-                                                <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
-                                                    <span style={{ whiteSpace: 'nowrap' }}>กำไร/ขาดทุน:</span>
-                                                    <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                <div className="print-field-row-wrap">
+                                                    <span className="print-meta-field-label">กำไร/ขาดทุน:</span>
+                                                    <span className="print-meta-field-value">
                                                         <AutoFitText text={data.profit || '-'} />
                                                     </span>
                                                 </div>
@@ -626,28 +627,28 @@ export default function InventoryPrint({ asset, onClose }) {
                             </td>
 
                             {/* ฝั่งขวา: ประวัติผู้ใช้งานพัสดุ */}
-                            <td className="history-section" style={{ width: asset?.asset_type === 'LAND_BUILDING' ? '45%' : '50%', padding: 0, verticalAlign: 'top' }}>
-                                <table style={{ border: '1px solid black', borderCollapse: 'collapse', width: '100%', height: '100%' }} className="print-nested-spec-table">
+                            <td className={`history-section ${asset?.asset_type === 'LAND_BUILDING' ? 'print-col-right-building' : 'print-col-right-general'}`}>
+                                <table className="print-nested-spec-table print-nested-spec-table-stretch">
                                     <tbody>
-                                        <tr style={{ height: '1px' }}>
-                                            <td style={{ fontWeight: 'bold' }}>
+                                        <tr className="print-row-min-height">
+                                            <td className="print-bold">
                                                 ชื่อผู้ใช้-ดูแล-รับผิดชอบ
                                                 <div className="user-responsibility-box"></div>
                                             </td>
                                         </tr>
-                                        <tr style={{ height: '1px' }}>
-                                            <td style={{ padding: 0 }}>
-                                                <table className="history-table nested-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                        <tr className="print-row-min-height">
+                                            <td className="print-p-0">
+                                                <table className="history-table nested-table print-history-table">
                                                     <thead>
                                                         <tr className="history-header-bg">
-                                                            <th style={{ width: '15%', borderRight: '1px solid black', borderBottom: '1px solid black', padding: '4.8px 8px', fontSize: '13.5px' }}>พ.ศ.</th>
-                                                            <th style={{ width: '35%', borderRight: '1px solid black', borderBottom: '1px solid black', padding: '4.8px 8px', fontSize: '13.5px' }}>
+                                                            <th className="print-history-th-first-three print-history-w-15">พ.ศ.</th>
+                                                            <th className="print-history-th-first-three print-history-w-35">
                                                                 <AutoFitText text="ชื่อส่วนราชการ" />
                                                             </th>
-                                                            <th style={{ width: '25%', borderRight: '1px solid black', borderBottom: '1px solid black', padding: '4.8px 8px', fontSize: '13.5px' }}>
+                                                            <th className="print-history-th-first-three print-history-w-25">
                                                                 <AutoFitText text="ชื่อผู้ใช้พัสดุ" />
                                                             </th>
-                                                            <th style={{ width: '25%', borderBottom: '1px solid black', padding: '4.8px 8px', fontSize: '13.5px' }}>
+                                                            <th className="print-history-th-last print-history-w-25">
                                                                 <AutoFitText text="ชื่อหัวหน้าส่วนราชการ" />
                                                             </th>
                                                         </tr>
@@ -655,14 +656,14 @@ export default function InventoryPrint({ asset, onClose }) {
                                                     <tbody>
                                                         {data.history.map((hist, idx) => (
                                                             <tr key={idx} className="history-row">
-                                                                <td className="history-cell-center" style={{ borderRight: '1px solid black', borderBottom: '1px solid black', padding: '4.8px 8px', fontSize: '13.5px', textAlign: 'center' }}>{hist.year}</td>
-                                                                <td className="history-cell" style={{ borderRight: '1px solid black', borderBottom: '1px solid black', padding: '4.8px 8px', fontSize: '13.5px' }}>
+                                                                <td className="history-cell-center print-history-td-first-three print-text-center">{hist.year}</td>
+                                                                <td className="history-cell print-history-td-first-three">
                                                                     <AutoFitText text={hist.department} />
                                                                 </td>
-                                                                <td className="history-cell" style={{ borderRight: '1px solid black', borderBottom: '1px solid black', padding: '4.8px 8px', fontSize: '13.5px' }}>
+                                                                <td className="history-cell print-history-td-first-three">
                                                                     <AutoFitText text={hist.user || '-'} />
                                                                 </td>
-                                                                <td className="history-cell-head" style={{ borderBottom: '1px solid black', padding: '4.8px 8px', fontSize: '13.5px' }}>
+                                                                <td className="history-cell-head print-history-td-last">
                                                                     <AutoFitText text={hist.head || '-'} />
                                                                 </td>
                                                             </tr>
@@ -672,8 +673,8 @@ export default function InventoryPrint({ asset, onClose }) {
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td style={{ padding: '8px 8px 0px 8px', textAlign: 'center', verticalAlign: 'bottom' }}>
-                                                <div className="photo-placeholder" style={{ margin: 0 }}>
+                                            <td className="print-photo-container-cell">
+                                                <div className="photo-placeholder print-photo-placeholder-wrap">
                                                     {asset.photo ? (
                                                         <img src={asset.photo} alt={asset.name} />
                                                     ) : (
@@ -691,54 +692,54 @@ export default function InventoryPrint({ asset, onClose }) {
 
                         {/* แถวที่ 5: ตารางย่อยการหาผลประโยชน์ */}
                         <tr>
-                            <td colSpan="2" style={{ padding: '0' }}>
-                                <div className="benefit-section-title" style={{ border: '1px solid black', borderCollapse: 'collapse' }}>
+                            <td colSpan="2" className="print-benefit-section-td">
+                                <div className="benefit-section-title print-benefit-title">
                                     การหาผลประโยชน์ในพัสดุ
                                 </div>
-                                <table className="benefit-table" style={{ border: '1px solid black', borderCollapse: 'collapse' }}>
+                                <table className="benefit-table print-benefit-tbl">
                                     <thead>
                                         <tr>
-                                            <th style={{ width: '10%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}>พ.ศ.</th>
-                                            <th style={{ width: '40%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}>รายการ</th>
-                                            <th style={{ width: '15%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}>ผลประโยชน์ (บาท)</th>
-                                            <th style={{ width: '10%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}>พ.ศ.</th>
-                                            <th style={{ width: '15%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}>รายการ</th>
-                                            <th style={{ width: '10%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}>ผลประโยชน์ (บาท)</th>
+                                            <th className="print-benefit-cell print-w-10">พ.ศ.</th>
+                                            <th className="print-benefit-cell print-w-40">รายการ</th>
+                                            <th className="print-benefit-cell print-w-15">ผลประโยชน์ (บาท)</th>
+                                            <th className="print-benefit-cell print-w-10">พ.ศ.</th>
+                                            <th className="print-benefit-cell print-w-15">รายการ</th>
+                                            <th className="print-benefit-cell print-w-10">ผลประโยชน์ (บาท)</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr className="benefit-row">
-                                            <td className="benefit-cell" style={{ height: 30, width: '10%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}  ></td>
-                                            <td className="benefit-cell" style={{ height: 30, width: '40%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}></td>
-                                            <td className="benefit-cell" style={{ height: 30, width: '15%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}></td>
-                                            <td className="benefit-cell" style={{ height: 30, width: '10%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}></td>
-                                            <td className="benefit-cell" style={{ height: 30, width: '15%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}></td>
-                                            <td className="benefit-cell-last" style={{ height: 30, width: '10%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}></td>
+                                            <td className="benefit-cell print-w-10"></td>
+                                            <td className="benefit-cell print-w-40"></td>
+                                            <td className="benefit-cell print-w-15"></td>
+                                            <td className="benefit-cell print-w-10"></td>
+                                            <td className="benefit-cell print-w-15"></td>
+                                            <td className="benefit-cell-last print-w-10"></td>
                                         </tr>
                                         <tr className="benefit-row">
-                                            <td className="benefit-cell" style={{ height: 30, width: '10%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}  ></td>
-                                            <td className="benefit-cell" style={{ height: 30, width: '40%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}></td>
-                                            <td className="benefit-cell" style={{ height: 30, width: '15%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}></td>
-                                            <td className="benefit-cell" style={{ height: 30, width: '10%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}></td>
-                                            <td className="benefit-cell" style={{ height: 30, width: '15%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}></td>
-                                            <td className="benefit-cell-last" style={{ height: 30, width: '10%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}></td>
+                                            <td className="benefit-cell print-w-10"></td>
+                                            <td className="benefit-cell print-w-40"></td>
+                                            <td className="benefit-cell print-w-15"></td>
+                                            <td className="benefit-cell print-w-10"></td>
+                                            <td className="benefit-cell print-w-15"></td>
+                                            <td className="benefit-cell-last print-w-10"></td>
                                         </tr>
 
                                         <tr className="benefit-row">
-                                            <td className="benefit-cell" style={{ height: 30, width: '10%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}  ></td>
-                                            <td className="benefit-cell" style={{ height: 30, width: '40%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}></td>
-                                            <td className="benefit-cell" style={{ height: 30, width: '15%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}></td>
-                                            <td className="benefit-cell" style={{ height: 30, width: '10%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}></td>
-                                            <td className="benefit-cell" style={{ height: 30, width: '15%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}></td>
-                                            <td className="benefit-cell-last" style={{ height: 30, width: '10%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}></td>
+                                            <td className="benefit-cell print-w-10"></td>
+                                            <td className="benefit-cell print-w-40"></td>
+                                            <td className="benefit-cell print-w-15"></td>
+                                            <td className="benefit-cell print-w-10"></td>
+                                            <td className="benefit-cell print-w-15"></td>
+                                            <td className="benefit-cell-last print-w-10"></td>
                                         </tr>
                                         <tr className="benefit-row">
-                                            <td className="benefit-cell" style={{ height: 30, width: '10%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}  ></td>
-                                            <td className="benefit-cell" style={{ height: 30, width: '40%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}></td>
-                                            <td className="benefit-cell" style={{ height: 30, width: '15%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}></td>
-                                            <td className="benefit-cell" style={{ height: 30, width: '10%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}></td>
-                                            <td className="benefit-cell" style={{ height: 30, width: '15%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}></td>
-                                            <td className="benefit-cell-last" style={{ height: 30, width: '10%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}></td>
+                                            <td className="benefit-cell print-w-10"></td>
+                                            <td className="benefit-cell print-w-40"></td>
+                                            <td className="benefit-cell print-w-15"></td>
+                                            <td className="benefit-cell print-w-10"></td>
+                                            <td className="benefit-cell print-w-15"></td>
+                                            <td className="benefit-cell-last print-w-10"></td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -751,54 +752,54 @@ export default function InventoryPrint({ asset, onClose }) {
             {/* หน้าที่ 2: ประวัติการซ่อมบำรุงรักษา */}
             <div className="a4-landscape-page page-break-before-always">
                 {/* ส่วนหัวเอกสาร หน้า 2 */}
-                <div className="print-header-title" style={{ marginBottom: '10px' }}>
+                <div className="print-header-title print-maint-header-title">
                     ประวัติการซ่อมบำรุงรักษา (หน้า ๒)
                 </div>
-                <div className="print-header-subtitle" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px', fontSize: '15px', fontWeight: '500' }}>
+                <div className="print-maint-header-subtitle">
                     <div>
-                        <strong>ประเภทพัสดุ:</strong> <span className="dotted-line" style={{ width: '180px' }}>{data.category}</span>
+                        <strong>ประเภทพัสดุ:</strong> <span className="dotted-line print-maint-tag-width-180">{data.category}</span>
                     </div>
                     <div>
-                        <strong>ชื่อพัสดุ:</strong> <span className="dotted-line" style={{ width: '280px' }}>{data.assetName}</span>
+                        <strong>ชื่อพัสดุ:</strong> <span className="dotted-line print-maint-tag-width-280">{data.assetName}</span>
                     </div>
                     <div>
-                        <strong>รหัสพัสดุ:</strong> <span className="dotted-line" style={{ width: '160px' }}>{data.assetCode}</span>
+                        <strong>รหัสพัสดุ:</strong> <span className="dotted-line print-maint-tag-width-160">{data.assetCode}</span>
                     </div>
                 </div>
-                <table className="card-maint-table" style={{ border: '1.5px solid #000000', width: '100%', borderCollapse: 'collapse' }}>
+                <table className="card-maint-table print-maint-main-table">
                     <thead>
-                        <tr style={{ backgroundColor: '#f9f5f1ff' }}>
-                            <th style={{ width: '12%', border: '1px solid #000000', padding: '10px 8px', textAlign: 'center', fontWeight: 'bold', fontSize: '15px' }}>วัน เดือน ปี</th>
-                            <th style={{ width: '22%', border: '1px solid #000000', padding: '10px 8px', textAlign: 'center', fontWeight: 'bold', fontSize: '15px' }}>เลขที่หนังสืออนุมัติ</th>
-                            <th style={{ width: '40%', border: '1px solid #000000', padding: '10px 8px', textAlign: 'center', fontWeight: 'bold', fontSize: '15px' }}>รายการซ่อมแซมหรือเปลี่ยนอะไหล่โดยละเอียด</th>
-                            <th style={{ width: '11%', border: '1px solid #000000', padding: '10px 8px', textAlign: 'center', fontWeight: 'bold', fontSize: '15px' }}>จำนวนเงิน (บาท)</th>
-                            <th style={{ width: '15%', border: '1px solid #000000', padding: '10px 8px', textAlign: 'center', fontWeight: 'bold', fontSize: '15px' }}>ผู้รับจ้าง/ช่างซ่อม</th>
+                        <tr className="print-maint-row-header">
+                            <th className="print-maint-th-common print-maint-th-12">วัน เดือน ปี</th>
+                            <th className="print-maint-th-common print-maint-th-22">เลขที่หนังสืออนุมัติ</th>
+                            <th className="print-maint-th-common print-maint-th-40">รายการซ่อมแซมหรือเปลี่ยนอะไหล่โดยละเอียด</th>
+                            <th className="print-maint-th-common print-maint-th-11">จำนวนเงิน (บาท)</th>
+                            <th className="print-maint-th-common print-maint-th-15">ผู้รับจ้าง/ช่างซ่อม</th>
                         </tr>
                     </thead>
                     <tbody>
                         {asset.maintenances && asset.maintenances.length > 0 ? (
                             asset.maintenances.map((maint, idx) => (
                                 <tr key={maint.id || idx}>
-                                    <td style={{ border: '1px solid #000000', padding: '12px 8px', textAlign: 'center', fontSize: '14px' }}>
+                                    <td className="print-maint-cell-center">
                                         {maint.approval_date ? formatThaiDateString(maint.approval_date) : '-'}
                                     </td>
-                                    <td style={{ border: '1px solid #000000', padding: '12px 8px', fontSize: '14px' }}>
+                                    <td className="print-maint-cell-common">
                                         {maint.document_number || '-'}
                                     </td>
-                                    <td style={{ border: '1px solid #000000', padding: '12px 8px', fontSize: '14px' }}>
+                                    <td className="print-maint-cell-common">
                                         {maint.description || '-'}
                                     </td>
-                                    <td style={{ border: '1px solid #000000', padding: '12px 8px', textAlign: 'right', fontSize: '14px' }}>
+                                    <td className="print-maint-cell-right">
                                         {(maint.cost || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </td>
-                                    <td style={{ border: '1px solid #000000', padding: '12px 8px', fontSize: '14px' }}>
+                                    <td className="print-maint-cell-common">
                                         {maint.contractor || '-'}
                                     </td>
                                 </tr>
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="5" style={{ border: '1px solid #000000', padding: '20px', textAlign: 'center', color: '#020000ff', fontSize: '15px' }}>
+                                <td colSpan="5" className="print-maint-cell-empty-state">
                                     ไม่มีประวัติการซ่อมบำรุงรักษาสำหรับพัสดุรายการนี้
                                 </td>
                             </tr>
@@ -806,11 +807,11 @@ export default function InventoryPrint({ asset, onClose }) {
                         {/* Fill empty rows to make it look like a standard official ledger form (at least 8 rows total) */}
                         {Array.from({ length: Math.max(0, 8 - (asset.maintenances ? asset.maintenances.length : 0)) }).map((_, idx) => (
                             <tr key={`empty-${idx}`}>
-                                <td style={{ border: '1px solid #000000', padding: '18px 8px' }}>&nbsp;</td>
-                                <td style={{ border: '1px solid #000000', padding: '18px 8px' }}>&nbsp;</td>
-                                <td style={{ border: '1px solid #000000', padding: '18px 8px' }}>&nbsp;</td>
-                                <td style={{ border: '1px solid #000000', padding: '18px 8px' }}>&nbsp;</td>
-                                <td style={{ border: '1px solid #000000', padding: '18px 8px' }}>&nbsp;</td>
+                                <td className="print-maint-cell-empty-filler">&nbsp;</td>
+                                <td className="print-maint-cell-empty-filler">&nbsp;</td>
+                                <td className="print-maint-cell-empty-filler">&nbsp;</td>
+                                <td className="print-maint-cell-empty-filler">&nbsp;</td>
+                                <td className="print-maint-cell-empty-filler">&nbsp;</td>
                             </tr>
                         ))}
                     </tbody>
