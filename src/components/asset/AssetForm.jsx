@@ -1,19 +1,5 @@
-import { useState } from 'react';
-import { calculateDepreciation } from '../../utils/depreciation';
+import useAssetForm from '../../hooks/useAssetForm';
 import { defaultDepartments } from '../../utils/mockData';
-
-const generateNewAssetId = () => `asset-${Date.now()}`;
-
-const formatAssetCode = (value) => {
-  const clean = value.replace(/\D/g, '');
-  const truncated = clean.slice(0, 9);
-  if (truncated.length > 5) {
-    return `${truncated.slice(0, 3)}/${truncated.slice(3, 5)}/${truncated.slice(5)}`;
-  } else if (truncated.length > 3) {
-    return `${truncated.slice(0, 3)}/${truncated.slice(3)}`;
-  }
-  return truncated;
-};
 
 export default function AssetForm({
   asset,
@@ -28,174 +14,28 @@ export default function AssetForm({
   onClose,
   sellers = []
 }) {
-  const isEdit = !!asset;
-
-  // Tabs: 'general', 'spec', 'financial'
-  const [activeTab, setActiveTab] = useState('general');
-
-  // Form states (Grouped object)
-  const [formData, setFormData] = useState({
-    assetType: asset ? asset.asset_type || 'EQUIPMENT' : 'EQUIPMENT',
-    category: asset ? asset.category || '' : (equipmentCategories[0] || ''),
-    assetCode: asset ? asset.asset_code || '' : '',
-    name: asset ? asset.name || '' : '',
-    location: asset ? asset.location || '' : '',
-    acquisitionMethod: asset ? asset.acquisition_method || 'ซื้อ' : 'ซื้อ',
-    deliveryDocumentNo: asset ? asset.delivery_document_no || '' : '',
-    deliveryDocumentDate: asset ? asset.delivery_document_date || '' : '',
-    sellerName: asset ? asset.seller_name || '' : (sellers[0] || ''),
-    unitPrice: asset ? asset.unit_price || 0 : 0,
-    responsibleDepartment: asset ? asset.responsible_department || '' : '',
-    status: asset ? asset.status || 'ใช้งาน' : 'ใช้งาน',
-    
-    // LAND_BUILDING specific (Ph.D. 1)
-    documentOfTitle: asset ? asset.document_of_title || '' : '',
-    areaSize: asset ? asset.area_size || '' : '',
-    buildingStyle: asset ? asset.building_style || '' : '',
-
-    // EQUIPMENT specific (Ph.D. 2)
-    manufacturerBrand: asset ? asset.manufacturer_brand || '' : '',
-    serialNumber: asset ? asset.serial_number || '' : '',
-    engineNumber: asset ? asset.engine_number || '' : '',
-    chassisNumber: asset ? asset.chassis_number || '' : '',
-    vehicleRegistration: asset ? asset.vehicle_registration || '' : '',
-    color: asset ? asset.color || '' : '',
-    warrantyStartDate: asset ? asset.warranty_start_date || '' : '',
-    warrantyEndDate: asset ? asset.warranty_end_date || '' : '',
-    warrantyCompany: asset ? asset.warranty_company || '' : '',
-    photo: asset ? asset.photo || '' : '',
+  const {
+    isEdit,
+    activeTab,
+    setActiveTab,
+    formData,
+    errors,
+    depreciationRate,
+    accumulatedDepreciation,
+    bookValue,
+    handleChange,
+    handleAssetTypeChange,
+    handlePhotoChange,
+    handleRemovePhoto,
+    handleSubmit
+  } = useAssetForm({
+    asset,
+    equipmentCategories,
+    landBuildingCategories,
+    sellers,
+    onSubmit,
+    onClose
   });
-
-  const budgetOwner = asset ? asset.budget_owner || '' : '';
-  const maintenances = asset ? asset.maintenances || [] : [];
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    let finalValue = value;
-    if (name === 'unitPrice') {
-      finalValue = parseFloat(value) || 0;
-    } else if (name === 'assetCode') {
-      finalValue = formatAssetCode(value);
-    }
-    setFormData(prev => ({
-      ...prev,
-      [name]: finalValue
-    }));
-  };
-
-  const handlePhotoChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const maxSize = 100 * 1024; // 100 KB
-    if (file.size > maxSize) {
-      alert(`ขนาดไฟล์ภาพต้องไม่เกิน 100 KB (ขนาดไฟล์ปัจจุบัน: ${(file.size / 1024).toFixed(1)} KB)`);
-      e.target.value = '';
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      setFormData(prev => ({
-        ...prev,
-        photo: event.target.result
-      }));
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleRemovePhoto = () => {
-    setFormData(prev => ({
-      ...prev,
-      photo: ''
-    }));
-  };
-
-  // Calculate depreciation dynamically during render
-  const calc = calculateDepreciation(formData.assetCode, formData.unitPrice);
-  const depreciationRate = calc.depreciationRatePercent;
-  const accumulatedDepreciation = calc.accumulatedDepreciation;
-  const bookValue = calc.bookValue;
-
-  // Submit Handler
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!formData.name || !formData.assetCode || !formData.category) {
-      alert('กรุณากรอก ชื่อพัสดุ รหัสพัสดุ และเลือกหมวดหมู่พัสดุ');
-      return;
-    }
-
-    // Basic regex check for 3-part code format
-    const codeFormat = /^\d{3}\/\d{2}\/\d{4}$/;
-    if (!codeFormat.test(formData.assetCode)) {
-      if (!window.confirm('คำเตือน: รหัสพัสดุไม่ได้อยู่ในรูปแบบแนะนำ (เช่น 001/10/0001) คุณต้องการใช้รหัสนี้ต่อหรือไม่?')) {
-        return;
-      }
-    }
-
-    // Preserve custodian history
-    const custodianHistory = asset?.custodian_history || [];
-
-    // Determine overall budget_owner from the latest custodian history entry, if any
-    let finalBudgetOwner = asset?.budget_owner || '';
-    if (custodianHistory.length > 0) {
-      const sorted = [...custodianHistory].sort((a, b) => {
-        const yA = parseInt(a.year) || 0;
-        const yB = parseInt(b.year) || 0;
-        return yB - yA;
-      });
-      finalBudgetOwner = sorted[0]?.budget_owner || '';
-    }
-
-    const payload = {
-      id: asset?.id || generateNewAssetId(),
-      asset_type: formData.assetType,
-      category: formData.category,
-      asset_code: formData.assetCode,
-      name: formData.name,
-      location: formData.location,
-      acquisition_method: formData.acquisitionMethod,
-      delivery_document_no: formData.deliveryDocumentNo,
-      delivery_document_date: formData.deliveryDocumentDate,
-      seller_name: formData.sellerName,
-      unit_price: parseFloat(formData.unitPrice) || 0,
-      budget_owner: finalBudgetOwner,
-      responsible_department: formData.responsibleDepartment,
-      status: formData.status,
-
-      // Ph.D. 1 specific fields
-      document_of_title: formData.assetType === 'LAND_BUILDING' ? formData.documentOfTitle : '',
-      area_size: formData.assetType === 'LAND_BUILDING' ? formData.areaSize : '',
-      building_style: formData.assetType === 'LAND_BUILDING' ? formData.buildingStyle : '',
-
-      // Ph.D. 2 specific fields
-      manufacturer_brand: formData.assetType === 'EQUIPMENT' ? formData.manufacturerBrand : '',
-      serial_number: formData.assetType === 'EQUIPMENT' ? formData.serialNumber : '',
-      engine_number: formData.assetType === 'EQUIPMENT' ? formData.engineNumber : '',
-      chassis_number: formData.assetType === 'EQUIPMENT' ? formData.chassisNumber : '',
-      vehicle_registration: formData.assetType === 'EQUIPMENT' ? formData.vehicleRegistration : '',
-      color: formData.assetType === 'EQUIPMENT' ? formData.color : '',
-      warranty_start_date: formData.assetType === 'EQUIPMENT' ? formData.warrantyStartDate : '',
-      warranty_end_date: formData.assetType === 'EQUIPMENT' ? formData.warrantyEndDate : '',
-      warranty_company: formData.assetType === 'EQUIPMENT' ? formData.warrantyCompany : '',
-
-      // Calculated stats
-      depreciation_rate_percent: depreciationRate,
-      accumulated_depreciation: accumulatedDepreciation,
-      book_value: bookValue,
-
-      // Maintenances sub-table list
-      maintenances: maintenances,
-
-      // Custodian history list
-      custodian_history: custodianHistory,
-
-      // Photo
-      photo: formData.photo
-    };
-
-    onSubmit(payload);
-  };
 
   return (
     <div className="modal-backdrop">
@@ -239,14 +79,7 @@ export default function AssetForm({
                   <select
                     name="assetType"
                     value={formData.assetType}
-                    onChange={(e) => {
-                      const newType = e.target.value;
-                      setFormData(prev => ({
-                        ...prev,
-                        assetType: newType,
-                        category: newType === 'LAND_BUILDING' ? (landBuildingCategories[0] || '') : (equipmentCategories[0] || '')
-                      }));
-                    }}
+                    onChange={(e) => handleAssetTypeChange(e.target.value)}
                     required
                   >
                     <option value="EQUIPMENT">ครุภัณฑ์</option>
@@ -259,6 +92,7 @@ export default function AssetForm({
                     name="category"
                     value={formData.category}
                     onChange={handleChange}
+                    className={errors.category ? 'input-error' : ''}
                     required
                   >
                     <option value="">-- เลือกหมวดหมู่ --</option>
@@ -266,6 +100,7 @@ export default function AssetForm({
                       <option key={cat} value={cat}>{cat}</option>
                     ))}
                   </select>
+                  {errors.category && <span className="error-text">{errors.category}</span>}
                 </div>
                 <div className="form-group col">
                   <label>รหัสพัสดุ *</label>
@@ -274,9 +109,11 @@ export default function AssetForm({
                     name="assetCode"
                     value={formData.assetCode}
                     onChange={handleChange}
-                    placeholder="000-00-0000"
+                    placeholder="000/00/0000"
+                    className={errors.assetCode ? 'input-error' : ''}
                     required
                   />
+                  {errors.assetCode && <span className="error-text">{errors.assetCode}</span>}
                 </div>
               </div>
 
@@ -289,8 +126,10 @@ export default function AssetForm({
                     value={formData.name}
                     onChange={handleChange}
                     placeholder="เช่น รถยนต์เอนกประสงค์, กล้องวงจรปิด"
+                    className={errors.name ? 'input-error' : ''}
                     required
                   />
+                  {errors.name && <span className="error-text">{errors.name}</span>}
                 </div>
                 <div className="form-group col">
                   <label>สถานะ</label>
@@ -337,6 +176,7 @@ export default function AssetForm({
                     name="location"
                     value={formData.location}
                     onChange={handleChange}
+                    className={errors.location ? 'input-error' : ''}
                     required
                   >
                     <option value="">-- เลือกสถานที่ตั้ง --</option>
@@ -344,6 +184,7 @@ export default function AssetForm({
                       <option key={loc} value={loc}>{loc}</option>
                     ))}
                   </select>
+                  {errors.location && <span className="error-text">{errors.location}</span>}
                 </div>
                 <div className="form-group col">
                   <label>ส่วนราชการเจ้าของพัสดุ *</label>
@@ -351,6 +192,7 @@ export default function AssetForm({
                     name="responsibleDepartment"
                     value={formData.responsibleDepartment}
                     onChange={handleChange}
+                    className={errors.responsibleDepartment ? 'input-error' : ''}
                     required
                   >
                     <option value="">-- เลือกส่วนราชการ --</option>
@@ -358,6 +200,7 @@ export default function AssetForm({
                       <option key={d} value={d}>{d}</option>
                     ))}
                   </select>
+                  {errors.responsibleDepartment && <span className="error-text">{errors.responsibleDepartment}</span>}
                 </div>
               </div>
 
@@ -370,8 +213,10 @@ export default function AssetForm({
                     value={formData.deliveryDocumentNo}
                     onChange={handleChange}
                     placeholder="เช่น เลขที่ใบส่งของ หรือ PO"
+                    className={errors.deliveryDocumentNo ? 'input-error' : ''}
                     required
                   />
+                  {errors.deliveryDocumentNo && <span className="error-text">{errors.deliveryDocumentNo}</span>}
                 </div>
                 <div className="form-group col">
                   <label>วันเดือนปีในเอกสาร *</label>
@@ -380,8 +225,10 @@ export default function AssetForm({
                     name="deliveryDocumentDate"
                     value={formData.deliveryDocumentDate}
                     onChange={handleChange}
+                    className={errors.deliveryDocumentDate ? 'input-error' : ''}
                     required
                   />
+                  {errors.deliveryDocumentDate && <span className="error-text">{errors.deliveryDocumentDate}</span>}
                 </div>
                 <div className="form-group col">
                   <label>ผู้ขาย / คู่สัญญา *</label>
@@ -389,6 +236,7 @@ export default function AssetForm({
                     name="sellerName"
                     value={formData.sellerName}
                     onChange={handleChange}
+                    className={errors.sellerName ? 'input-error' : ''}
                     required
                   >
                     <option value="">-- เลือกผู้ขาย --</option>
@@ -396,6 +244,7 @@ export default function AssetForm({
                       <option key={s} value={s}>{s}</option>
                     ))}
                   </select>
+                  {errors.sellerName && <span className="error-text">{errors.sellerName}</span>}
                 </div>
               </div>
 

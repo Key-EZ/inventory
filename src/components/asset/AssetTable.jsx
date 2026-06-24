@@ -1,115 +1,44 @@
-import { useState, useMemo } from 'react';
+import useAssetTable from '../../hooks/useAssetTable';
 
-export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onRepairAsset, onPrintAsset, onViewRepairHistory, onManageCustodian, initialSearchQuery = '' }) {
-  // Filter & Search states
-  const [search, setSearch] = useState(initialSearchQuery);
-  const [filterStatus, setFilterStatus] = useState('ทั้งหมด');
-  const [filterCategory, setFilterCategory] = useState('ทั้งหมด');
-
-  // Sort states
-  const [sortBy, setSortBy] = useState('code-asc'); // date-desc, date-asc, cost-desc, cost-asc, id-asc, bookvalue-desc, code-asc
-
-  // Pagination states
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8;
-
-  // Extract unique categories for filtering
-  const categories = useMemo(() => {
-    const catSet = new Set(assets.map(item => item.category).filter(Boolean));
-    return ['ทั้งหมด', ...Array.from(catSet)];
-  }, [assets]);
-
-  // Filtered and sorted assets
-  const processedAssets = useMemo(() => {
-    let result = [...assets];
-
-    // 1. Text Search
-    if (search.trim() !== '') {
-      const q = search.toLowerCase();
-      result = result.filter(item =>
-        (item.asset_code || '').toLowerCase().includes(q) ||
-        (item.name || '').toLowerCase().includes(q) ||
-        (item.category || '').toLowerCase().includes(q) ||
-        (item.location || '').toLowerCase().includes(q) ||
-        (item.responsible_department || '').toLowerCase().includes(q) ||
-        (item.manufacturer_brand || '').toLowerCase().includes(q) ||
-        (item.chassis_number || '').toLowerCase().includes(q) ||
-        (item.vehicle_registration || '').toLowerCase().includes(q)
-      );
-    }
-
-    // 2. Status Filter
-    if (filterStatus !== 'ทั้งหมด') {
-      result = result.filter(item => item.status === filterStatus);
-    }
-
-    // 3. Category Filter
-    if (filterCategory !== 'ทั้งหมด') {
-      result = result.filter(item => item.category === filterCategory);
-    }
-
-    // 5. Sorting
-    result.sort((a, b) => {
-      // Helper to parse acquisition year from code XXX/YY/ZZZZ
-      const getYear = (code) => {
-        const parts = String(code || '').split('/');
-        if (parts.length >= 2) return parseInt(parts[1]) || 0;
-        return 0;
-      };
-
-      switch (sortBy) {
-        case 'code-asc':
-          return (a.asset_code || '').localeCompare(b.asset_code || '');
-        case 'year-desc':
-          return getYear(b.asset_code) - getYear(a.asset_code);
-        case 'year-asc':
-          return getYear(a.asset_code) - getYear(b.asset_code);
-        case 'cost-desc':
-          return (b.unit_price || 0) - (a.unit_price || 0);
-        case 'cost-asc':
-          return (a.unit_price || 0) - (b.unit_price || 0);
-        case 'bookvalue-desc':
-          return (b.book_value || 0) - (a.book_value || 0);
-        default:
-          return 0;
-      }
-    });
-
-    return result;
-  }, [assets, search, filterStatus, filterCategory, sortBy]);
-
-  // Reset page when filters change during render (React-recommended pattern)
-  const [prevFilters, setPrevFilters] = useState({ search, filterStatus, filterCategory, sortBy });
-  if (
-    prevFilters.search !== search ||
-    prevFilters.filterStatus !== filterStatus ||
-    prevFilters.filterCategory !== filterCategory ||
-    prevFilters.sortBy !== sortBy
-  ) {
-    setPrevFilters({ search, filterStatus, filterCategory, sortBy });
-    setCurrentPage(1);
-  }
-
-  // Pagination math
-  const totalItems = processedAssets.length;
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
-  const paginatedAssets = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    return processedAssets.slice(startIndex, startIndex + itemsPerPage);
-  }, [processedAssets, currentPage]);
+export default function AssetTable({
+  assets,
+  onEditAsset,
+  onDeleteAsset,
+  onRepairAsset,
+  onPrintAsset,
+  onViewRepairHistory,
+  onManageCustodian,
+  initialSearchQuery = ''
+}) {
+  const {
+    search,
+    filterStatus,
+    filterCategory,
+    sortBy,
+    currentPage,
+    openMenuId,
+    categories,
+    totalItems,
+    totalPages,
+    paginatedAssets,
+    handleSearchChange,
+    handleStatusChange,
+    handleCategoryChange,
+    handleSortChange,
+    handleClearFilters,
+    setCurrentPage,
+    toggleMenu,
+    closeMenu
+  } = useAssetTable({
+    assets,
+    initialSearchQuery
+  });
 
   const statusBadges = {
     'ใช้งาน': 'status-badge-active',
     'ชำรุด': 'status-badge-damaged',
     'รอจำหน่าย': 'status-badge-pending',
     'จำหน่ายแล้ว': 'status-badge-disposed'
-  };
-
-  const handleClearFilters = () => {
-    setSearch('');
-    setFilterStatus('ทั้งหมด');
-    setFilterCategory('ทั้งหมด');
-    setSortBy('code-asc');
   };
 
   return (
@@ -132,7 +61,7 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onRepai
             <input
               type="text"
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
               placeholder="รหัสพัสดุ, ชื่อ, ยี่ห้อ, ทะเบียน, ที่ตั้ง..."
               className="filter-input-element"
             />
@@ -143,7 +72,7 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onRepai
             <label>สถานะ</label>
             <select
               value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
+              onChange={(e) => handleStatusChange(e.target.value)}
               className="filter-input-element"
             >
               <option value="ทั้งหมด">ทั้งหมดทุกสถานะ</option>
@@ -159,7 +88,7 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onRepai
             <label>หมวดหมู่พัสดุ</label>
             <select
               value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value)}
+              onChange={(e) => handleCategoryChange(e.target.value)}
               className="filter-input-element"
             >
               <option value="ทั้งหมด">ทั้งหมดทุกหมวดหมู่</option>
@@ -174,7 +103,7 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onRepai
             <label>จัดเรียงตาม</label>
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
+              onChange={(e) => handleSortChange(e.target.value)}
               className="filter-input-element"
             >
               <option value="code-asc">รหัสพัสดุ (น้อย ➔ มาก)</option>
@@ -201,68 +130,152 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onRepai
           <table className="data-table">
             <thead>
               <tr>
-                <th style={{ width: '10%' }}>รหัสพัสดุ</th>
-                <th style={{ width: '20%' }}>รายการทรัพย์สิน / พัสดุ</th>
-                <th style={{ width: '20%' }}>หน่วยดูแล/สถานที่ตั้ง</th>
-                <th style={{ width: '5%' }}>สถานะ</th>
-                <th style={{ width: '35%' }} className="text-center">การจัดการ</th>
+                <th style={{ width: '12%' }}>รหัสพัสดุ</th>
+                <th style={{ width: '38%' }}>รายการทรัพย์สิน / พัสดุ</th>
+                <th style={{ width: '25%' }}>หน่วยดูแล/สถานที่ตั้ง</th>
+                <th style={{ width: '10%' }}>สถานะ</th>
+                <th style={{ width: '15%' }} className="text-center">การจัดการ</th>
               </tr>
             </thead>
             <tbody>
               {paginatedAssets.length > 0 ? (
-                paginatedAssets.map(item => (
-                  <tr key={item.id} className="table-row-hover">
-                    <td className="table-cell-id"><strong>{item.asset_code}</strong></td>
-                    <td className="table-cell-name">
-                      <div className="item-name-main">{item.name}</div>
-                      <div className="item-name-sub">
-                        <span style={{
-                          color: item.asset_type === 'LAND_BUILDING' ? 'var(--status-active-text)' : 'var(--primary-color)',
-                          fontWeight: '600',
-                          marginRight: '6px'
-                        }}>
-                          [{item.category || (item.asset_type === 'LAND_BUILDING' ? 'พ.ด.1 ที่ดิน/โรงเรือน' : 'พ.ด.2 ครุภัณฑ์')}]
+                paginatedAssets.map(item => {
+                  const isMenuOpen = openMenuId === item.id;
+                  return (
+                    <tr key={item.id} className="table-row-hover">
+                      <td className="table-cell-id"><strong>{item.asset_code}</strong></td>
+                      <td className="table-cell-name">
+                        <div className="item-name-main">{item.name}</div>
+                        <div className="item-name-sub">
+                          <span style={{
+                            color: item.asset_type === 'LAND_BUILDING' ? 'var(--status-active-text)' : 'var(--primary-color)',
+                            fontWeight: '600',
+                            marginRight: '6px'
+                          }}>
+                            [{item.category || (item.asset_type === 'LAND_BUILDING' ? 'พ.ด.1 ที่ดิน/โรงเรือน' : 'พ.ด.2 ครุภัณฑ์')}]
+                          </span>
+                          {item.asset_type === 'LAND_BUILDING' ? (
+                            <span>{item.building_style || 'ที่ดินเปล่า'}</span>
+                          ) : (
+                            <span>{item.manufacturer_brand} {item.serial_number && `(SN: ${item.serial_number})`}</span>
+                          )}
+                        </div>
+                      </td>
+                      <td>
+                        <div className="custodian-text">🏢 {item.responsible_department || 'ไม่ระบุหน่วยงาน'}</div>
+                        <div className="location-text">📍 {item.location || 'ไม่ระบุสถานที่'}</div>
+                      </td>
+                      <td>
+                        <span className={`status-badge ${statusBadges[item.status || 'ใช้งาน']}`}>
+                          {item.status}
                         </span>
-                        {item.asset_type === 'LAND_BUILDING' ? (
-                          <span>{item.building_style || 'ที่ดินเปล่า'}</span>
-                        ) : (
-                          <span>{item.manufacturer_brand} {item.serial_number && `(SN: ${item.serial_number})`}</span>
-                        )}
-                      </div>
-                    </td>
-                    <td>
-                      <div className="custodian-text">🏢 {item.responsible_department || 'ไม่ระบุหน่วยงาน'}</div>
-                      <div className="location-text">📍 {item.location || 'ไม่ระบุสถานที่'}</div>
-                    </td>
-                    <td>
-                      <span className={`status-badge ${statusBadges[item.status || 'ใช้งาน']}`}>
-                        {item.status}
-                      </span>
-                    </td>
-                    <td className="text-center">
-                      <div className="table-actions">
-                        <button className="btn-table-print" onClick={() => onPrintAsset(item)} title="พิมพ์เอกสาร">
-                          🖨️ พิมพ์
-                        </button>
-                        <button className="btn-table-repair" onClick={() => onRepairAsset(item)} title="แจ้งซ่อม">
-                          🔧 แจ้งซ่อม
-                        </button>
-                        <button className="btn-table-history" onClick={() => onViewRepairHistory(item)} title="ประวัติการซ่อมแซม">
-                          📜 ประวัติซ่อม
-                        </button>
-                        <button className="btn-table-custodian" onClick={() => onManageCustodian(item)} title="ผู้ดูแลรับผิดชอบ">
-                          👤 ผู้รับผิดชอบ
-                        </button>
-                        <button className="btn-table-edit" onClick={() => onEditAsset(item)} title="แก้ไขข้อมูล">
-                          ✏️ แก้ไข
-                        </button>
-                        <button className="btn-table-delete" onClick={() => onDeleteAsset(item.id)} title="ลบข้อมูล">
-                          🗑️ ลบ
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                      </td>
+                      <td
+                        className="text-center"
+                        style={{
+                          overflow: 'visible',
+                          position: 'relative',
+                          zIndex: isMenuOpen ? 50 : 1,
+                          paddingTop: isMenuOpen ? '60px' : '16px',
+                          paddingBottom: isMenuOpen ? '60px' : '16px',
+                          transition: 'padding 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                        }}
+                      >
+                        <div className="table-actions" style={{ overflow: 'visible' }}>
+                          <div className={`radial-menu-container ${isMenuOpen ? 'active' : ''}`}>
+                            <button
+                              className={`btn-radial-trigger ${isMenuOpen ? 'active' : ''}`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleMenu(item.id);
+                              }}
+                              title="จัดการครุภัณฑ์"
+                            >
+                              ⚙️
+                            </button>
+
+                            {isMenuOpen && (
+                              <div
+                                className="radial-menu-overlay"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  closeMenu();
+                                }}
+                              />
+                            )}
+
+                            <div className={`radial-menu-options ${isMenuOpen ? 'open' : ''}`}>
+                              {/* บน (สีฟ้า): แก้ไข */}
+                              <button
+                                className="radial-btn btn-top"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onEditAsset(item);
+                                  closeMenu();
+                                }}
+                              >
+                                ✏️
+                                <span className="radial-tooltip">แก้ไข</span>
+                              </button>
+
+                              {/* ขวา (สีแดง): ลบ */}
+                              <button
+                                className="radial-btn btn-right"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onDeleteAsset(item.id);
+                                  closeMenu();
+                                }}
+                              >
+                                🗑️
+                                <span className="radial-tooltip">ลบ</span>
+                              </button>
+
+                              {/* ล่างขวา: พิมพ์ */}
+                              <button
+                                className="radial-btn btn-bottom-right"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onPrintAsset(item);
+                                  closeMenu();
+                                }}
+                              >
+                                🖨️
+                                <span className="radial-tooltip">พิมพ์</span>
+                              </button>
+
+                              {/* ล่างซ้าย: แจ้งซ่อม */}
+                              <button
+                                className="radial-btn btn-bottom-left"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onRepairAsset(item);
+                                  closeMenu();
+                                }}
+                              >
+                                🔧
+                                <span className="radial-tooltip">แจ้งซ่อม</span>
+                              </button>
+
+                              {/* ซ้าย: ผู้รับผิดชอบ */}
+                              <button
+                                className="radial-btn btn-left"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onManageCustodian(item);
+                                  closeMenu();
+                                }}
+                              >
+                                👤
+                                <span className="radial-tooltip">ผู้รับผิดชอบ</span>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
                   <td colSpan="5" className="table-empty-row">

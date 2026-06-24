@@ -3065,4 +3065,276 @@ body.modal-print-open {
 
 .print-nested-spec-table tr:last-child td {
   border-bottom: none !important;
+}
+
+/* ==========================================
+   Radial Context Menu
+   ========================================== */
+
+/* Click-away backdrop overlay */
+.radial-menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: transparent;
+  z-index: 10;
+}
+
+/* Container */
+.radial-menu-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+}
+
+.radial-menu-container.active {
+  z-index: 999;
+}
+
+/* Trigger Button */
+.btn-radial-trigger {
+  position: relative;
+  z-index: 20;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: var(--bg-secondary, #f8fafc);
+  border: 1px solid var(--border-color, #e2e8f0);
+  color: var(--text-primary, #1e293b);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.btn-radial-trigger:hover {
+  background-color: var(--bg-hover, #f1f5f9);
+  border-color: var(--primary-color, #3b82f6);
+  transform: scale(1.08);
+}
+
+.btn-radial-trigger.active {
+  background-color: var(--primary-color, #3b82f6);
+  color: #ffffff;
+  border-color: var(--primary-color, #3b82f6);
+  transform: rotate(135deg);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+/* Options Wrapper */
+.radial-menu-options {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  visibility: hidden;
+  z-index: 30;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.radial-menu-options.open {
+  pointer-events: auto;
+  visibility: visible;
+}
+
+/* Base button style */
+.radial-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 32px;
+  height: 32px;
+  margin-top: -16px;
+  margin-left: -16px;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  opacity: 0;
+  transform: scale(0.3);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  font-size: 0.9rem;
+}
+
+.radial-menu-options.open .radial-btn {
+  opacity: 1;
+}
+
+/* Directional Positions & Custom Colors */
+
+/* Top (บน): แก้ไข - สีฟ้า */
+.radial-menu-options.open .btn-top {
+  transform: translateY(-56px) scale(1);
+}
+.btn-top {
+  background-color: #f0f9ff;
+  color: #0284c7;
+  border: 1.5px solid #bae6fd;
+}
+.btn-top:hover {
+  background-color: #0284c7;
+  color: #ffffff;
+  border-color: #0284c7;
+  box-shadow: 0 0 12px rgba(2, 132, 199, 0.4);
+}
+
+/* Right (ขวา): ลบ - สีแดง */
+.radial-menu-options.open .btn-right {
+  transform: translateX(56px) scale(1);
+}
+.btn-right {
+  background-color: #fef2f2;
+  color: #dc2626;
+  border: 1.5px solid #fca5a5;
+}
+.btn-right:hover {
+  background-color: #dc2626;
+  color: #ffffff;
+  border-color: #dc2626;
+  box-shadow: 0 0 12px rgba(220, 38, 38, 0.4);
+}
+
+/* Bottom-Right (ล่างขวา): พิมพ์ - สีเขียว/Teal */
+.radial-menu-options.open .btn-bottom-right {
+  transform: translate(40px, 40px) scale(1);
+}
+.btn-bottom-right {
+  background-color: #f0fdf4;
+  color: #16a34a;
+  border: 1.5px solid #bbf7d0;
+}
+.btn-bottom-right:hover {
+  background-color: #16a34a;
+  color: #ffffff;
+  border-color: #16a34a;
+  box-shadow: 0 0 12px rgba(22, 163, 74, 0.4);
+}
+
+/* Bottom-Left (ล่างซ้าย): แจ้งซ่อม - สีส้ม/Amber */
+.radial-menu-options.open .btn-bottom-left {
+  transform: translate(-40px, 40px) scale(1);
+}
+.btn-bottom-left {
+  background-color: #fffbeb;
+  color: #d97706;
+  border: 1.5px solid #fde68a;
+}
+.btn-bottom-left:hover {
+  background-color: #d97706;
+  color: #ffffff;
+  border-color: #d97706;
+  box-shadow: 0 0 12px rgba(217, 119, 6, 0.4);
+}
+
+/* Left (ซ้าย): ผู้รับผิดชอบ - สีม่วง/Indigo */
+.radial-menu-options.open .btn-left {
+  transform: translateX(-56px) scale(1);
+}
+.btn-left {
+  background-color: #e0e7ff;
+  color: #4f46e5;
+  border: 1.5px solid #c7d2fe;
+}
+.btn-left:hover {
+  background-color: #4f46e5;
+  color: #ffffff;
+  border-color: #4f46e5;
+  box-shadow: 0 0 12px rgba(79, 70, 229, 0.4);
+}
+
+/* Tooltips */
+.radial-tooltip {
+  position: absolute;
+  background-color: #0f172a;
+  color: #ffffff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  z-index: 1005;
+}
+
+/* Positioning tooltips for directions */
+.btn-top .radial-tooltip {
+  bottom: 130%;
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+}
+.btn-right .radial-tooltip {
+  left: 130%;
+  top: 50%;
+  transform: translateY(-50%) translateX(-4px);
+}
+.btn-bottom-right .radial-tooltip {
+  left: 110%;
+  top: 110%;
+  transform: translate(-4px, -4px);
+}
+.btn-bottom-left .radial-tooltip {
+  right: 110%;
+  top: 110%;
+  transform: translate(4px, -4px);
+}
+.btn-left .radial-tooltip {
+  right: 130%;
+  top: 50%;
+  transform: translateY(-50%) translateX(4px);
+}
+
+/* Show tooltips on hover */
+.radial-btn:hover .radial-tooltip {
+  opacity: 1;
+}
+.btn-top:hover .radial-tooltip {
+  transform: translateX(-50%) translateY(0);
+}
+.btn-right:hover .radial-tooltip {
+  transform: translateY(-50%) translateX(0);
+}
+.btn-bottom-right:hover .radial-tooltip {
+  transform: translate(0, 0);
+}
+.btn-bottom-left:hover .radial-tooltip {
+  transform: translate(0, 0);
+}
+.btn-left:hover .radial-tooltip {
+  transform: translateY(-50%) translateX(0);
+}
+
+/* Form validation errors */
+.input-error {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15) !important;
+}
+
+.input-error:focus {
+  border-color: #dc2626 !important;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.25) !important;
+}
+
+.error-text {
+  color: #dc2626;
+  font-size: 0.75rem;
+  margin-top: 4px;
+  display: block;
+  font-weight: 500;
 }
