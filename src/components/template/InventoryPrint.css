@@ -233,24 +233,32 @@
   font-size: 15px;
 }
 
-.print-maint-th-12 {
+.print-maint-th-index {
+  width: 5%;
+}
+
+.print-maint-th-date {
+  width: 10%;
+}
+
+.print-maint-th-doc {
+  width: 18%;
+}
+
+.print-maint-th-desc {
+  width: 35%;
+}
+
+.print-maint-th-cost {
+  width: 10%;
+}
+
+.print-maint-th-contractor {
   width: 12%;
 }
 
-.print-maint-th-22 {
-  width: 22%;
-}
-
-.print-maint-th-40 {
-  width: 40%;
-}
-
-.print-maint-th-11 {
-  width: 11%;
-}
-
-.print-maint-th-15 {
-  width: 15%;
+.print-maint-th-remarks {
+  width: 10%;
 }
 
 .print-maint-cell-common {
@@ -398,8 +406,8 @@
   position: absolute !important;
   bottom: 15mm !important;
   right: 20mm !important;
-  width: 400px !important;
-  height: 300px !important;
+  width: 350px !important;
+  height: 250px !important;
   border: 1px solid #000000 !important;
   background-color: #ffffff !important;
   margin: 0 !important;
@@ -421,4 +429,3 @@
     right: 10px !important;
   }
 }
-

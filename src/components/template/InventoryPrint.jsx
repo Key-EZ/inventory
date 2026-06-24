@@ -255,27 +255,39 @@ export default function InventoryPrint({ asset, onClose }) {
                     <div className="print-meta-col-50-center">
                         <div className="print-meta-cell-grow-1-5">
                             <span className="print-meta-field-label">สำนักงาน</span>
-                            <span className="print-meta-field-value dotted-line">
+                            {/* <span className="print-meta-field-value dotted-line">
                                 <AutoFitText text={data.agency} />
+                            </span>*/}
+                            <span className="print-meta-field-value dotted-line">
+                                {data.agency}
                             </span>
                         </div>
                         <div className="print-meta-cell-grow-1">
                             <span className="print-meta-field-label">อำเภอ</span>
-                            <span className="print-meta-field-value dotted-line">
+                            {/*<span className="print-meta-field-value dotted-line">
                                 <AutoFitText text={data.amphoe} />
+                            </span>*/}
+                            <span className="print-meta-field-value dotted-line">
+                                {data.amphoe}
                             </span>
                         </div>
                         <div className="print-meta-cell-grow-1">
                             <span className="print-meta-field-label">จังหวัด</span>
-                            <span className="print-meta-field-value dotted-line">
+                            {/*<span className="print-meta-field-value dotted-line">
                                 <AutoFitText text={data.province} />
+                            </span>*/}
+                            <span className="print-meta-field-value dotted-line">
+                                {data.province}
                             </span>
                         </div>
                     </div>
                     <div className="print-meta-col-25-right">
                         <span className="print-meta-field-label">เลขรหัสพัสดุ</span>
-                        <span className="print-meta-field-value dotted-line">
+                        {/*<span className="print-meta-field-value dotted-line">
                             <AutoFitText text={data.assetCode} />
+                        </span>*/}
+                        <span className="print-meta-field-value dotted-line">
+                            {data.assetCode}
                         </span>
                     </div>
                 </div>
@@ -701,12 +713,36 @@ export default function InventoryPrint({ asset, onClose }) {
                                     </thead>
                                     <tbody>
                                         <tr className="benefit-row">
-                                            <td className="benefit-cell print-w-10" style={{ height: '20px' }}></td>
-                                            <td className="benefit-cell print-w-40" style={{ height: '20px' }}></td>
-                                            <td className="benefit-cell print-w-15" style={{ height: '20px' }}></td>
-                                            <td className="benefit-cell print-w-10" style={{ height: '20px' }}></td>
-                                            <td className="benefit-cell print-w-15" style={{ height: '20px' }}></td>
-                                            <td className="benefit-cell-last print-w-10" style={{ height: '20px' }}></td>
+                                            <td className="benefit-cell print-w-10" style={{ height: '20px', border: '1px solid black', borderCollapse: 'collapse' }}></td>
+                                            <td className="benefit-cell print-w-40" style={{ height: '20px', border: '1px solid black', borderCollapse: 'collapse' }}></td>
+                                            <td className="benefit-cell print-w-15" style={{ height: '20px', border: '1px solid black', borderCollapse: 'collapse' }}></td>
+                                            <td className="benefit-cell print-w-10" style={{ height: '20px', border: '1px solid black', borderCollapse: 'collapse' }}></td>
+                                            <td className="benefit-cell print-w-15" style={{ height: '20px', border: '1px solid black', borderCollapse: 'collapse' }}></td>
+                                            <td className="benefit-cell-last print-w-10" style={{ height: '20px', border: '1px solid black', borderCollapse: 'collapse' }}></td>
+                                        </tr>
+                                        <tr className="benefit-row">
+                                            <td className="benefit-cell print-w-10" style={{ height: '20px', border: '1px solid black', borderCollapse: 'collapse' }}></td>
+                                            <td className="benefit-cell print-w-40" style={{ height: '20px', border: '1px solid black', borderCollapse: 'collapse' }}></td>
+                                            <td className="benefit-cell print-w-15" style={{ height: '20px', border: '1px solid black', borderCollapse: 'collapse' }}></td>
+                                            <td className="benefit-cell print-w-10" style={{ height: '20px', border: '1px solid black', borderCollapse: 'collapse' }}></td>
+                                            <td className="benefit-cell print-w-15" style={{ height: '20px', border: '1px solid black', borderCollapse: 'collapse' }}></td>
+                                            <td className="benefit-cell-last print-w-10" style={{ height: '20px', border: '1px solid black', borderCollapse: 'collapse' }}></td>
+                                        </tr>
+                                        <tr className="benefit-row">
+                                            <td className="benefit-cell print-w-10" style={{ height: '20px', border: '1px solid black', borderCollapse: 'collapse' }}></td>
+                                            <td className="benefit-cell print-w-40" style={{ height: '20px', border: '1px solid black', borderCollapse: 'collapse' }}></td>
+                                            <td className="benefit-cell print-w-15" style={{ height: '20px', border: '1px solid black', borderCollapse: 'collapse' }}></td>
+                                            <td className="benefit-cell print-w-10" style={{ height: '20px', border: '1px solid black', borderCollapse: 'collapse' }}></td>
+                                            <td className="benefit-cell print-w-15" style={{ height: '20px', border: '1px solid black', borderCollapse: 'collapse' }}></td>
+                                            <td className="benefit-cell-last print-w-10" style={{ height: '20px', border: '1px solid black', borderCollapse: 'collapse' }}></td>
+                                        </tr>
+                                        <tr className="benefit-row">
+                                            <td className="benefit-cell print-w-10" style={{ height: '20px', border: '1px solid black', borderCollapse: 'collapse' }}></td>
+                                            <td className="benefit-cell print-w-40" style={{ height: '20px', border: '1px solid black', borderCollapse: 'collapse' }}></td>
+                                            <td className="benefit-cell print-w-15" style={{ height: '20px', border: '1px solid black', borderCollapse: 'collapse' }}></td>
+                                            <td className="benefit-cell print-w-10" style={{ height: '20px', border: '1px solid black', borderCollapse: 'collapse' }}></td>
+                                            <td className="benefit-cell print-w-15" style={{ height: '20px', border: '1px solid black', borderCollapse: 'collapse' }}></td>
+                                            <td className="benefit-cell-last print-w-10" style={{ height: '20px', border: '1px solid black', borderCollapse: 'collapse' }}></td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -744,11 +780,27 @@ export default function InventoryPrint({ asset, onClose }) {
                 <table className="card-maint-table print-maint-main-table">
                     <thead>
                         <tr className="print-maint-row-header">
-                            <th className="print-maint-th-common print-maint-th-12">วัน เดือน ปี</th>
-                            <th className="print-maint-th-common print-maint-th-22">เลขที่หนังสืออนุมัติ</th>
-                            <th className="print-maint-th-common print-maint-th-40">รายการซ่อมแซมหรือเปลี่ยนอะไหล่โดยละเอียด</th>
-                            <th className="print-maint-th-common print-maint-th-11">จำนวนเงิน (บาท)</th>
-                            <th className="print-maint-th-common print-maint-th-15">ผู้รับจ้าง/ช่างซ่อม</th>
+                            <th className="print-maint-th-common print-maint-th-index">
+                                <AutoFitText text="ครั้งที่" />
+                            </th>
+                            <th className="print-maint-th-common print-maint-th-date">
+                                <AutoFitText text="วัน เดือน ปี" />
+                            </th>
+                            <th className="print-maint-th-common print-maint-th-doc">
+                                <AutoFitText text="เลขที่หนังสืออนุมัติ" />
+                            </th>
+                            <th className="print-maint-th-common print-maint-th-desc">
+                                <AutoFitText text="รายการซ่อมแซมหรือเปลี่ยนอะไหล่โดยละเอียด" />
+                            </th>
+                            <th className="print-maint-th-common print-maint-th-cost">
+                                <AutoFitText text="จำนวนเงิน (บาท)" />
+                            </th>
+                            <th className="print-maint-th-common print-maint-th-contractor">
+                                <AutoFitText text="ผู้รับจ้าง/ช่างซ่อม" />
+                            </th>
+                            <th className="print-maint-th-common print-maint-th-remarks">
+                                <AutoFitText text="หมายเหตุ" />
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -756,25 +808,31 @@ export default function InventoryPrint({ asset, onClose }) {
                             asset.maintenances.map((maint, idx) => (
                                 <tr key={maint.id || idx}>
                                     <td className="print-maint-cell-center">
-                                        {maint.approval_date ? formatThaiDateString(maint.approval_date) : '-'}
+                                        {idx + 1}
+                                    </td>
+                                    <td className="print-maint-cell-center">
+                                        <AutoFitText text={maint.approval_date ? formatThaiDateString(maint.approval_date) : '-'} />
                                     </td>
                                     <td className="print-maint-cell-common">
-                                        {maint.document_number || '-'}
+                                        <AutoFitText text={maint.document_number || '-'} />
                                     </td>
                                     <td className="print-maint-cell-common">
-                                        {maint.description || '-'}
+                                        <AutoFitText text={maint.description || '-'} />
                                     </td>
                                     <td className="print-maint-cell-right">
-                                        {(maint.cost || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        <AutoFitText text={(maint.cost || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} />
                                     </td>
                                     <td className="print-maint-cell-common">
-                                        {maint.contractor || '-'}
+                                        <AutoFitText text={maint.contractor || '-'} />
+                                    </td>
+                                    <td className="print-maint-cell-common">
+                                        <AutoFitText text={maint.remark || maint.notes || '-'} />
                                     </td>
                                 </tr>
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="5" className="print-maint-cell-empty-state">
+                                <td colSpan="7" className="print-maint-cell-empty-state">
                                     ไม่มีประวัติการซ่อมบำรุงรักษาสำหรับพัสดุรายการนี้
                                 </td>
                             </tr>
@@ -782,6 +840,8 @@ export default function InventoryPrint({ asset, onClose }) {
                         {/* Fill empty rows to make it look like a standard official ledger form (at least 8 rows total) */}
                         {Array.from({ length: Math.max(0, 8 - (asset.maintenances ? asset.maintenances.length : 0)) }).map((_, idx) => (
                             <tr key={`empty-${idx}`}>
+                                <td className="print-maint-cell-empty-filler">&nbsp;</td>
+                                <td className="print-maint-cell-empty-filler">&nbsp;</td>
                                 <td className="print-maint-cell-empty-filler">&nbsp;</td>
                                 <td className="print-maint-cell-empty-filler">&nbsp;</td>
                                 <td className="print-maint-cell-empty-filler">&nbsp;</td>
