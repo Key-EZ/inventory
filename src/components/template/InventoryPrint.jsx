@@ -764,7 +764,7 @@ export default function InventoryPrint({ asset, onClose }) {
             <div className="a4-landscape-page page-break-before-always">
                 {/* ส่วนหัวเอกสาร หน้า 2 */}
                 <div className="print-header-title print-maint-header-title">
-                    ประวัติการซ่อมบำรุงรักษา (หน้า ๒)
+                    บันทึกการซ่อม/ปรับปรุงแก้ไขพัสดุ
                 </div>
                 <div className="print-maint-header-subtitle">
                     <div>
@@ -783,20 +783,20 @@ export default function InventoryPrint({ asset, onClose }) {
                             <th className="print-maint-th-common print-maint-th-index">
                                 <AutoFitText text="ครั้งที่" />
                             </th>
-                            <th className="print-maint-th-common print-maint-th-date">
-                                <AutoFitText text="วัน เดือน ปี" />
-                            </th>
                             <th className="print-maint-th-common print-maint-th-doc">
                                 <AutoFitText text="เลขที่หนังสืออนุมัติ" />
                             </th>
+                            <th className="print-maint-th-common print-maint-th-date">
+                                <AutoFitText text="ลงวันที่" />
+                            </th>
                             <th className="print-maint-th-common print-maint-th-desc">
-                                <AutoFitText text="รายการซ่อมแซมหรือเปลี่ยนอะไหล่โดยละเอียด" />
+                                <AutoFitText text="รายการซ่อม/ปรับปรุงแก้ไข" />
                             </th>
                             <th className="print-maint-th-common print-maint-th-cost">
-                                <AutoFitText text="จำนวนเงิน (บาท)" />
+                                <AutoFitText text="จำนวนเงิน" />
                             </th>
                             <th className="print-maint-th-common print-maint-th-contractor">
-                                <AutoFitText text="ผู้รับจ้าง/ช่างซ่อม" />
+                                <AutoFitText text="ผู้ซ่อม/ปรับปรุง" />
                             </th>
                             <th className="print-maint-th-common print-maint-th-remarks">
                                 <AutoFitText text="หมายเหตุ" />
@@ -811,10 +811,10 @@ export default function InventoryPrint({ asset, onClose }) {
                                         {idx + 1}
                                     </td>
                                     <td className="print-maint-cell-center">
-                                        <AutoFitText text={maint.approval_date ? formatThaiDateString(maint.approval_date) : '-'} />
+                                        <AutoFitText text={maint.document_number ? formatThaiDateString(maint.document_number) : '-'} />
                                     </td>
                                     <td className="print-maint-cell-common">
-                                        <AutoFitText text={maint.document_number || '-'} />
+                                        <AutoFitText text={maint.approval_date ? formatThaiDateString(maint.approval_date) : '-'} />
                                     </td>
                                     <td className="print-maint-cell-common">
                                         <AutoFitText text={maint.description || '-'} />
