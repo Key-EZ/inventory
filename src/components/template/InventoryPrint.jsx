@@ -279,7 +279,7 @@ export default function InventoryPrint({ asset, onClose }) {
                     </div>
                 </div>
 
-                <table className="form-table">
+                <table className="form-table" style={{ border: '1px solid black', borderCollapse: 'collapse' }}>
                     <tbody>
 
                         <tr className="text-sm">
@@ -640,9 +640,10 @@ export default function InventoryPrint({ asset, onClose }) {
                                                 <table className="history-table nested-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                                                     <thead>
                                                         <tr className="history-header-bg">
-                                                            <th style={{ width: '20%', borderRight: '1px solid black', borderBottom: '1px solid black', padding: '4.8px 8px', fontSize: '13.5px' }}>พ.ศ.</th>
-                                                            <th style={{ width: '40%', borderRight: '1px solid black', borderBottom: '1px solid black', padding: '4.8px 8px', fontSize: '13.5px' }}>ชื่อส่วนราชการ</th>
-                                                            <th style={{ width: '40%', borderBottom: '1px solid black', padding: '4.8px 8px', fontSize: '13.5px' }}>ชื่อผู้ใช้/หัวหน้า</th>
+                                                            <th style={{ width: '15%', borderRight: '1px solid black', borderBottom: '1px solid black', padding: '4.8px 8px', fontSize: '13.5px' }}>พ.ศ.</th>
+                                                            <th style={{ width: '35%', borderRight: '1px solid black', borderBottom: '1px solid black', padding: '4.8px 8px', fontSize: '13.5px' }}>ชื่อส่วนราชการ</th>
+                                                            <th style={{ width: '25%', borderRight: '1px solid black', borderBottom: '1px solid black', padding: '4.8px 8px', fontSize: '13.5px' }}>ชื่อผู้ใช้พัสดุ</th>
+                                                            <th style={{ width: '25%', borderBottom: '1px solid black', padding: '4.8px 8px', fontSize: '13.5px' }}>ชื่อหัวหน้าส่วนราชการ</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -650,8 +651,9 @@ export default function InventoryPrint({ asset, onClose }) {
                                                             <tr key={idx} className="history-row">
                                                                 <td className="history-cell-center" style={{ borderRight: '1px solid black', borderBottom: '1px solid black', padding: '4.8px 8px', fontSize: '13.5px', textAlign: 'center' }}>{hist.year}</td>
                                                                 <td className="history-cell" style={{ borderRight: '1px solid black', borderBottom: '1px solid black', padding: '4.8px 8px', fontSize: '13.5px' }}>{hist.department}</td>
+                                                                <td className="history-cell" style={{ borderRight: '1px solid black', borderBottom: '1px solid black', padding: '4.8px 8px', fontSize: '13.5px' }}>{hist.user || '-'}</td>
                                                                 <td className="history-cell-head" style={{ borderBottom: '1px solid black', padding: '4.8px 8px', fontSize: '13.5px' }}>
-                                                                    {hist.head || hist.user}
+                                                                    {hist.head || '-'}
                                                                 </td>
                                                             </tr>
                                                         ))}
@@ -679,29 +681,54 @@ export default function InventoryPrint({ asset, onClose }) {
 
                         {/* แถวที่ 5: ตารางย่อยการหาผลประโยชน์ */}
                         <tr>
-                            <td colSpan="3" style={{ padding: '0' }}>
-                                <div className="benefit-section-title">
-                                    <strong>การหาผลประโยชน์ในพัสดุ</strong>
+                            <td colSpan="2" style={{ padding: '0' }}>
+                                <div className="benefit-section-title" style={{ border: '1px solid black', borderCollapse: 'collapse' }}>
+                                    การหาผลประโยชน์ในพัสดุ
                                 </div>
-                                <table className="benefit-table">
+                                <table className="benefit-table" style={{ border: '1px solid black', borderCollapse: 'collapse' }}>
                                     <thead>
                                         <tr>
-                                            <th style={{ width: '10%' }}>พ.ศ.</th>
-                                            <th style={{ width: '40%' }}>รายการ</th>
-                                            <th style={{ width: '15%' }}>ผลประโยชน์ (บาท)</th>
-                                            <th style={{ width: '10%' }}>พ.ศ.</th>
-                                            <th style={{ width: '15%' }}>รายการ</th>
-                                            <th style={{ width: '10%' }}>ผลประโยชน์ (บาท)</th>
+                                            <th style={{ width: '10%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}>พ.ศ.</th>
+                                            <th style={{ width: '40%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}>รายการ</th>
+                                            <th style={{ width: '15%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}>ผลประโยชน์ (บาท)</th>
+                                            <th style={{ width: '10%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}>พ.ศ.</th>
+                                            <th style={{ width: '15%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}>รายการ</th>
+                                            <th style={{ width: '10%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}>ผลประโยชน์ (บาท)</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr className="benefit-row">
-                                            <td className="benefit-cell"></td>
-                                            <td className="benefit-cell"></td>
-                                            <td className="benefit-cell"></td>
-                                            <td className="benefit-cell"></td>
-                                            <td className="benefit-cell"></td>
-                                            <td className="benefit-cell-last"></td>
+                                            <td className="benefit-cell" style={{ height: 30, width: '10%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}  ></td>
+                                            <td className="benefit-cell" style={{ height: 30, width: '40%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}></td>
+                                            <td className="benefit-cell" style={{ height: 30, width: '15%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}></td>
+                                            <td className="benefit-cell" style={{ height: 30, width: '10%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}></td>
+                                            <td className="benefit-cell" style={{ height: 30, width: '15%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}></td>
+                                            <td className="benefit-cell-last" style={{ height: 30, width: '10%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}></td>
+                                        </tr>
+                                        <tr className="benefit-row">
+                                            <td className="benefit-cell" style={{ height: 30, width: '10%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}  ></td>
+                                            <td className="benefit-cell" style={{ height: 30, width: '40%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}></td>
+                                            <td className="benefit-cell" style={{ height: 30, width: '15%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}></td>
+                                            <td className="benefit-cell" style={{ height: 30, width: '10%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}></td>
+                                            <td className="benefit-cell" style={{ height: 30, width: '15%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}></td>
+                                            <td className="benefit-cell-last" style={{ height: 30, width: '10%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}></td>
+                                        </tr>
+
+                                        <tr className="benefit-row">
+                                            <td className="benefit-cell" style={{ height: 30, width: '10%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}  ></td>
+                                            <td className="benefit-cell" style={{ height: 30, width: '40%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}></td>
+                                            <td className="benefit-cell" style={{ height: 30, width: '15%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}></td>
+                                            <td className="benefit-cell" style={{ height: 30, width: '10%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}></td>
+                                            <td className="benefit-cell" style={{ height: 30, width: '15%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}></td>
+                                            <td className="benefit-cell-last" style={{ height: 30, width: '10%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}></td>
+                                        </tr>
+                                        <tr className="benefit-row">
+                                            <td className="benefit-cell" style={{ height: 30, width: '10%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}  ></td>
+                                            <td className="benefit-cell" style={{ height: 30, width: '40%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}></td>
+                                            <td className="benefit-cell" style={{ height: 30, width: '15%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}></td>
+                                            <td className="benefit-cell" style={{ height: 30, width: '10%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}></td>
+                                            <td className="benefit-cell" style={{ height: 30, width: '15%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}></td>
+                                            <td className="benefit-cell-last" style={{ height: 30, width: '10%', border: '1px solid black', borderCollapse: 'collapse', padding: '4.8px 8px', fontSize: '13.5px' }}></td>
                                         </tr>
                                     </tbody>
                                 </table>

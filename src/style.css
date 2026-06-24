@@ -2035,7 +2035,7 @@ body {
   /* Set A4 Page in Landscape mode */
   @page {
     size: A4 landscape;
-    margin: 5px;
+    margin: 5px 10px;
   }
 
   /* Reset layout and hide elements */
@@ -2584,7 +2584,7 @@ body.modal-print-open {
   body.modal-print-open .a4-landscape-page {
     border: none !important;
     box-shadow: none !important;
-    padding: 5px !important;
+    padding: 5px 10px !important;
     margin: 0 !important;
     width: 100% !important;
     min-height: auto !important;
