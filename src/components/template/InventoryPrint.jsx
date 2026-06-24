@@ -673,15 +673,7 @@ export default function InventoryPrint({ asset, onClose }) {
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td className="print-photo-container-cell">
-                                                <div className="photo-placeholder print-photo-placeholder-wrap">
-                                                    {asset.photo ? (
-                                                        <img src={asset.photo} alt={asset.name} />
-                                                    ) : (
-                                                        '[ รูปถ่ายพัสดุถ้ามี ]'
-                                                    )}
-                                                </div>
-                                            </td>
+
                                         </tr>
                                     </tbody>
                                 </table>
@@ -709,46 +701,29 @@ export default function InventoryPrint({ asset, onClose }) {
                                     </thead>
                                     <tbody>
                                         <tr className="benefit-row">
-                                            <td className="benefit-cell print-w-10"></td>
-                                            <td className="benefit-cell print-w-40"></td>
-                                            <td className="benefit-cell print-w-15"></td>
-                                            <td className="benefit-cell print-w-10"></td>
-                                            <td className="benefit-cell print-w-15"></td>
-                                            <td className="benefit-cell-last print-w-10"></td>
-                                        </tr>
-                                        <tr className="benefit-row">
-                                            <td className="benefit-cell print-w-10"></td>
-                                            <td className="benefit-cell print-w-40"></td>
-                                            <td className="benefit-cell print-w-15"></td>
-                                            <td className="benefit-cell print-w-10"></td>
-                                            <td className="benefit-cell print-w-15"></td>
-                                            <td className="benefit-cell-last print-w-10"></td>
-                                        </tr>
-
-                                        <tr className="benefit-row">
-                                            <td className="benefit-cell print-w-10"></td>
-                                            <td className="benefit-cell print-w-40"></td>
-                                            <td className="benefit-cell print-w-15"></td>
-                                            <td className="benefit-cell print-w-10"></td>
-                                            <td className="benefit-cell print-w-15"></td>
-                                            <td className="benefit-cell-last print-w-10"></td>
-                                        </tr>
-                                        <tr className="benefit-row">
-                                            <td className="benefit-cell print-w-10"></td>
-                                            <td className="benefit-cell print-w-40"></td>
-                                            <td className="benefit-cell print-w-15"></td>
-                                            <td className="benefit-cell print-w-10"></td>
-                                            <td className="benefit-cell print-w-15"></td>
-                                            <td className="benefit-cell-last print-w-10"></td>
+                                            <td className="benefit-cell print-w-10" style={{ height: '20px' }}></td>
+                                            <td className="benefit-cell print-w-40" style={{ height: '20px' }}></td>
+                                            <td className="benefit-cell print-w-15" style={{ height: '20px' }}></td>
+                                            <td className="benefit-cell print-w-10" style={{ height: '20px' }}></td>
+                                            <td className="benefit-cell print-w-15" style={{ height: '20px' }}></td>
+                                            <td className="benefit-cell-last print-w-10" style={{ height: '20px' }}></td>
                                         </tr>
                                     </tbody>
                                 </table>
+                            </td>
+                            <td className="print-photo-container-cell">
+                                <div className="photo-placeholder print-photo-placeholder-wrap">
+                                    {asset.photo ? (
+                                        <img src={asset.photo} alt={asset.name} />
+                                    ) : (
+                                        '[ รูปถ่ายพัสดุถ้ามี ]'
+                                    )}
+                                </div>
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-
             {/* หน้าที่ 2: ประวัติการซ่อมบำรุงรักษา */}
             <div className="a4-landscape-page page-break-before-always">
                 {/* ส่วนหัวเอกสาร หน้า 2 */}

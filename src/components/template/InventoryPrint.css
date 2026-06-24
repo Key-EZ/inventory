@@ -178,7 +178,9 @@
 }
 
 .print-photo-placeholder-wrap {
-  margin: 0;
+  margin: 0 auto;
+  width: 200px;
+  height: 100px;
 }
 
 .print-benefit-section-td {
