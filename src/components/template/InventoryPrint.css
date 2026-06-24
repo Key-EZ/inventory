@@ -172,16 +172,20 @@
 }
 
 .print-photo-container-cell {
-  padding: 8px 8px 0px 8px;
-  text-align: center;
-  vertical-align: bottom;
+  padding: 0;
+  width: 200px;
 }
 
 .print-photo-placeholder-wrap {
-  margin: 0 auto;
+  position: absolute;
+  right: 20mm;
+  bottom: 15mm;
   width: 200px;
   height: 100px;
+  margin: 0;
+  z-index: 10;
 }
+
 
 .print-benefit-section-td {
   padding: 0;
@@ -393,4 +397,11 @@
 
 .print-text-center {
   text-align: center;
+}
+
+@media print {
+  .print-photo-placeholder-wrap {
+    right: 10px !important;
+    bottom: 5px !important;
+  }
 }
