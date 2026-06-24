@@ -1,39 +1,65 @@
 import { useEffect, useRef, useState } from 'react';
 import { formatThaiDateString } from '../../utils/dateUtils';
 
-function AutoFitText({ text, maxFontSize = 13.5, minFontSize = 8, style = {} }) {
+function AutoFitText({ text, maxFontSize = 13.5, minFontSize = 8, className = '', style = {} }) {
     const containerRef = useRef(null);
     const [fontSize, setFontSize] = useState(maxFontSize);
 
     useEffect(() => {
-        const el = containerRef.current;
-        if (!el) return;
+        setFontSize(maxFontSize);
+    }, [text, maxFontSize]);
 
-        // Reset to max size to measure
-        el.style.fontSize = `${maxFontSize}px`;
-        
-        let currentSize = maxFontSize;
-        // Shrink font size until it fits the container width
-        while (el.scrollWidth > el.clientWidth && currentSize > minFontSize) {
-            currentSize -= 0.5;
-            el.style.fontSize = `${currentSize}px`;
-        }
-        setFontSize(currentSize);
+    useEffect(() => {
+        if (!containerRef.current) return;
+        const container = containerRef.current;
+
+        const observer = new ResizeObserver((entries) => {
+            for (let entry of entries) {
+                const containerWidth = entry.contentRect.width;
+                if (containerWidth <= 0) continue;
+
+                const measureSpan = document.createElement('span');
+                measureSpan.style.visibility = 'hidden';
+                measureSpan.style.position = 'absolute';
+                measureSpan.style.whiteSpace = 'nowrap';
+                measureSpan.style.fontFamily = window.getComputedStyle(container).fontFamily;
+                measureSpan.style.fontSize = `${maxFontSize}px`;
+                measureSpan.textContent = String(text || '');
+                document.body.appendChild(measureSpan);
+
+                const textWidth = measureSpan.getBoundingClientRect().width;
+                document.body.removeChild(measureSpan);
+
+                const availableWidth = containerWidth - 2;
+
+                if (textWidth > availableWidth && availableWidth > 0) {
+                    const scale = availableWidth / textWidth;
+                    const newFontSize = Math.max(minFontSize, Math.floor(maxFontSize * scale * 10) / 10);
+                    setFontSize(newFontSize);
+                } else {
+                    setFontSize(maxFontSize);
+                }
+            }
+        });
+
+        observer.observe(container);
+        return () => observer.disconnect();
     }, [text, maxFontSize, minFontSize]);
 
     return (
         <span
             ref={containerRef}
+            className={className}
             style={{
-                display: 'block',
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                width: '100%',
                 fontSize: `${fontSize}px`,
+                whiteSpace: 'nowrap',
+                display: 'inline-block',
+                maxWidth: '100%',
+                overflow: 'hidden',
+                textOverflow: 'clip',
+                verticalAlign: 'bottom',
                 ...style
             }}
-            title={text}
         >
             {text}
         </span>
@@ -84,7 +110,7 @@ export default function InventoryPrint({ asset, onClose }) {
     const getDisplayData = () => {
 
         const code = asset.asset_code || '';
-        const parts = code.split('-');
+        const parts = code.split('/');
         let yearBE = '67';
         if (parts.length >= 2) {
             yearBE = parts[1];
@@ -195,17 +221,28 @@ export default function InventoryPrint({ asset, onClose }) {
             {/* หน้าเอกสารควบคุมสัดส่วน */}
             <div className="a4-landscape-page">
                 {/* ส่วนหัวเอกสาร */}
-                <div className="print-ledger-tag">
-                    <div>{asset?.asset_type === 'LAND_BUILDING' ? 'พ.ด. ๑' : 'พ.ด. ๒'}</div>
-                    <div className="print-ledger-tag-sub">
-                        1
-                    </div>
-                </div>
-                <div className="print-header-title">
-                    {asset?.asset_type === 'LAND_BUILDING'
-                        ? 'ทะเบียนที่ดินและสิ่งก่อสร้าง'
-                        : 'ทะเบียนพัสดุครุภัณฑ์ ปศุสัตว์และสัตว์พาหนะ'}
-                </div>
+                <table style={{ width: '100%', borderCollapse: 'collapse', margin: 0, padding: 0 }}>
+                    <tbody>
+                        <tr style={{ margin: 0, padding: 0 }}>
+                            <td style={{ width: '90%', padding: 0, margin: 0 }}>
+                                <div className="print-header-title" style={{ margin: 0, padding: 0 }}>
+                                    {asset?.asset_type === 'LAND_BUILDING'
+                                        ? 'ทะเบียนที่ดินและสิ่งก่อสร้าง'
+                                        : 'ทะเบียนพัสดุครุภัณฑ์ ปศุสัตว์และสัตว์พาหนะ'}
+                                </div>
+                            </td>
+                            <td style={{ width: '10%', padding: 0, margin: 0, textAlign: 'right', verticalAlign: 'middle', fontWeight: 'bold' }}>
+                                <div>{asset?.asset_type === 'LAND_BUILDING' ? 'พ.ด. ๑' : 'พ.ด. ๒'}</div>
+                            </td>
+                        </tr>
+                        <tr style={{ margin: 0, padding: 0 }}>
+                            <td style={{ width: '95%', padding: 0, margin: 0 }}></td>
+                            <td style={{ width: '5%', verticalAlign: 'middle', border: '1px solid black', textAlign: 'center', padding: '2px 0', margin: 0 }}>
+                                <div>1</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
                 {/* ข้อมูลหน่วยงาน แถวเดียว นอกตาราง */}
                 <div className="print-header-metadata" style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '8px', fontSize: '14px', fontFamily: 'Sarabun, sans-serif', alignItems: 'flex-end' }}>
                     <div style={{ width: '25%', display: 'flex', alignItems: 'flex-end' }}>
@@ -255,7 +292,7 @@ export default function InventoryPrint({ asset, onClose }) {
                                                 <td>
                                                     <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
                                                         <span style={{ whiteSpace: 'nowrap' }}>ชื่อพัสดุ:</span>
-                                                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                        <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
                                                             <AutoFitText text={data.assetName} />
                                                         </span>
                                                     </div>
@@ -265,7 +302,7 @@ export default function InventoryPrint({ asset, onClose }) {
                                                 <td>
                                                     <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
                                                         <span style={{ whiteSpace: 'nowrap' }}>เอกสารสิทธิ์ (โฉนด/น.ส.3):</span>
-                                                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                        <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
                                                             <AutoFitText text={asset.document_of_title || '-'} />
                                                         </span>
                                                     </div>
@@ -275,7 +312,7 @@ export default function InventoryPrint({ asset, onClose }) {
                                                 <td>
                                                     <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
                                                         <span style={{ whiteSpace: 'nowrap' }}>ขนาดเนื้อที่:</span>
-                                                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                        <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
                                                             <AutoFitText text={asset.area_size || '-'} />
                                                         </span>
                                                     </div>
@@ -285,7 +322,7 @@ export default function InventoryPrint({ asset, onClose }) {
                                                 <td>
                                                     <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
                                                         <span style={{ whiteSpace: 'nowrap' }}>ลักษณะโรงเรือน/สิ่งก่อสร้าง:</span>
-                                                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                        <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
                                                             <AutoFitText text={asset.building_style || '-'} />
                                                         </span>
                                                     </div>
@@ -295,7 +332,7 @@ export default function InventoryPrint({ asset, onClose }) {
                                                 <td>
                                                     <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
                                                         <span style={{ whiteSpace: 'nowrap' }}>สถานะพัสดุ:</span>
-                                                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                        <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
                                                             <AutoFitText text={asset.status || '-'} />
                                                         </span>
                                                     </div>
@@ -305,7 +342,7 @@ export default function InventoryPrint({ asset, onClose }) {
                                                 <td>
                                                     <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
                                                         <span style={{ whiteSpace: 'nowrap' }}>ลักษณะการได้มา:</span>
-                                                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                        <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
                                                             <AutoFitText text={asset.acquisition_method || '-'} />
                                                         </span>
                                                     </div>
@@ -315,7 +352,7 @@ export default function InventoryPrint({ asset, onClose }) {
                                                 <td>
                                                     <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
                                                         <span style={{ whiteSpace: 'nowrap' }}>เอกสารอนุมัติ/สัญญา:</span>
-                                                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                        <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
                                                             <AutoFitText text={asset.delivery_document_no ? `${asset.delivery_document_no} ลงวันที่ ${asset.delivery_document_date ? formatThaiDateString(asset.delivery_document_date) : '-'} (${asset.seller_name || '-'})` : '-'} />
                                                         </span>
                                                     </div>
@@ -338,7 +375,7 @@ export default function InventoryPrint({ asset, onClose }) {
                                                 <td>
                                                     <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
                                                         <span style={{ whiteSpace: 'nowrap' }}>ชื่อพัสดุ:</span>
-                                                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                        <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
                                                             <AutoFitText text={data.assetName} />
                                                         </span>
                                                     </div>
@@ -348,7 +385,7 @@ export default function InventoryPrint({ asset, onClose }) {
                                                 <td>
                                                     <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
                                                         <span style={{ whiteSpace: 'nowrap' }}>ใบส่งของ:</span>
-                                                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                        <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
                                                             <AutoFitText text={asset.delivery_document_no || '-'} />
                                                         </span>
                                                     </div>
@@ -358,7 +395,7 @@ export default function InventoryPrint({ asset, onClose }) {
                                                 <td>
                                                     <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
                                                         <span style={{ whiteSpace: 'nowrap' }}>ชื่อ/ยี่ห้อผู้ทำหรือผลิต:</span>
-                                                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                        <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
                                                             <AutoFitText text={data.brand || '-'} />
                                                         </span>
                                                     </div>
@@ -368,7 +405,7 @@ export default function InventoryPrint({ asset, onClose }) {
                                                 <td>
                                                     <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
                                                         <span style={{ whiteSpace: 'nowrap' }}>แบบ/ชนิด/ลักษณะ:</span>
-                                                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                        <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
                                                             <AutoFitText text={data.model || '-'} />
                                                         </span>
                                                     </div>
@@ -378,7 +415,7 @@ export default function InventoryPrint({ asset, onClose }) {
                                                 <td>
                                                     <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
                                                         <span style={{ whiteSpace: 'nowrap' }}>หมายเลขตัวรถ:</span>
-                                                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                        <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
                                                             <AutoFitText text={data.carNumber || '-'} />
                                                         </span>
                                                     </div>
@@ -388,7 +425,7 @@ export default function InventoryPrint({ asset, onClose }) {
                                                 <td>
                                                     <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
                                                         <span style={{ whiteSpace: 'nowrap' }}>หมายเลขเครื่อง (ถ้ามี):</span>
-                                                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                        <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
                                                             <AutoFitText text={data.engineNumber || '-'} />
                                                         </span>
                                                     </div>
@@ -398,7 +435,7 @@ export default function InventoryPrint({ asset, onClose }) {
                                                 <td>
                                                     <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
                                                         <span style={{ whiteSpace: 'nowrap' }}>หมายเลขกรอบ (ถ้ามี):</span>
-                                                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                        <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
                                                             <AutoFitText text={data.chassisNumber || '-'} />
                                                         </span>
                                                     </div>
@@ -408,7 +445,7 @@ export default function InventoryPrint({ asset, onClose }) {
                                                 <td>
                                                     <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
                                                         <span style={{ whiteSpace: 'nowrap' }}>หมายเลขจดทะเบียน (ถ้ามี):</span>
-                                                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                        <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
                                                             <AutoFitText text={data.registrationNumber || '-'} />
                                                         </span>
                                                     </div>
@@ -418,7 +455,7 @@ export default function InventoryPrint({ asset, onClose }) {
                                                 <td>
                                                     <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
                                                         <span style={{ whiteSpace: 'nowrap' }}>สีของพัสดุ:</span>
-                                                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                        <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
                                                             <AutoFitText text={data.color || '-'} />
                                                         </span>
                                                     </div>
@@ -428,7 +465,7 @@ export default function InventoryPrint({ asset, onClose }) {
                                                 <td>
                                                     <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
                                                         <span style={{ whiteSpace: 'nowrap' }}>อื่นๆ (ถ้ามีระบุ):</span>
-                                                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                        <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
                                                             <AutoFitText text={asset.other_details || '-'} />
                                                         </span>
                                                     </div>
@@ -441,7 +478,7 @@ export default function InventoryPrint({ asset, onClose }) {
                                                 <td>
                                                     <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
                                                         <span style={{ whiteSpace: 'nowrap' }}>พัสดุรับประกันถึงวันที่:</span>
-                                                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                        <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
                                                             <AutoFitText text={data.warrantyUntil || '-'} />
                                                         </span>
                                                     </div>
@@ -451,7 +488,7 @@ export default function InventoryPrint({ asset, onClose }) {
                                                 <td>
                                                     <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
                                                         <span style={{ whiteSpace: 'nowrap' }}>พัสดุประกันไว้ที่บริษัท:</span>
-                                                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                        <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
                                                             <AutoFitText text={data.warrantyCompany || '-'} />
                                                         </span>
                                                     </div>
@@ -461,7 +498,7 @@ export default function InventoryPrint({ asset, onClose }) {
                                                 <td>
                                                     <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
                                                         <span style={{ whiteSpace: 'nowrap' }}>วันที่ประกันพัสดุ:</span>
-                                                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                        <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
                                                             <AutoFitText text={data.warrantyDate || '-'} />
                                                         </span>
                                                     </div>
@@ -480,7 +517,7 @@ export default function InventoryPrint({ asset, onClose }) {
                                             <td>
                                                 <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
                                                     <span style={{ whiteSpace: 'nowrap' }}>ซื้อ/จ้าง/ได้มา จาก:</span>
-                                                    <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                    <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
                                                         <AutoFitText text={asset.seller_name || '-'} />
                                                     </span>
                                                 </div>
@@ -490,7 +527,7 @@ export default function InventoryPrint({ asset, onClose }) {
                                             <td>
                                                 <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
                                                     <span style={{ whiteSpace: 'nowrap' }}>ซื้อ/จ้าง/ได้มา เมื่อวันที่:</span>
-                                                    <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                    <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
                                                         <AutoFitText text={data.acquiredDate || '-'} />
                                                     </span>
                                                 </div>
@@ -500,12 +537,12 @@ export default function InventoryPrint({ asset, onClose }) {
                                             <td>
                                                 <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%', gap: '4px' }}>
                                                     <span style={{ whiteSpace: 'nowrap' }}>ราคา:</span>
-                                                    <span className="dotted-line" style={{ width: '70px', flexShrink: 0 }}>
+                                                    <span style={{ width: '70px', flexShrink: 0 }}>
                                                         <AutoFitText text={data.price} />
                                                     </span>
                                                     <span style={{ whiteSpace: 'nowrap' }}>บาท</span>
                                                     <span style={{ whiteSpace: 'nowrap', marginLeft: '4px' }}>งบประมาณ:</span>
-                                                    <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0 }}>
+                                                    <span style={{ flexGrow: 1, minWidth: 0 }}>
                                                         <AutoFitText text={data.budgetSource} />
                                                     </span>
                                                 </div>
@@ -519,11 +556,11 @@ export default function InventoryPrint({ asset, onClose }) {
                                                 <td>
                                                     <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%', gap: '4px' }}>
                                                         <span style={{ whiteSpace: 'nowrap' }}>{item.year}:</span>
-                                                        <span className="dotted-line" style={{ width: '35px', textAlign: 'center', flexShrink: 0 }}>
+                                                        <span style={{ width: '35px', textAlign: 'center', flexShrink: 0 }}>
                                                             {item.rate}
                                                         </span>
                                                         <span style={{ whiteSpace: 'nowrap' }}>% คงเหลือราคา</span>
-                                                        <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0 }}>
+                                                        <span style={{ flexGrow: 1, minWidth: 0 }}>
                                                             <AutoFitText text={item.balance} />
                                                         </span>
                                                         <span style={{ whiteSpace: 'nowrap' }}>บาท</span>
@@ -538,7 +575,7 @@ export default function InventoryPrint({ asset, onClose }) {
                                             <td>
                                                 <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
                                                     <span style={{ whiteSpace: 'nowrap' }}>วันที่จำหน่าย:</span>
-                                                    <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                    <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
                                                         <AutoFitText text={data.disposalDate || '-'} />
                                                     </span>
                                                 </div>
@@ -548,7 +585,7 @@ export default function InventoryPrint({ asset, onClose }) {
                                             <td>
                                                 <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
                                                     <span style={{ whiteSpace: 'nowrap' }}>วิธีจำหน่าย:</span>
-                                                    <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                    <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
                                                         <AutoFitText text={data.disposalMethod || '-'} />
                                                     </span>
                                                 </div>
@@ -558,7 +595,7 @@ export default function InventoryPrint({ asset, onClose }) {
                                             <td>
                                                 <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
                                                     <span style={{ whiteSpace: 'nowrap' }}>เลขที่หนังสืออนุมัติ:</span>
-                                                    <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                    <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
                                                         <AutoFitText text={data.disposalDocNo || '-'} />
                                                     </span>
                                                 </div>
@@ -568,7 +605,7 @@ export default function InventoryPrint({ asset, onClose }) {
                                             <td>
                                                 <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
                                                     <span style={{ whiteSpace: 'nowrap' }}>ราคาจำหน่าย:</span>
-                                                    <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                    <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
                                                         <AutoFitText text={data.disposalPrice || '-'} />
                                                     </span>
                                                 </div>
@@ -578,7 +615,7 @@ export default function InventoryPrint({ asset, onClose }) {
                                             <td>
                                                 <div style={{ display: 'flex', alignItems: 'flex-end', width: '100%' }}>
                                                     <span style={{ whiteSpace: 'nowrap' }}>กำไร/ขาดทุน:</span>
-                                                    <span className="dotted-line" style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
+                                                    <span style={{ flexGrow: 1, minWidth: 0, marginLeft: '4px' }}>
                                                         <AutoFitText text={data.profit || '-'} />
                                                     </span>
                                                 </div>

@@ -33,7 +33,7 @@ export default function BentoDashboard({ assets, onAddClick, onResetDemo, onView
 
   // Recent assets (sorted by acquisition year in code descending)
   const getYear = (code) => {
-    const parts = String(code || '').split('-');
+    const parts = String(code || '').split('/');
     if (parts.length >= 2) return parseInt(parts[1]) || 0;
     return 0;
   };
@@ -156,7 +156,7 @@ export default function BentoDashboard({ assets, onAddClick, onResetDemo, onView
               {recentAssets.length > 0 ? (
                 recentAssets.map(asset => {
                   const theme = statusColors[asset.status] || { bg: '#f1f5f9', text: '#475569' };
-                  const parts = String(asset.asset_code || '').split('-');
+                  const parts = String(asset.asset_code || '').split('/');
                   const displayYear = parts.length >= 2 ? `25${parts[1]}` : '-';
 
                   return (

@@ -50,9 +50,9 @@ export default function AssetTable({ assets, onEditAsset, onDeleteAsset, onRepai
 
     // 5. Sorting
     result.sort((a, b) => {
-      // Helper to parse acquisition year from code XXX-YY-ZZZZ
+      // Helper to parse acquisition year from code XXX/YY/ZZZZ
       const getYear = (code) => {
-        const parts = String(code || '').split('-');
+        const parts = String(code || '').split('/');
         if (parts.length >= 2) return parseInt(parts[1]) || 0;
         return 0;
       };

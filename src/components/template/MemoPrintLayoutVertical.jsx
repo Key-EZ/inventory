@@ -43,18 +43,18 @@ export default function MemoPrintLayoutVertical({
         <tbody>
           <tr>
             <td style={{ width: '97%' }}>
-              <strong>ส่วนราชการ</strong> <span className="dotted-line" style={{ width: '80%' }}>{agency}</span>
+              <strong>ส่วนราชการ</strong> <span style={{ width: '80%' }}>{agency}</span>
             </td>
           </tr>
           <tr>
             <td style={{ width: '97%' }}>
-              <strong>ที่</strong> <span className="dotted-line" style={{ width: '47%' }}>{docNo}</span>
-              <strong>วันที่</strong> <span className="dotted-line" style={{ width: '40%' }}>{docDate}</span>
+              <strong>ที่</strong> <span style={{ width: '47%' }}>{docNo}</span>
+              <strong>วันที่</strong> <span style={{ width: '40%' }}>{docDate}</span>
             </td>
           </tr>
           <tr>
             <td>
-              <strong>เรื่อง</strong> <span className="dotted-line" style={{ width: '90%', fontWeight: 'bold' }}>{subject}</span>
+              <strong>เรื่อง</strong> <span style={{ width: '90%', fontWeight: 'bold' }}>{subject}</span>
             </td>
           </tr>
         </tbody>

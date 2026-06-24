@@ -2035,7 +2035,7 @@ body {
   /* Set A4 Page in Landscape mode */
   @page {
     size: A4 landscape;
-    margin: 10mm 15mm;
+    margin: 5px;
   }
 
   /* Reset layout and hide elements */
@@ -2420,12 +2420,12 @@ body {
     background-color: #f8fafc !important;
     color: #000000 !important;
     border-bottom: 1px solid #000000 !important;
-    padding: 8px 12px !important;
+    padding: 7.2px 12px !important;
   }
 
   .card-maint-table td {
     border-bottom: 1px solid #000000 !important;
-    padding: 8px 12px !important;
+    padding: 7.2px 12px !important;
   }
 
   /* Color resets for print */
@@ -2545,7 +2545,7 @@ body.modal-print-open {
 }
 
 .form-table td {
-  padding: 6px 8px;
+  padding: 5.4px 8px;
   vertical-align: top;
 }
 
@@ -2584,7 +2584,7 @@ body.modal-print-open {
   body.modal-print-open .a4-landscape-page {
     border: none !important;
     box-shadow: none !important;
-    padding: 0 !important;
+    padding: 5px !important;
     margin: 0 !important;
     width: 100% !important;
     min-height: auto !important;
@@ -3057,9 +3057,9 @@ body.modal-print-open {
 
 .print-nested-spec-table td {
   border-bottom: 1px solid #000000 !important;
-  padding: 4.8px 8px !important;
+  padding: 4.3px 8px !important;
   font-size: 13.5px !important;
-  line-height: 1.4 !important;
+  line-height: 1.25 !important;
   text-align: left !important;
 }
 

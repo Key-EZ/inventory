@@ -28,6 +28,12 @@ export default function useInventory() {
           let tempAsset = { ...asset };
           let assetUpdated = false;
 
+          if (tempAsset.asset_code && tempAsset.asset_code.includes('-')) {
+            migrated = true;
+            assetUpdated = true;
+            tempAsset.asset_code = tempAsset.asset_code.replace(/-/g, '/');
+          }
+
           if (tempAsset.approval_document !== undefined && tempAsset.delivery_document_no === undefined) {
             migrated = true;
             assetUpdated = true;
@@ -301,8 +307,8 @@ export default function useInventory() {
     if (loadedAssets.length === 0) {
       loadedAssets = getSeedAssets();
     }
-    const dellAsset = loadedAssets.find(a => a.asset_code === '412-67-0001');
-    const toyotaAsset = loadedAssets.find(a => a.asset_code === '312-64-0001');
+    const dellAsset = loadedAssets.find(a => a.asset_code === '412/67/0001');
+    const toyotaAsset = loadedAssets.find(a => a.asset_code === '312/64/0001');
     let seedReqs = [];
     if (dellAsset && toyotaAsset) {
       seedReqs = [
@@ -476,8 +482,8 @@ export default function useInventory() {
       saveEquipmentCategories(defaultEquipmentCategories);
       saveAgencies(defaultAgencies);
 
-      const dellAsset = seed.find(a => a.asset_code === '412-67-0001');
-      const toyotaAsset = seed.find(a => a.asset_code === '312-64-0001');
+      const dellAsset = seed.find(a => a.asset_code === '412/67/0001');
+      const toyotaAsset = seed.find(a => a.asset_code === '312/64/0001');
       let seedReqs = [];
       if (dellAsset && toyotaAsset) {
         seedReqs = [

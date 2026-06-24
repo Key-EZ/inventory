@@ -8,9 +8,9 @@ const formatAssetCode = (value) => {
   const clean = value.replace(/\D/g, '');
   const truncated = clean.slice(0, 9);
   if (truncated.length > 5) {
-    return `${truncated.slice(0, 3)}-${truncated.slice(3, 5)}-${truncated.slice(5)}`;
+    return `${truncated.slice(0, 3)}/${truncated.slice(3, 5)}/${truncated.slice(5)}`;
   } else if (truncated.length > 3) {
-    return `${truncated.slice(0, 3)}-${truncated.slice(3)}`;
+    return `${truncated.slice(0, 3)}/${truncated.slice(3)}`;
   }
   return truncated;
 };
@@ -126,9 +126,9 @@ export default function AssetForm({
     }
 
     // Basic regex check for 3-part code format
-    const codeFormat = /^\d{3}-\d{2}-\d{4}$/;
+    const codeFormat = /^\d{3}\/\d{2}\/\d{4}$/;
     if (!codeFormat.test(formData.assetCode)) {
-      if (!window.confirm('คำเตือน: รหัสพัสดุไม่ได้อยู่ในรูปแบบแนะนำ (เช่น 001-10-0001) คุณต้องการใช้รหัสนี้ต่อหรือไม่?')) {
+      if (!window.confirm('คำเตือน: รหัสพัสดุไม่ได้อยู่ในรูปแบบแนะนำ (เช่น 001/10/0001) คุณต้องการใช้รหัสนี้ต่อหรือไม่?')) {
         return;
       }
     }

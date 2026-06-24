@@ -1,7 +1,7 @@
 /**
  * Calculates straight-line depreciation for an asset based on code-parsed acquisition year and price.
  * 
- * @param {string} assetCode - Code in XXX-YY-ZZZZ format
+ * @param {string} assetCode - Code in XXX/YY/ZZZZ format
  * @param {number} unitPrice - Price per unit
  * @param {string} [asOfDateStr] - Target date for calculation (default is today)
  * @returns {Object} { accumulatedDepreciation, bookValue, depreciationRatePercent }
@@ -13,7 +13,7 @@ export function calculateDepreciation(assetCode, unitPrice, asOfDateStr) {
   }
 
   const code = String(assetCode || '');
-  const parts = code.split('-');
+  const parts = code.split('/');
   
   let categoryCode = '311';
   let acquisitionYearBE = 67;

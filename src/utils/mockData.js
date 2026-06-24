@@ -5,7 +5,7 @@ const initialAssetsRaw = [
   {
     asset_type: "LAND_BUILDING",
     category: "ที่ดินที่มีกรรมสิทธิ์",
-    asset_code: "101-64-0001",
+    asset_code: "101/64/0001",
     name: "ที่ดินที่ทำการสำนักงานเทศบาลนครนนทบุรี",
     location: "ถนนรัตนาธิเบศร์ ตำบลบางกระสอ อำเภอเมืองนนทบุรี",
     acquisition_method: "รับโอน",
@@ -23,7 +23,7 @@ const initialAssetsRaw = [
   {
     asset_type: "LAND_BUILDING",
     category: "อาคารสำนักงาน",
-    asset_code: "102-65-0002",
+    asset_code: "102/65/0002",
     name: "อาคารหอประชุมอเนกประสงค์ 3 ชั้น",
     location: "ลานกิจกรรมกลาง เทศบาลนครนนทบุรี",
     acquisition_method: "จ้าง",
@@ -51,7 +51,7 @@ const initialAssetsRaw = [
   {
     asset_type: "EQUIPMENT",
     category: "ครุภัณฑ์คอมพิวเตอร์",
-    asset_code: "412-67-0001",
+    asset_code: "412/67/0001",
     name: "เครื่องคอมพิวเตอร์พกพา (Notebook)",
     location: "ห้องทำงานเทคโนโลยีสารสนเทศ",
     acquisition_method: "ซื้อ",
@@ -84,7 +84,7 @@ const initialAssetsRaw = [
   {
     asset_type: "EQUIPMENT",
     category: "ครุภัณฑ์สำนักงาน",
-    asset_code: "311-68-0008",
+    asset_code: "311/68/0008",
     name: "เก้าอี้ทำงานสำนักงานเพื่อสุขภาพ",
     location: "ห้องธุรการทั่วไป",
     acquisition_method: "ซื้อ",
@@ -108,7 +108,7 @@ const initialAssetsRaw = [
   {
     asset_type: "EQUIPMENT",
     category: "ครุภัณฑ์ไฟฟ้าและวิทยุ",
-    asset_code: "313-66-0014",
+    asset_code: "313/66/0014",
     name: "เครื่องปรับอากาศ 18000 BTU Inverter",
     location: "ห้องทำงานผู้ว่าราชการ",
     acquisition_method: "ซื้อ",
@@ -141,7 +141,7 @@ const initialAssetsRaw = [
   {
     asset_type: "EQUIPMENT",
     category: "ครุภัณฑ์สำนักงาน",
-    asset_code: "311-65-0003",
+    asset_code: "311/65/0003",
     name: "โต๊ะประชุมไม้ ขนาด 12 ที่นั่ง",
     location: "ห้องประชุมใหญ่ ชั้น 3",
     acquisition_method: "จ้าง",
@@ -165,7 +165,7 @@ const initialAssetsRaw = [
   {
     asset_type: "EQUIPMENT",
     category: "ครุภัณฑ์ยานพาหนะและขนส่ง",
-    asset_code: "312-64-0001",
+    asset_code: "312/64/0001",
     name: "รถยนต์อเนกประสงค์ (SUV) 2,400 ซีซี",
     location: "โรงจอดรถยนต์กลาง",
     acquisition_method: "ซื้อ",
@@ -206,7 +206,7 @@ const initialAssetsRaw = [
   {
     asset_type: "EQUIPMENT",
     category: "ครุภัณฑ์คอมพิวเตอร์",
-    asset_code: "412-68-0012",
+    asset_code: "412/68/0012",
     name: "เครื่องพิมพ์มัลติฟังก์ชัน เลเซอร์",
     location: "ห้องทำงานเทคโนโลยีสารสนเทศ",
     acquisition_method: "ซื้อ",

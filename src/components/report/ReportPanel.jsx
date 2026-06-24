@@ -17,7 +17,7 @@ export default function ReportPanel({ assets = [], locations = [] }) {
   // Helper mapping: Category mapping for custom formatting/code parsing
   const getCategoryDetails = (asset) => {
     const codeStr = asset.asset_code || '';
-    const parts = codeStr.split('-');
+    const parts = codeStr.split('/');
     let code = '311';
     if (parts.length >= 1) {
       code = parts[0].trim();
@@ -50,7 +50,7 @@ export default function ReportPanel({ assets = [], locations = [] }) {
       assets
         .map(a => {
           const code = a.asset_code || '';
-          const parts = code.split('-');
+          const parts = code.split('/');
           if (parts.length >= 2) {
             const yr = parseInt(parts[1]);
             return isNaN(yr) ? null : yr;
@@ -96,7 +96,7 @@ export default function ReportPanel({ assets = [], locations = [] }) {
       // 5. Acquisition Year
       if (filterYear !== 'ทั้งหมด') {
         const code = item.asset_code || '';
-        const parts = code.split('-');
+        const parts = code.split('/');
         if (parts.length >= 2) {
           const yr = parseInt(parts[1]);
           if (yr !== parseInt(filterYear)) return false;
