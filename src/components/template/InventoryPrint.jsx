@@ -641,19 +641,29 @@ export default function InventoryPrint({ asset, onClose }) {
                                                     <thead>
                                                         <tr className="history-header-bg">
                                                             <th style={{ width: '15%', borderRight: '1px solid black', borderBottom: '1px solid black', padding: '4.8px 8px', fontSize: '13.5px' }}>พ.ศ.</th>
-                                                            <th style={{ width: '35%', borderRight: '1px solid black', borderBottom: '1px solid black', padding: '4.8px 8px', fontSize: '13.5px' }}>ชื่อส่วนราชการ</th>
-                                                            <th style={{ width: '25%', borderRight: '1px solid black', borderBottom: '1px solid black', padding: '4.8px 8px', fontSize: '13.5px' }}>ชื่อผู้ใช้พัสดุ</th>
-                                                            <th style={{ width: '25%', borderBottom: '1px solid black', padding: '4.8px 8px', fontSize: '13.5px' }}>ชื่อหัวหน้าส่วนราชการ</th>
+                                                            <th style={{ width: '35%', borderRight: '1px solid black', borderBottom: '1px solid black', padding: '4.8px 8px', fontSize: '13.5px' }}>
+                                                                <AutoFitText text="ชื่อส่วนราชการ" />
+                                                            </th>
+                                                            <th style={{ width: '25%', borderRight: '1px solid black', borderBottom: '1px solid black', padding: '4.8px 8px', fontSize: '13.5px' }}>
+                                                                <AutoFitText text="ชื่อผู้ใช้พัสดุ" />
+                                                            </th>
+                                                            <th style={{ width: '25%', borderBottom: '1px solid black', padding: '4.8px 8px', fontSize: '13.5px' }}>
+                                                                <AutoFitText text="ชื่อหัวหน้าส่วนราชการ" />
+                                                            </th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                         {data.history.map((hist, idx) => (
                                                             <tr key={idx} className="history-row">
                                                                 <td className="history-cell-center" style={{ borderRight: '1px solid black', borderBottom: '1px solid black', padding: '4.8px 8px', fontSize: '13.5px', textAlign: 'center' }}>{hist.year}</td>
-                                                                <td className="history-cell" style={{ borderRight: '1px solid black', borderBottom: '1px solid black', padding: '4.8px 8px', fontSize: '13.5px' }}>{hist.department}</td>
-                                                                <td className="history-cell" style={{ borderRight: '1px solid black', borderBottom: '1px solid black', padding: '4.8px 8px', fontSize: '13.5px' }}>{hist.user || '-'}</td>
+                                                                <td className="history-cell" style={{ borderRight: '1px solid black', borderBottom: '1px solid black', padding: '4.8px 8px', fontSize: '13.5px' }}>
+                                                                    <AutoFitText text={hist.department} />
+                                                                </td>
+                                                                <td className="history-cell" style={{ borderRight: '1px solid black', borderBottom: '1px solid black', padding: '4.8px 8px', fontSize: '13.5px' }}>
+                                                                    <AutoFitText text={hist.user || '-'} />
+                                                                </td>
                                                                 <td className="history-cell-head" style={{ borderBottom: '1px solid black', padding: '4.8px 8px', fontSize: '13.5px' }}>
-                                                                    {hist.head || '-'}
+                                                                    <AutoFitText text={hist.head || '-'} />
                                                                 </td>
                                                             </tr>
                                                         ))}
