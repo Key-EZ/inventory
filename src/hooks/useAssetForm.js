@@ -130,9 +130,6 @@ export default function useAssetForm({
     if (!formData.category) tempErrors.category = 'กรุณาเลือกหมวดหมู่พัสดุ';
     if (!formData.location) tempErrors.location = 'กรุณาเลือกสถานที่ตั้ง';
     if (!formData.responsibleDepartment) tempErrors.responsibleDepartment = 'กรุณาเลือกส่วนราชการ';
-    if (!formData.deliveryDocumentNo) tempErrors.deliveryDocumentNo = 'กรุณากรอกเลขที่ใบส่งของ/สัญญา';
-    if (!formData.deliveryDocumentDate) tempErrors.deliveryDocumentDate = 'กรุณาเลือกวันเดือนปีในเอกสาร';
-    if (!formData.sellerName) tempErrors.sellerName = 'กรุณาเลือกผู้ขาย/คู่สัญญา';
     
     setErrors(tempErrors);
     return Object.keys(tempErrors).length === 0;

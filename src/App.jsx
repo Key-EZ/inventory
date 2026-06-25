@@ -99,7 +99,8 @@ export default function App() {
     sellers,
     handleAddSeller,
     handleEditSeller,
-    handleDeleteSeller
+    handleDeleteSeller,
+    importAssetsData
   } = useInventory();
 
   // --- Sub-components / Props ---
@@ -381,6 +382,7 @@ export default function App() {
             onAddSeller={handleAddSeller}
             onEditSeller={handleEditSeller}
             onDeleteSeller={handleDeleteSeller}
+            onImportAssets={importAssetsData}
           />
         )}
 

@@ -864,6 +864,174 @@ export default function useInventory() {
     addAuditLog('ตั้งค่าระบบ', `ลบรายชื่อผู้ขาย: ${seller}`);
   };
 
+  const importAssetsData = (parsedAssets, mode = 'merge') => {
+    if (!Array.isArray(parsedAssets)) {
+      return { success: false, errors: ['ข้อมูลที่นำเข้าไม่ใช่รายการอาร์เรย์ (Invalid format)'] };
+    }
+
+    const errors = [];
+    const validAssets = [];
+    let addedCount = 0;
+    let updatedCount = 0;
+
+    parsedAssets.forEach((rawAsset, idx) => {
+      const rowNum = idx + 1;
+      
+      // Required fields: name, asset_type, category, asset_code
+      if (!rawAsset.name) {
+        errors.push(`แถวที่ ${rowNum}: ไม่มีชื่อพัสดุ`);
+        return;
+      }
+      if (!rawAsset.asset_type || (rawAsset.asset_type !== 'LAND_BUILDING' && rawAsset.asset_type !== 'EQUIPMENT')) {
+        errors.push(`แถวที่ ${rowNum}: ประเภททรัพย์สินไม่ถูกต้อง (ต้องเป็น LAND_BUILDING หรือ EQUIPMENT)`);
+        return;
+      }
+      if (!rawAsset.category) {
+        errors.push(`แถวที่ ${rowNum}: ไม่มีหมวดหมู่พัสดุ`);
+        return;
+      }
+      if (!rawAsset.asset_code) {
+        errors.push(`แถวที่ ${rowNum}: ไม่มีรหัสพัสดุ (asset_code)`);
+        return;
+      }
+
+      // Unit price validation
+      let unitPrice = parseFloat(rawAsset.unit_price) || 0;
+      if (unitPrice < 0) {
+        unitPrice = 0;
+      }
+
+      const asset_code = String(rawAsset.asset_code).trim();
+      const name = String(rawAsset.name).trim();
+      const category = String(rawAsset.category).trim();
+      const asset_type = rawAsset.asset_type;
+      
+      const newAsset = {
+        id: rawAsset.id || `asset-${Date.now()}-${idx}-${Math.random().toString(36).substr(2, 5)}`,
+        asset_type,
+        category,
+        asset_code,
+        name,
+        location: rawAsset.location ? String(rawAsset.location).trim() : '',
+        acquisition_method: rawAsset.acquisition_method ? String(rawAsset.acquisition_method).trim() : 'ซื้อ',
+        delivery_document_no: rawAsset.delivery_document_no ? String(rawAsset.delivery_document_no).trim() : '',
+        delivery_document_date: rawAsset.delivery_document_date ? String(rawAsset.delivery_document_date).trim() : '',
+        seller_name: rawAsset.seller_name ? String(rawAsset.seller_name).trim() : '',
+        unit_price: unitPrice,
+        budget_owner: rawAsset.budget_owner ? String(rawAsset.budget_owner).trim() : '',
+        responsible_department: rawAsset.responsible_department ? String(rawAsset.responsible_department).trim() : '',
+        status: rawAsset.status ? String(rawAsset.status).trim() : 'ใช้งาน',
+        maintenances: Array.isArray(rawAsset.maintenances) ? rawAsset.maintenances : [],
+
+        // Ph.D.1 Specific
+        document_of_title: rawAsset.document_of_title ? String(rawAsset.document_of_title).trim() : '',
+        area_size: rawAsset.area_size ? String(rawAsset.area_size).trim() : '',
+        building_style: rawAsset.building_style ? String(rawAsset.building_style).trim() : '',
+
+        // Ph.D.2 Specific
+        manufacturer_brand: rawAsset.manufacturer_brand ? String(rawAsset.manufacturer_brand).trim() : '',
+        serial_number: rawAsset.serial_number ? String(rawAsset.serial_number).trim() : '',
+        engine_number: rawAsset.engine_number ? String(rawAsset.engine_number).trim() : '',
+        chassis_number: rawAsset.chassis_number ? String(rawAsset.chassis_number).trim() : '',
+        vehicle_registration: rawAsset.vehicle_registration ? String(rawAsset.vehicle_registration).trim() : '',
+        color: rawAsset.color ? String(rawAsset.color).trim() : '',
+        warranty_start_date: rawAsset.warranty_start_date ? String(rawAsset.warranty_start_date).trim() : '',
+        warranty_end_date: rawAsset.warranty_end_date ? String(rawAsset.warranty_end_date).trim() : '',
+        warranty_company: rawAsset.warranty_company ? String(rawAsset.warranty_company).trim() : '',
+
+        // Depreciation: raw value or default as-is per request
+        depreciation_rate_percent: rawAsset.depreciation_rate_percent !== undefined ? parseFloat(rawAsset.depreciation_rate_percent) || 0 : 0,
+        accumulated_depreciation: rawAsset.accumulated_depreciation !== undefined ? parseFloat(rawAsset.accumulated_depreciation) || 0 : 0,
+        book_value: rawAsset.book_value !== undefined ? parseFloat(rawAsset.book_value) || 0 : unitPrice
+      };
+
+      validAssets.push(newAsset);
+    });
+
+    if (validAssets.length === 0) {
+      return { success: false, added: 0, updated: 0, errors: errors.length > 0 ? errors : ['ไม่มีข้อมูลที่ถูกต้องเพื่อนำเข้า'] };
+    }
+
+    // Dynamic master option lists update
+    const newDepts = new Set(departments);
+    const newLocs = new Set(locations);
+    const newBrands = new Set(brands);
+    const newSellers = new Set(sellers);
+    const newLandCats = new Set(landBuildingCategories);
+    const newEquipCats = new Set(equipmentCategories);
+    let listsUpdated = false;
+
+    validAssets.forEach(a => {
+      if (a.responsible_department && !newDepts.has(a.responsible_department)) {
+        newDepts.add(a.responsible_department);
+        listsUpdated = true;
+      }
+      if (a.location && !newLocs.has(a.location)) {
+        newLocs.add(a.location);
+        listsUpdated = true;
+      }
+      if (a.manufacturer_brand && !newBrands.has(a.manufacturer_brand)) {
+        newBrands.add(a.manufacturer_brand);
+        listsUpdated = true;
+      }
+      if (a.seller_name && !newSellers.has(a.seller_name)) {
+        newSellers.add(a.seller_name);
+        listsUpdated = true;
+      }
+      if (a.category) {
+        if (a.asset_type === 'LAND_BUILDING' && !newLandCats.has(a.category)) {
+          newLandCats.add(a.category);
+          listsUpdated = true;
+        } else if (a.asset_type === 'EQUIPMENT' && !newEquipCats.has(a.category)) {
+          newEquipCats.add(a.category);
+          listsUpdated = true;
+        }
+      }
+    });
+
+    if (listsUpdated) {
+      if (newDepts.size > departments.length) saveDepartments(Array.from(newDepts));
+      if (newLocs.size > locations.length) saveLocations(Array.from(newLocs));
+      if (newBrands.size > brands.length) saveBrands(Array.from(newBrands));
+      if (newSellers.size > sellers.length) saveSellers(Array.from(newSellers));
+      if (newLandCats.size > landBuildingCategories.length) saveLandBuildingCategories(Array.from(newLandCats));
+      if (newEquipCats.size > equipmentCategories.length) saveEquipmentCategories(Array.from(newEquipCats));
+    }
+
+    let updatedList;
+    if (mode === 'replace') {
+      updatedList = validAssets;
+      addedCount = validAssets.length;
+    } else {
+      const currentAssetsMap = new Map(assets.map(a => [a.asset_code, a]));
+      validAssets.forEach(newAsset => {
+        if (currentAssetsMap.has(newAsset.asset_code)) {
+          const existing = currentAssetsMap.get(newAsset.asset_code);
+          newAsset.id = existing.id;
+          if (newAsset.maintenances.length === 0 && existing.maintenances && existing.maintenances.length > 0) {
+            newAsset.maintenances = existing.maintenances;
+          }
+          currentAssetsMap.set(newAsset.asset_code, newAsset);
+          updatedCount++;
+        } else {
+          currentAssetsMap.set(newAsset.asset_code, newAsset);
+          addedCount++;
+        }
+      });
+      updatedList = Array.from(currentAssetsMap.values());
+    }
+
+    saveAssetsToStateAndStorage(updatedList);
+    addAuditLog('ตั้งค่าระบบ', `นำเข้าข้อมูลครุภัณฑ์สำเร็จ (นำเข้าใหม่: ${addedCount} รายการ, อัปเดตข้อมูลเดิม: ${updatedCount} รายการ)`);
+
+    return {
+      success: true,
+      added: addedCount,
+      updated: updatedCount,
+      errors
+    };
+  };
+
   return {
     assets,
     divisions,
@@ -918,6 +1086,7 @@ export default function useInventory() {
     sellers,
     handleAddSeller,
     handleEditSeller,
-    handleDeleteSeller
+    handleDeleteSeller,
+    importAssetsData
   };
 }

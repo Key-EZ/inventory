@@ -206,7 +206,7 @@ export default function AssetForm({
 
               <div className="form-row">
                 <div className="form-group col">
-                  <label>เลขที่ใบส่งของ/สัญญา *</label>
+                  <label>เลขที่ใบส่งของ/สัญญา</label>
                   <input
                     type="text"
                     name="deliveryDocumentNo"
@@ -214,30 +214,27 @@ export default function AssetForm({
                     onChange={handleChange}
                     placeholder="เช่น เลขที่ใบส่งของ หรือ PO"
                     className={errors.deliveryDocumentNo ? 'input-error' : ''}
-                    required
                   />
                   {errors.deliveryDocumentNo && <span className="error-text">{errors.deliveryDocumentNo}</span>}
                 </div>
                 <div className="form-group col">
-                  <label>วันเดือนปีในเอกสาร *</label>
+                  <label>วันเดือนปีในเอกสาร</label>
                   <input
                     type="date"
                     name="deliveryDocumentDate"
                     value={formData.deliveryDocumentDate}
                     onChange={handleChange}
                     className={errors.deliveryDocumentDate ? 'input-error' : ''}
-                    required
                   />
                   {errors.deliveryDocumentDate && <span className="error-text">{errors.deliveryDocumentDate}</span>}
                 </div>
                 <div className="form-group col">
-                  <label>ผู้ขาย / คู่สัญญา *</label>
+                  <label>ผู้ขาย / คู่สัญญา</label>
                   <select
                     name="sellerName"
                     value={formData.sellerName}
                     onChange={handleChange}
                     className={errors.sellerName ? 'input-error' : ''}
-                    required
                   >
                     <option value="">-- เลือกผู้ขาย --</option>
                     {sellers.map(s => (
