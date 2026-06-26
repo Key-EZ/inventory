@@ -37,7 +37,7 @@ export default function useInventory() {
           if (tempAsset.approval_document !== undefined && tempAsset.delivery_document_no === undefined) {
             migrated = true;
             assetUpdated = true;
-            let docNo = '';
+            let docNo;
             let docDate = '';
             const docStr = tempAsset.approval_document || '';
             const noMatch = docStr.match(/เลขที่\s*(.*?)\s*ลงวันที่/);

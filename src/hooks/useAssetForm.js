@@ -19,8 +19,7 @@ export default function useAssetForm({
   equipmentCategories = [],
   landBuildingCategories = [],
   sellers = [],
-  onSubmit,
-  onClose
+  onSubmit
 }) {
   const isEdit = !!asset;
   const [activeTab, setActiveTab] = useState('general');
@@ -58,7 +57,6 @@ export default function useAssetForm({
     photo: asset ? asset.photo || '' : '',
   });
 
-  const budgetOwner = asset ? asset.budget_owner || '' : '';
   const maintenances = asset ? asset.maintenances || [] : [];
 
   const handleChange = (e) => {

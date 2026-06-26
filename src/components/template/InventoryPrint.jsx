@@ -6,9 +6,12 @@ function AutoFitText({ text, maxFontSize = 13.5, minFontSize = 8, className = ''
     const containerRef = useRef(null);
     const [fontSize, setFontSize] = useState(maxFontSize);
 
-    useEffect(() => {
+    // Sync font size changes in render phase when text or maxFontSize dependencies change
+    const [prevProps, setPrevProps] = useState({ text, maxFontSize });
+    if (text !== prevProps.text || maxFontSize !== prevProps.maxFontSize) {
+        setPrevProps({ text, maxFontSize });
         setFontSize(maxFontSize);
-    }, [text, maxFontSize]);
+    }
 
     useEffect(() => {
         if (!containerRef.current) return;

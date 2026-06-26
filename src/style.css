@@ -1,5 +1,6 @@
 /* style.css - การสไตล์ลิ่งสไตล์คลีนแบบลดทอนหน่วย ประสิทธิภาพความเร็วสูง */
 :root {
+  --base-font-size: 15px;
   --border-radius: 12px;
   --primary-color: #4f46e5;
   --primary-color-hover: #4338ca;
@@ -3337,4 +3338,57 @@ body.modal-print-open {
   margin-top: 4px;
   display: block;
   font-weight: 500;
+}
+
+/* Typography base scaling */
+html {
+  font-size: var(--base-font-size);
+}
+
+/* Tooltip Style for professional help prompts */
+.tooltip-trigger {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: var(--border-color);
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-weight: bold;
+  cursor: help;
+  margin-left: 6px;
+  transition: all 0.2s ease;
+  vertical-align: middle;
+}
+
+.tooltip-trigger:hover {
+  background-color: var(--primary-color);
+  color: #ffffff;
+}
+
+.tooltip-trigger::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #0f172a;
+  color: #ffffff;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: normal;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 1000;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.tooltip-trigger:hover::after {
+  opacity: 1;
 }

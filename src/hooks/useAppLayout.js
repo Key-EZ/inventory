@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 
 export default function useAppLayout() {
   const [activeLayout, setActiveLayout] = useState(() => {
-    return localStorage.getItem('inventory_layout') || 'centered';
+    const saved = localStorage.getItem('inventory_layout');
+    return (saved && saved !== 'reports') ? saved : 'centered';
   });
 
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -20,6 +21,10 @@ export default function useAppLayout() {
   const [isRepairFormOpen, setIsRepairFormOpen] = useState(false);
   const [repairActiveTab, setRepairActiveTab] = useState('new_request');
 
+  const [fontScale, setFontScale] = useState(() => {
+    return localStorage.getItem('inventory_font_scale') || 'normal';
+  });
+
   // Sync theme to document element
   useEffect(() => {
     if (isDarkMode) {
@@ -30,6 +35,19 @@ export default function useAppLayout() {
       localStorage.setItem('inventory_theme', 'light');
     }
   }, [isDarkMode]);
+
+  // Sync typography font scaling to root styles
+  useEffect(() => {
+    let size = '15px';
+    if (fontScale === 'small') size = '13.5px';
+    if (fontScale === 'large') size = '17px';
+    document.documentElement.style.setProperty('--base-font-size', size);
+    localStorage.setItem('inventory_font_scale', fontScale);
+  }, [fontScale]);
+
+  const adjustFontScale = (scale) => {
+    setFontScale(scale);
+  };
 
   const toggleTheme = () => {
     setIsDarkMode(prev => !prev);
@@ -105,5 +123,7 @@ export default function useAppLayout() {
     openPrintAsset,
     closePrintAsset,
     navigateFromLanding,
+    fontScale,
+    adjustFontScale
   };
 }

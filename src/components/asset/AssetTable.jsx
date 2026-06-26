@@ -6,7 +6,6 @@ export default function AssetTable({
   onDeleteAsset,
   onRepairAsset,
   onPrintAsset,
-  onViewRepairHistory,
   onManageCustodian,
   initialSearchQuery = ''
 }) {

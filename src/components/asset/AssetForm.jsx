@@ -3,13 +3,10 @@ import { defaultDepartments } from '../../utils/mockData';
 
 export default function AssetForm({
   asset,
-  custodians = [],
   brands = [],
   locations = [],
   landBuildingCategories = [],
   equipmentCategories = [],
-  agencies = [],
-  positions = [],
   onSubmit,
   onClose,
   sellers = []
@@ -87,7 +84,10 @@ export default function AssetForm({
                   </select>
                 </div>
                 <div className="form-group col">
-                  <label>หมวดหมู่พัสดุ *</label>
+                  <label>
+                    หมวดหมู่พัสดุ *
+                    <span className="tooltip-trigger" data-tooltip="เลือกหมวดหมู่ย่อยของทรัพย์สินเพื่อใช้จัดกลุ่มและแสดงในรายงาน พ.ด.3">?</span>
+                  </label>
                   <select
                     name="category"
                     value={formData.category}
@@ -103,7 +103,10 @@ export default function AssetForm({
                   {errors.category && <span className="error-text">{errors.category}</span>}
                 </div>
                 <div className="form-group col">
-                  <label>รหัสพัสดุ *</label>
+                  <label>
+                    รหัสพัสดุ *
+                    <span className="tooltip-trigger" data-tooltip="รูปแบบแนะนำ: XXX/YY/ZZZZ (รหัสประเภท/ปี พ.ศ. จัดหา/ลำดับ)">?</span>
+                  </label>
                   <input
                     type="text"
                     name="assetCode"
@@ -159,7 +162,10 @@ export default function AssetForm({
 
               <div className="form-row">
                 <div className="form-group col">
-                  <label>ราคาต่อหน่วย (บาท) *</label>
+                  <label>
+                    ราคาต่อหน่วย (บาท) *
+                    <span className="tooltip-trigger" data-tooltip="ราคาทุนรวมต่อหน่วยสำหรับใช้คำนวณหักค่าเสื่อมราคาประจำปี">?</span>
+                  </label>
                   <input
                     type="number"
                     step="0.01"
@@ -171,7 +177,10 @@ export default function AssetForm({
                   />
                 </div>
                 <div className="form-group col">
-                  <label>ที่ตั้งพัสดุ *</label>
+                  <label>
+                    ที่ตั้งพัสดุ *
+                    <span className="tooltip-trigger" data-tooltip="สถานที่ตั้งของครุภัณฑ์หรือทรัพย์สินสำหรับการตรวจสอบพัสดุประจำปี">?</span>
+                  </label>
                   <select
                     name="location"
                     value={formData.location}
@@ -206,7 +215,10 @@ export default function AssetForm({
 
               <div className="form-row">
                 <div className="form-group col">
-                  <label>เลขที่ใบส่งของ/สัญญา</label>
+                  <label>
+                    เลขที่ใบส่งของ/สัญญา
+                    <span className="tooltip-trigger" data-tooltip="เลขที่ที่ปรากฏในใบส่งของ ใบสั่งซื้อ (PO) หรือสัญญาจัดซื้อจัดจ้าง">?</span>
+                  </label>
                   <input
                     type="text"
                     name="deliveryDocumentNo"
@@ -218,7 +230,10 @@ export default function AssetForm({
                   {errors.deliveryDocumentNo && <span className="error-text">{errors.deliveryDocumentNo}</span>}
                 </div>
                 <div className="form-group col">
-                  <label>วันเดือนปีในเอกสาร</label>
+                  <label>
+                    วันเดือนปีในเอกสาร
+                    <span className="tooltip-trigger" data-tooltip="วันเดือนปีที่ลงในใบส่งมอบหรือหนังสืออนุมัติ/สัญญาจัดหา">?</span>
+                  </label>
                   <input
                     type="date"
                     name="deliveryDocumentDate"
@@ -229,7 +244,10 @@ export default function AssetForm({
                   {errors.deliveryDocumentDate && <span className="error-text">{errors.deliveryDocumentDate}</span>}
                 </div>
                 <div className="form-group col">
-                  <label>ผู้ขาย / คู่สัญญา</label>
+                  <label>
+                    ผู้ขาย / คู่สัญญา
+                    <span className="tooltip-trigger" data-tooltip="ชื่อบริษัท ห้างหุ้นส่วนจำกัด หรือร้านค้าคู่สัญญาที่จัดหาพัสดุนี้">?</span>
+                  </label>
                   <select
                     name="sellerName"
                     value={formData.sellerName}

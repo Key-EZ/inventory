@@ -6,7 +6,6 @@ import CustodianHistoryModal from './components/asset/CustodianHistoryModal';
 import BentoDashboard from './components/BentoDashboard';
 import CenteredLanding from './components/CenteredLanding';
 import SettingsPanel from './components/SettingsPanel';
-import ReportPanel from './components/report/ReportPanel';
 import InventoryPrint from './components/template/InventoryPrint';
 import GetRepair from './components/repair/GetRepair';
 import RepairJobs from './components/repair/RepairJobs';
@@ -44,6 +43,8 @@ export default function App() {
     openPrintAsset,
     closePrintAsset,
     navigateFromLanding,
+    fontScale,
+    adjustFontScale
   } = useAppLayout();
 
   const {
@@ -137,12 +138,7 @@ export default function App() {
         >
           🔍 ค้นหา
         </li>
-        <li
-          className={`sidebar-menu-item ${activeLayout === 'reports' ? 'active' : ''}`}
-          onClick={() => changeLayout('reports')}
-        >
-          📈 รายงาน พ.ด.1-3
-        </li>
+
         <li
           className={`sidebar-menu-item ${activeLayout === 'repair_jobs' ? 'active' : ''}`}
           onClick={() => changeLayout('repair_jobs')}
@@ -183,7 +179,6 @@ export default function App() {
   const layoutTitles = {
     'sidebar': 'ทะเบียนครุภัณฑ์',
     'bento': 'Dashboard',
-    'reports': 'รายงานสรุป พ.ด.1-3',
     'centered': 'ค้นหา',
     'settings': 'ตั้งค่าระบบครุภัณฑ์',
     'repair_jobs': 'งานซ่อมอุปกรณ์',
@@ -221,13 +216,7 @@ export default function App() {
           >
             Dashboard
           </button>
-          <button
-            className={`layout-toggle-btn ${activeLayout === 'reports' ? 'active' : ''}`}
-            onClick={() => changeLayout('reports')}
-            title="พ.ด. 1, พ.ด. 2, และ พ.ด. 3"
-          >
-            รายงาน
-          </button>
+
           <button
             className={`layout-toggle-btn ${activeLayout === 'repair_jobs' ? 'active' : ''}`}
             onClick={() => changeLayout('repair_jobs')}
@@ -255,6 +244,37 @@ export default function App() {
             title="Audit Log"
           >
             ประวัติระบบ
+          </button>
+        </div>
+
+        {/* Font Scaling Buttons */}
+        <div className="font-scale-group" style={{ display: 'flex', gap: '4px', marginRight: '12px', alignItems: 'center' }}>
+          <button
+            type="button"
+            className={`layout-toggle-btn ${fontScale === 'small' ? 'active' : ''}`}
+            style={{ padding: '4px 10px', fontSize: '0.8rem', minWidth: '32px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            onClick={() => adjustFontScale('small')}
+            title="ลดขนาดตัวอักษร"
+          >
+            A-
+          </button>
+          <button
+            type="button"
+            className={`layout-toggle-btn ${fontScale === 'normal' ? 'active' : ''}`}
+            style={{ padding: '4px 10px', fontSize: '0.85rem', fontWeight: 'bold', minWidth: '32px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            onClick={() => adjustFontScale('normal')}
+            title="ขนาดตัวอักษรปกติ"
+          >
+            A
+          </button>
+          <button
+            type="button"
+            className={`layout-toggle-btn ${fontScale === 'large' ? 'active' : ''}`}
+            style={{ padding: '4px 10px', fontSize: '0.95rem', minWidth: '32px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            onClick={() => adjustFontScale('large')}
+            title="เพิ่มขนาดตัวอักษร"
+          >
+            A+
           </button>
         </div>
 
@@ -329,13 +349,7 @@ export default function App() {
           />
         )}
 
-        {activeLayout === 'reports' && (
-          <ReportPanel
-            assets={assets}
-            custodians={custodians}
-            locations={locations}
-          />
-        )}
+
 
         {activeLayout === 'settings' && (
           <SettingsPanel
@@ -495,12 +509,7 @@ export default function App() {
               >
                 🔍 ค้นหา
               </li>
-              <li
-                className={`sidebar-menu-item ${activeLayout === 'reports' ? 'active' : ''}`}
-                onClick={() => changeLayout('reports')}
-              >
-                📈 รายงาน พ.ด.1-3
-              </li>
+
               <li
                 className={`sidebar-menu-item ${activeLayout === 'repair_jobs' ? 'active' : ''}`}
                 onClick={() => changeLayout('repair_jobs')}

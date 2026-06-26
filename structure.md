@@ -67,7 +67,6 @@ inventory/
 - **[RepairJobs.jsx](file:///c:/Users/hsc2s/OneDrive/Apps/inventory/src/components/repair/RepairJobs.jsx)**: Tracks pending, in-progress, and resolved repair tickets.
 
 #### Report & Printing Templates (`src/components/report/` & `src/components/template/`)
-- **[ReportPanel.jsx](file:///c:/Users/hsc2s/OneDrive/Apps/inventory/src/components/report/ReportPanel.jsx)**: Compiles registers into printable official A4 landscape records for พ.ด.1, พ.ด.2, and พ.ด.3 summaries.
 - **[InventoryPrint.jsx](file:///c:/Users/hsc2s/OneDrive/Apps/inventory/src/components/template/InventoryPrint.jsx)**: Generates print layout for individual asset sheets.
 - **[MemoPrintLayoutVertical.jsx](file:///c:/Users/hsc2s/OneDrive/Apps/inventory/src/components/template/MemoPrintLayoutVertical.jsx)**: Official vertical memo format for repair approval requests.
 
