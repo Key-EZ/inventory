@@ -6,10 +6,26 @@
  * @param {string} [asOfDateStr] - Target date for calculation (default is today)
  * @returns {Object} { accumulatedDepreciation, bookValue, depreciationRatePercent }
  */
-export function calculateDepreciation(assetCode, unitPrice, asOfDateStr) {
+export function calculateDepreciation(assetCode, unitPrice, categoryName, categoryDepreciationYears, asOfDateStr) {
   const price = parseFloat(unitPrice) || 0;
   if (price <= 0) {
     return { accumulatedDepreciation: 0, bookValue: 0, depreciationRatePercent: 0 };
+  }
+
+  // Handle flexible signature:
+  // calculateDepreciation(assetCode, unitPrice, asOfDateStr)
+  // calculateDepreciation(assetCode, unitPrice, categoryName, categoryDepreciationYears, asOfDateStr)
+  let catName = categoryName;
+  let depMapping = categoryDepreciationYears;
+  let dateStr = asOfDateStr;
+
+  if (typeof categoryName === 'string' && !categoryDepreciationYears) {
+    // If 4th arg is missing, the 3rd arg might be asOfDateStr
+    const isDate = categoryName.includes('-') || !isNaN(Date.parse(categoryName));
+    if (isDate) {
+      dateStr = categoryName;
+      catName = undefined;
+    }
   }
 
   const code = String(assetCode || '');
@@ -29,18 +45,32 @@ export function calculateDepreciation(assetCode, unitPrice, asOfDateStr) {
     }
   }
 
-  // Determine depreciation rate by local gov standard prefix codes
+  // Determine depreciation rate: prioritize custom mapping, fallback to legacy prefix codes
   let rate = 10; // Default 10%
-  if (categoryCode === '101') {
-    rate = 0;   // Land (ที่ดิน) has 0% depreciation
-  } else if (categoryCode === '102' || categoryCode === '103') {
-    rate = 5;   // Buildings / Structures 5%
-  } else if (categoryCode === '412') {
-    rate = 20;  // Computer hardware 20%
-  } else if (categoryCode === '312') {
-    rate = 20;  // Vehicles 20%
-  } else if (categoryCode === '313') {
-    rate = 20;  // Electrical/Radio 20%
+  let customYearsFound = false;
+
+  if (catName && depMapping && depMapping[catName] !== undefined) {
+    const years = parseFloat(depMapping[catName]);
+    customYearsFound = true;
+    if (years <= 0) {
+      rate = 0;
+    } else {
+      rate = 100 / years;
+    }
+  }
+
+  if (!customYearsFound) {
+    if (categoryCode === '101') {
+      rate = 0;
+    } else if (categoryCode === '102' || categoryCode === '103') {
+      rate = 5;
+    } else if (categoryCode === '412') {
+      rate = 20;
+    } else if (categoryCode === '312') {
+      rate = 20;
+    } else if (categoryCode === '313') {
+      rate = 20;
+    }
   }
 
   if (rate === 0) {
@@ -53,7 +83,7 @@ export function calculateDepreciation(assetCode, unitPrice, asOfDateStr) {
 
   // Assume acquisition date is Jan 1st of the year
   const acquisitionDate = new Date(`${ceYear}-01-01`);
-  const targetDate = asOfDateStr ? new Date(asOfDateStr) : new Date();
+  const targetDate = dateStr ? new Date(dateStr) : new Date();
 
   if (isNaN(acquisitionDate.getTime()) || acquisitionDate > targetDate) {
     return { accumulatedDepreciation: 0, bookValue: price, depreciationRatePercent: rate };

@@ -58,6 +58,7 @@ export default function App() {
     landingBadgeText,
     landBuildingCategories,
     equipmentCategories,
+    categoryDepreciationYears,
     agencies,
     auditLogs,
     repairRequests,
@@ -358,6 +359,7 @@ export default function App() {
             divisions={divisions}
             departments={departments}
             positions={positions}
+            categoryDepreciationYears={categoryDepreciationYears}
             brands={brands}
             locations={locations}
             landingBadgeText={landingBadgeText}
@@ -427,8 +429,10 @@ export default function App() {
           locations={locations}
           landBuildingCategories={landBuildingCategories}
           equipmentCategories={equipmentCategories}
+          categoryDepreciationYears={categoryDepreciationYears}
           agencies={agencies}
           positions={positions}
+          departments={departments}
           onSubmit={handleSubmitForm}
           onClose={closeForm}
           sellers={sellers}

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { calculateDepreciation } from '../utils/depreciation';
 import {
   getSeedAssets,
   defaultDivisions,
@@ -273,6 +274,38 @@ export default function useInventory() {
     return defaultAgencies;
   });
 
+  const [categoryDepreciationYears, setCategoryDepreciationYears] = useState(() => {
+    const saved = localStorage.getItem('inventory_category_depreciation_years');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.warn('Failed to parse category depreciation years', e);
+      }
+    }
+    const defaultMapping = {
+      'ที่ดินที่มีกรรมสิทธิ์': 0,
+      'อาคารสำนักงาน': 20,
+      'สิ่งปลูกสร้าง': 20,
+      'ครุภัณฑ์สำนักงาน': 10,
+      'ครุภัณฑ์คอมพิวเตอร์': 5,
+      'ครุภัณฑ์ยานพาหนะและขนส่ง': 5,
+      'ครุภัณฑ์ไฟฟ้าและวิทยุ': 5,
+      'ครุภัณฑ์โฆษณาและเผยแพร่': 5,
+      'ครุภัณฑ์งานบ้านงานครัว': 5,
+      'ครุภัณฑ์วิทยาศาสตร์และการแพทย์': 10,
+      'ครุภัณฑ์กีฬา': 5,
+      'สินทรัพย์ไม่มีตัวตนอื่น': 5
+    };
+    localStorage.setItem('inventory_category_depreciation_years', JSON.stringify(defaultMapping));
+    return defaultMapping;
+  });
+
+  const saveCategoryDepreciationYears = (mapping) => {
+    setCategoryDepreciationYears(mapping);
+    localStorage.setItem('inventory_category_depreciation_years', JSON.stringify(mapping));
+  };
+
   const [auditLogs, setAuditLogs] = useState(() => {
     const saved = localStorage.getItem('inventory_audit_logs');
     if (saved) {
@@ -348,6 +381,25 @@ export default function useInventory() {
   const saveAssetsToStateAndStorage = (newAssetsList) => {
     setAssets(newAssetsList);
     localStorage.setItem('inventory_assets', JSON.stringify(newAssetsList));
+  };
+
+  const recalculateAllAssetsDepreciation = (updatedMapping = categoryDepreciationYears, currentAssets = assets) => {
+    const updatedAssets = currentAssets.map(asset => {
+      const dep = calculateDepreciation(
+        asset.asset_code,
+        asset.unit_price,
+        asset.category,
+        updatedMapping
+      );
+      return {
+        ...asset,
+        depreciation_rate_percent: dep.depreciation_rate_percent,
+        accumulated_depreciation: dep.accumulated_depreciation,
+        book_value: dep.book_value
+      };
+    });
+    setAssets(updatedAssets);
+    localStorage.setItem('inventory_assets', JSON.stringify(updatedAssets));
   };
 
   // --- Audit Log Helpers ---
@@ -481,6 +533,22 @@ export default function useInventory() {
       saveLandBuildingCategories(defaultLandBuildingCategories);
       saveEquipmentCategories(defaultEquipmentCategories);
       saveAgencies(defaultAgencies);
+
+      const defaultMapping = {
+        'ที่ดินที่มีกรรมสิทธิ์': 0,
+        'อาคารสำนักงาน': 20,
+        'สิ่งปลูกสร้าง': 20,
+        'ครุภัณฑ์สำนักงาน': 10,
+        'ครุภัณฑ์คอมพิวเตอร์': 5,
+        'ครุภัณฑ์ยานพาหนะและขนส่ง': 5,
+        'ครุภัณฑ์ไฟฟ้าและวิทยุ': 5,
+        'ครุภัณฑ์โฆษณาและเผยแพร่': 5,
+        'ครุภัณฑ์งานบ้านงานครัว': 5,
+        'ครุภัณฑ์วิทยาศาสตร์และการแพทย์': 10,
+        'ครุภัณฑ์กีฬา': 5,
+        'สินทรัพย์ไม่มีตัวตนอื่น': 5
+      };
+      saveCategoryDepreciationYears(defaultMapping);
 
       const dellAsset = seed.find(a => a.asset_code === '412/67/0001');
       const toyotaAsset = seed.find(a => a.asset_code === '312/64/0001');
@@ -765,44 +833,88 @@ export default function useInventory() {
   };
 
   // --- Land Category CRUD ---
-  const handleAddLandCategory = (cat) => {
+  const handleAddLandCategory = (cat, years = 20) => {
     saveLandBuildingCategories([...landBuildingCategories, cat]);
-    addAuditLog('ตั้งค่าระบบ', `เพิ่มหมวดหมู่ที่ดิน พ.ด.1: ${cat}`);
+    const updatedMapping = { ...categoryDepreciationYears };
+    updatedMapping[cat] = parseInt(years) >= 0 ? parseInt(years) : 20;
+    saveCategoryDepreciationYears(updatedMapping);
+    addAuditLog('ตั้งค่าระบบ', `เพิ่มหมวดหมู่ที่ดิน พ.ด.1: ${cat} (ค่าเสื่อม ${years} ปี)`);
   };
 
-  const handleEditLandCategory = (oldCat, newCat) => {
+  const handleEditLandCategory = (oldCat, newCat, newYears) => {
     saveLandBuildingCategories(landBuildingCategories.map(c => c === oldCat ? newCat : c));
-    saveAssetsToStateAndStorage(assets.map(a => 
+    
+    const updatedMapping = { ...categoryDepreciationYears };
+    if (newYears !== undefined) {
+      updatedMapping[newCat] = parseInt(newYears) >= 0 ? parseInt(newYears) : 20;
+    } else {
+      updatedMapping[newCat] = updatedMapping[oldCat] !== undefined ? updatedMapping[oldCat] : 20;
+    }
+    if (oldCat !== newCat) {
+      delete updatedMapping[oldCat];
+    }
+    saveCategoryDepreciationYears(updatedMapping);
+
+    const updatedAssets = assets.map(a => 
       (a.asset_type === 'LAND_BUILDING' && a.category === oldCat) 
         ? { ...a, category: newCat } 
         : a
-    ));
-    addAuditLog('ตั้งค่าระบบ', `แก้ไขหมวดหมู่ที่ดิน พ.ด.1 จาก "${oldCat}" เป็น "${newCat}"`);
+    );
+    recalculateAllAssetsDepreciation(updatedMapping, updatedAssets);
+    
+    addAuditLog('ตั้งค่าระบบ', `แก้ไขหมวดหมู่ที่ดิน พ.ด.1: ${oldCat} -> ${newCat} (${updatedMapping[newCat]} ปี)`);
   };
 
   const handleDeleteLandCategory = (cat) => {
     saveLandBuildingCategories(landBuildingCategories.filter(c => c !== cat));
+    const updatedMapping = { ...categoryDepreciationYears };
+    delete updatedMapping[cat];
+    saveCategoryDepreciationYears(updatedMapping);
+    
+    recalculateAllAssetsDepreciation(updatedMapping, assets);
     addAuditLog('ตั้งค่าระบบ', `ลบหมวดหมู่ที่ดิน พ.ด.1: ${cat}`);
   };
 
   // --- Equipment Category CRUD ---
-  const handleAddEquipmentCategory = (cat) => {
+  const handleAddEquipmentCategory = (cat, years = 5) => {
     saveEquipmentCategories([...equipmentCategories, cat]);
-    addAuditLog('ตั้งค่าระบบ', `เพิ่มหมวดหมู่ครุภัณฑ์ พ.ด.2: ${cat}`);
+    const updatedMapping = { ...categoryDepreciationYears };
+    updatedMapping[cat] = parseInt(years) >= 0 ? parseInt(years) : 5;
+    saveCategoryDepreciationYears(updatedMapping);
+    addAuditLog('ตั้งค่าระบบ', `เพิ่มหมวดหมู่ครุภัณฑ์ พ.ด.2: ${cat} (ค่าเสื่อม ${years} ปี)`);
   };
 
-  const handleEditEquipmentCategory = (oldCat, newCat) => {
+  const handleEditEquipmentCategory = (oldCat, newCat, newYears) => {
     saveEquipmentCategories(equipmentCategories.map(c => c === oldCat ? newCat : c));
-    saveAssetsToStateAndStorage(assets.map(a => 
+    
+    const updatedMapping = { ...categoryDepreciationYears };
+    if (newYears !== undefined) {
+      updatedMapping[newCat] = parseInt(newYears) >= 0 ? parseInt(newYears) : 5;
+    } else {
+      updatedMapping[newCat] = updatedMapping[oldCat] !== undefined ? updatedMapping[oldCat] : 5;
+    }
+    if (oldCat !== newCat) {
+      delete updatedMapping[oldCat];
+    }
+    saveCategoryDepreciationYears(updatedMapping);
+
+    const updatedAssets = assets.map(a => 
       (a.asset_type === 'EQUIPMENT' && a.category === oldCat) 
         ? { ...a, category: newCat } 
         : a
-    ));
-    addAuditLog('ตั้งค่าระบบ', `แก้ไขหมวดหมู่ครุภัณฑ์ พ.ด.2 จาก "${oldCat}" เป็น "${newCat}"`);
+    );
+    recalculateAllAssetsDepreciation(updatedMapping, updatedAssets);
+    
+    addAuditLog('ตั้งค่าระบบ', `แก้ไขหมวดหมู่ครุภัณฑ์ พ.ด.2: ${oldCat} -> ${newCat} (${updatedMapping[newCat]} ปี)`);
   };
 
   const handleDeleteEquipmentCategory = (cat) => {
     saveEquipmentCategories(equipmentCategories.filter(c => c !== cat));
+    const updatedMapping = { ...categoryDepreciationYears };
+    delete updatedMapping[cat];
+    saveCategoryDepreciationYears(updatedMapping);
+    
+    recalculateAllAssetsDepreciation(updatedMapping, assets);
     addAuditLog('ตั้งค่าระบบ', `ลบหมวดหมู่ครุภัณฑ์ พ.ด.2: ${cat}`);
   };
 
@@ -1043,6 +1155,7 @@ export default function useInventory() {
     landingBadgeText,
     landBuildingCategories,
     equipmentCategories,
+    categoryDepreciationYears,
     agencies,
     auditLogs,
     repairRequests,

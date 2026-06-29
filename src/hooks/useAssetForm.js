@@ -19,6 +19,7 @@ export default function useAssetForm({
   equipmentCategories = [],
   landBuildingCategories = [],
   sellers = [],
+  categoryDepreciationYears = {},
   onSubmit
 }) {
   const isEdit = !!asset;
@@ -116,7 +117,7 @@ export default function useAssetForm({
   };
 
   // Dynamic calculations
-  const calc = calculateDepreciation(formData.assetCode, formData.unitPrice);
+  const calc = calculateDepreciation(formData.assetCode, formData.unitPrice, formData.category, categoryDepreciationYears);
   const depreciationRate = calc.depreciationRatePercent;
   const accumulatedDepreciation = calc.accumulatedDepreciation;
   const bookValue = calc.bookValue;
@@ -126,8 +127,6 @@ export default function useAssetForm({
     if (!formData.name) tempErrors.name = 'กรุณากรอกชื่อพัสดุ';
     if (!formData.assetCode) tempErrors.assetCode = 'กรุณากรอกรหัสพัสดุ';
     if (!formData.category) tempErrors.category = 'กรุณาเลือกหมวดหมู่พัสดุ';
-    if (!formData.location) tempErrors.location = 'กรุณาเลือกสถานที่ตั้ง';
-    if (!formData.responsibleDepartment) tempErrors.responsibleDepartment = 'กรุณาเลือกส่วนราชการ';
     
     setErrors(tempErrors);
     return Object.keys(tempErrors).length === 0;
