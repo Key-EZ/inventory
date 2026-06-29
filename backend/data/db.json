@@ -1,73 +1,6 @@
 {
   "assets": [
     {
-      "id": "asset-1782742147831-0",
-      "asset_type": "LAND_BUILDING",
-      "category": "ที่ดินที่มีกรรมสิทธิ์",
-      "asset_code": "101/64/0001",
-      "name": "ที่ดินที่ทำการสำนักงานเทศบาลนครนนทบุรี",
-      "location": "ถนนรัตนาธิเบศร์ ตำบลบางกระสอ อำเภอเมืองนนทบุรี",
-      "acquisition_method": "รับโอน",
-      "delivery_document_no": "นบ 0023/154",
-      "delivery_document_date": "2021-03-12",
-      "seller_name": "สำนักงานที่ดินจังหวัดนนทบุรี",
-      "unit_price": 15000000,
-      "budget_owner": "เทศบาลนครนนทบุรี",
-      "responsible_department": "สำนักปลัดเทศบาล",
-      "status": "ใช้งาน",
-      "document_of_title": "โฉนดที่ดิน เลขที่ 12456",
-      "area_size": "5 ไร่ 2 งาน 40 ตารางวา",
-      "building_style": "ที่ดินเปล่าไม่มีอาคาร",
-      "manufacturer_brand": "",
-      "serial_number": "",
-      "engine_number": "",
-      "chassis_number": "",
-      "vehicle_registration": "",
-      "color": "",
-      "warranty_start_date": "",
-      "warranty_end_date": "",
-      "warranty_company": "",
-      "maintenances": []
-    },
-    {
-      "id": "asset-1782742147831-1",
-      "asset_type": "LAND_BUILDING",
-      "category": "อาคารสำนักงาน",
-      "asset_code": "102/65/0002",
-      "name": "อาคารหอประชุมอเนกประสงค์ 3 ชั้น",
-      "location": "ลานกิจกรรมกลาง เทศบาลนครนนทบุรี",
-      "acquisition_method": "จ้าง",
-      "delivery_document_no": "15/2565",
-      "delivery_document_date": "2022-02-10",
-      "seller_name": "หจก. นนทบุรีการค้า",
-      "unit_price": 8400000,
-      "budget_owner": "งบพัฒนาท้องถิ่น",
-      "responsible_department": "กองช่าง",
-      "status": "ใช้งาน",
-      "document_of_title": "- (สร้างบนที่ราชพัสดุ)",
-      "area_size": "พื้นที่ใช้สอย 1,200 ตารางเมตร",
-      "building_style": "อาคารคอนกรีตเสริมเหล็ก (ตึก) 3 ชั้น",
-      "manufacturer_brand": "",
-      "serial_number": "",
-      "engine_number": "",
-      "chassis_number": "",
-      "vehicle_registration": "",
-      "color": "",
-      "warranty_start_date": "",
-      "warranty_end_date": "",
-      "warranty_company": "",
-      "maintenances": [
-        {
-          "id": "maint-101",
-          "approval_date": "2024-05-12",
-          "document_number": "อนุมัติเลขที่ 145/2567",
-          "description": "ปรับปรุงระบบกันซึมดาดฟ้าและทาสีภายนอกอาคารใหม่",
-          "cost": 250000,
-          "contractor": "หจก. นนทบุรีการช่าง"
-        }
-      ]
-    },
-    {
       "id": "asset-1782742147831-2",
       "asset_type": "EQUIPMENT",
       "category": "ครุภัณฑ์คอมพิวเตอร์",
@@ -106,35 +39,6 @@
       ]
     },
     {
-      "id": "asset-1782742147831-3",
-      "asset_type": "EQUIPMENT",
-      "category": "ครุภัณฑ์สำนักงาน",
-      "asset_code": "311/68/0008",
-      "name": "เก้าอี้ทำงานสำนักงานเพื่อสุขภาพ",
-      "location": "ห้องธุรการทั่วไป",
-      "acquisition_method": "ซื้อ",
-      "delivery_document_no": "นบ 0023/108",
-      "delivery_document_date": "2025-01-10",
-      "seller_name": "บจก. ดีลักซ์ ซิสเต็มส์",
-      "unit_price": 6500,
-      "budget_owner": "งบดำเนินงานปกติ",
-      "responsible_department": "ฝ่ายธุรการทั่วไป",
-      "status": "ใช้งาน",
-      "document_of_title": "",
-      "area_size": "",
-      "building_style": "",
-      "manufacturer_brand": "Modernform",
-      "serial_number": "MF-ERGO-2025010",
-      "engine_number": "",
-      "chassis_number": "",
-      "vehicle_registration": "",
-      "color": "สีดำพนักตาข่าย",
-      "warranty_start_date": "2025-01-10",
-      "warranty_end_date": "2028-01-10",
-      "warranty_company": "บจก. ดีลักซ์ ซิสเต็มส์",
-      "maintenances": []
-    },
-    {
       "id": "asset-1782742147831-4",
       "asset_type": "EQUIPMENT",
       "category": "ครุภัณฑ์ไฟฟ้าและวิทยุ",
@@ -169,81 +73,6 @@
           "description": "บริการล้างแอร์ เติมน้ำยารั่วซึม และซ่อมบอร์ดมอเตอร์คอยล์เย็น",
           "cost": 2500,
           "contractor": "ร้านแอร์เจริญยนต์นนทบุรี"
-        }
-      ]
-    },
-    {
-      "id": "asset-1782742147831-5",
-      "asset_type": "EQUIPMENT",
-      "category": "ครุภัณฑ์สำนักงาน",
-      "asset_code": "311/65/0003",
-      "name": "โต๊ะประชุมไม้ ขนาด 12 ที่นั่ง",
-      "location": "ห้องประชุมใหญ่ ชั้น 3",
-      "acquisition_method": "จ้าง",
-      "delivery_document_no": "QT-20220218",
-      "delivery_document_date": "2022-02-18",
-      "seller_name": "หจก. นนทบุรีการค้า",
-      "unit_price": 24500,
-      "budget_owner": "งบครุภัณฑ์สำนักงาน",
-      "responsible_department": "ฝ่ายการเงินและบัญชี",
-      "status": "ชำรุด",
-      "document_of_title": "",
-      "area_size": "",
-      "building_style": "",
-      "manufacturer_brand": "Concept Furniture",
-      "serial_number": "CF-MT240-2022",
-      "engine_number": "",
-      "chassis_number": "",
-      "vehicle_registration": "",
-      "color": "สีลายไม้สักทอง",
-      "warranty_start_date": "2022-02-18",
-      "warranty_end_date": "2023-02-18",
-      "warranty_company": "หจก. นนทบุรีการค้า",
-      "maintenances": []
-    },
-    {
-      "id": "asset-1782742147831-6",
-      "asset_type": "EQUIPMENT",
-      "category": "ครุภัณฑ์ยานพาหนะและขนส่ง",
-      "asset_code": "312/64/0001",
-      "name": "รถยนต์อเนกประสงค์ (SUV) 2,400 ซีซี",
-      "location": "โรงจอดรถยนต์กลาง",
-      "acquisition_method": "ซื้อ",
-      "delivery_document_no": "e-bidding 12/2564",
-      "delivery_document_date": "2021-08-12",
-      "seller_name": "บจก. ยานยนต์รุ่งเรือง",
-      "unit_price": 1390000,
-      "budget_owner": "งบลงทุนจัดหายานพาหนะ",
-      "responsible_department": "ฝ่ายธุรการทั่วไป",
-      "status": "รอจำหน่าย",
-      "document_of_title": "",
-      "area_size": "",
-      "building_style": "",
-      "manufacturer_brand": "Toyota",
-      "serial_number": "TOY-SUV-FT-6408",
-      "engine_number": "2GD-FTV-124586",
-      "chassis_number": "MR053K41208945",
-      "vehicle_registration": "กข-5642 นนทบุรี",
-      "color": "สีบรอนซ์เงิน",
-      "warranty_start_date": "2021-08-12",
-      "warranty_end_date": "2024-08-12",
-      "warranty_company": "บจก. ยานยนต์รุ่งเรือง",
-      "maintenances": [
-        {
-          "id": "maint-301",
-          "approval_date": "2023-10-15",
-          "document_number": "อนุมัติซ่อมเลขที่ 45/2566",
-          "description": "เปลี่ยนยางรถยนต์ 4 เส้น และเช็คระยะรอบ 80,000 กม.",
-          "cost": 28000,
-          "contractor": "ศูนย์บริการโตโยต้านนทบุรี"
-        },
-        {
-          "id": "maint-302",
-          "approval_date": "2024-03-20",
-          "document_number": "ใบเสร็จเลขที่ 5894",
-          "description": "เปลี่ยนแบตเตอรี่รถยนต์และซ่อมเปลี่ยนไดชาร์จ",
-          "cost": 7500,
-          "contractor": "ร้านบี-ควิก สาขารัตนาธิเบศร์"
         }
       ]
     },
@@ -422,6 +251,76 @@
     "สำนักงานที่ดินจังหวัดนนทบุรี"
   ],
   "auditLogs": [
+    {
+      "id": "log-1782745191365-502",
+      "timestamp": "2026-06-29T14:59:51.365Z",
+      "action": "เข้าระบบ",
+      "details": "ลงชื่อเข้าใช้งานระบบด้วยบัญชีผู้ดูแลระบบ (Admin)",
+      "user": "admin"
+    },
+    {
+      "id": "log-1782745151624-559",
+      "timestamp": "2026-06-29T14:59:11.624Z",
+      "action": "เข้าระบบ",
+      "details": "ลงชื่อเข้าใช้งานระบบด้วยบัญชี SSO: นายสมศักดิ์ รักชาติ",
+      "user": "นายสมศักดิ์ รักชาติ"
+    },
+    {
+      "id": "log-1782745135620-953",
+      "timestamp": "2026-06-29T14:58:55.620Z",
+      "action": "ลบ",
+      "details": "ลบข้อมูลครุภัณฑ์ออกจากระบบ: รถยนต์อเนกประสงค์ (SUV) 2,400 ซีซี รหัส 312/64/0001",
+      "user": "admin"
+    },
+    {
+      "id": "log-1782745128174-590",
+      "timestamp": "2026-06-29T14:58:48.174Z",
+      "action": "ลบ",
+      "details": "ลบข้อมูลครุภัณฑ์ออกจากระบบ: เก้าอี้ทำงานสำนักงานเพื่อสุขภาพ รหัส 311/68/0008",
+      "user": "admin"
+    },
+    {
+      "id": "log-1782745125502-735",
+      "timestamp": "2026-06-29T14:58:45.502Z",
+      "action": "ลบ",
+      "details": "ลบข้อมูลครุภัณฑ์ออกจากระบบ: โต๊ะประชุมไม้ ขนาด 12 ที่นั่ง รหัส 311/65/0003",
+      "user": "admin"
+    },
+    {
+      "id": "log-1782745122394-264",
+      "timestamp": "2026-06-29T14:58:42.394Z",
+      "action": "ลบ",
+      "details": "ลบข้อมูลครุภัณฑ์ออกจากระบบ: อาคารหอประชุมอเนกประสงค์ 3 ชั้น รหัส 102/65/0002",
+      "user": "admin"
+    },
+    {
+      "id": "log-1782745118909-917",
+      "timestamp": "2026-06-29T14:58:38.909Z",
+      "action": "ลบ",
+      "details": "ลบข้อมูลครุภัณฑ์ออกจากระบบ: ที่ดินที่ทำการสำนักงานเทศบาลนครนนทบุรี รหัส 101/64/0001",
+      "user": "admin"
+    },
+    {
+      "id": "log-1782745107984-265",
+      "timestamp": "2026-06-29T14:58:27.984Z",
+      "action": "ตั้งค่าระบบ",
+      "details": "ปรับปรุงการตั้งค่าระบบและบัญชีตัวเลือกมาสเตอร์ลิสต์",
+      "user": "admin"
+    },
+    {
+      "id": "log-1782744984280-38",
+      "timestamp": "2026-06-29T14:56:24.280Z",
+      "action": "เข้าระบบ",
+      "details": "ลงชื่อเข้าใช้งานระบบด้วยบัญชีผู้ดูแลระบบ (Admin)",
+      "user": "admin"
+    },
+    {
+      "id": "log-1782744784497-7",
+      "timestamp": "2026-06-29T14:53:04.497Z",
+      "action": "เข้าระบบ",
+      "details": "ลงชื่อเข้าใช้งานระบบด้วยบัญชี SSO: นายสมชาย ใจดี",
+      "user": "นายสมชาย ใจดี"
+    },
     {
       "id": "log-1782743420323-94d1bixbu",
       "timestamp": "2026-06-29T14:30:20.323Z",
