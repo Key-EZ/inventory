@@ -107,13 +107,19 @@ export default function App() {
     importAssetsData,
     currentUser,
     isAdmin,
+    isSystemAdmin,
     logout,
     handleLoginSuccess
   } = useInventory();
 
   // --- Auth Guards ---
   const handleMenuClick = (layout) => {
-    if ((layout === 'settings' || layout === 'audit_log' || layout === 'repair_jobs') && !isAdmin) {
+    if ((layout === 'settings' || layout === 'audit_log') && !isSystemAdmin) {
+      alert('เฉพาะผู้ใช้งานระดับ Admin เท่านั้นที่สามารถเข้าใช้งานเมนูนี้ได้');
+      setIsLoginModalOpen(true);
+      return;
+    }
+    if (layout === 'repair_jobs' && !isAdmin) {
       setIsLoginModalOpen(true);
       return;
     }
@@ -236,14 +242,16 @@ export default function App() {
         <li
           className={`sidebar-menu-item ${activeLayout === 'settings' ? 'active' : ''}`}
           onClick={() => handleMenuClick('settings')}
+          style={!isSystemAdmin ? { opacity: 0.75 } : {}}
         >
-          ⚙️ ตั้งค่าระบบ
+          ⚙️ ตั้งค่าระบบ {!isSystemAdmin && '🔒'}
         </li>
         <li
           className={`sidebar-menu-item ${activeLayout === 'audit_log' ? 'active' : ''}`}
           onClick={() => handleMenuClick('audit_log')}
+          style={!isSystemAdmin ? { opacity: 0.75 } : {}}
         >
-          📜 ประวัติระบบ (Audit Log)
+          📜 ประวัติระบบ (Audit Log) {!isSystemAdmin && '🔒'}
         </li>
 
         <div className="sidebar-menu-divider"></div>
@@ -636,14 +644,16 @@ export default function App() {
               <li
                 className={`sidebar-menu-item ${activeLayout === 'settings' ? 'active' : ''}`}
                 onClick={() => { setIsMobileMenuOpen(false); handleMenuClick('settings'); }}
+                style={!isSystemAdmin ? { opacity: 0.75 } : {}}
               >
-                ⚙️ ตั้งค่าระบบ
+                ⚙️ ตั้งค่าระบบ {!isSystemAdmin && '🔒'}
               </li>
               <li
                 className={`sidebar-menu-item ${activeLayout === 'audit_log' ? 'active' : ''}`}
                 onClick={() => { setIsMobileMenuOpen(false); handleMenuClick('audit_log'); }}
+                style={!isSystemAdmin ? { opacity: 0.75 } : {}}
               >
-                📜 ประวัติระบบ (Audit Log)
+                📜 ประวัติระบบ (Audit Log) {!isSystemAdmin && '🔒'}
               </li>
 
               <div className="sidebar-menu-divider"></div>

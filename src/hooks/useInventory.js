@@ -387,6 +387,7 @@ export default function useInventory() {
   });
   const [isBackendOnline, setIsBackendOnline] = useState(false);
   const isAdmin = !!currentUser;
+  const isSystemAdmin = currentUser?.role === 'ADMIN';
 
   // --- Backend Sync useEffect ---
   useEffect(() => {
@@ -1548,6 +1549,7 @@ export default function useInventory() {
     importAssetsData,
     currentUser,
     isAdmin,
+    isSystemAdmin,
     token,
     isBackendOnline,
     loginAdmin,

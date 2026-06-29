@@ -120,6 +120,9 @@ app.get('/api/settings', (req, res) => {
 });
 
 app.put('/api/settings', (req, res) => {
+  if (req.user.role !== 'ADMIN') {
+    return res.status(403).json({ success: false, message: 'Forbidden: Admin access required' });
+  }
   const dbData = readDb();
   const keys = [
     'divisions', 'departments', 'custodians', 'positions', 'brands',
@@ -154,6 +157,9 @@ app.put('/api/settings', (req, res) => {
 });
 
 app.post('/api/settings/reset', (req, res) => {
+  if (req.user.role !== 'ADMIN') {
+    return res.status(403).json({ success: false, message: 'Forbidden: Admin access required' });
+  }
   const defaultData = getDefaultData();
   addAuditLogServer(defaultData, 'ระบบ', 'รีเซ็ตระบบกลับสู่การตั้งค่ามาตรฐานและข้อมูลตัวอย่าง', req.user.name);
   writeDb(defaultData);
@@ -365,11 +371,27 @@ app.put('/api/repairs/:id/complete', (req, res) => {
 
 // --- Audit Logs Routes ---
 app.get('/api/audit-logs', (req, res) => {
-  const dbData = readDb();
-  res.json(dbData.auditLogs);
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  if (!token) {
+    return res.status(401).json({ success: false, message: 'Unauthorized: Access token missing' });
+  }
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    if (decoded.role !== 'ADMIN') {
+      return res.status(403).json({ success: false, message: 'Forbidden: Admin access required' });
+    }
+    const dbData = readDb();
+    res.json(dbData.auditLogs);
+  } catch {
+    return res.status(401).json({ success: false, message: 'Unauthorized: Invalid token' });
+  }
 });
 
 app.delete('/api/audit-logs', (req, res) => {
+  if (req.user.role !== 'ADMIN') {
+    return res.status(403).json({ success: false, message: 'Forbidden: Admin access required' });
+  }
   const dbData = readDb();
   dbData.auditLogs = [
     {
