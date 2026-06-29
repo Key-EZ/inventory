@@ -239,20 +239,22 @@ export default function App() {
         >
           🛠️ งานซ่อมอุปกรณ์
         </li>
-        <li
-          className={`sidebar-menu-item ${activeLayout === 'settings' ? 'active' : ''}`}
-          onClick={() => handleMenuClick('settings')}
-          style={!isSystemAdmin ? { opacity: 0.75 } : {}}
-        >
-          ⚙️ ตั้งค่าระบบ {!isSystemAdmin && '🔒'}
-        </li>
-        <li
-          className={`sidebar-menu-item ${activeLayout === 'audit_log' ? 'active' : ''}`}
-          onClick={() => handleMenuClick('audit_log')}
-          style={!isSystemAdmin ? { opacity: 0.75 } : {}}
-        >
-          📜 ประวัติระบบ (Audit Log) {!isSystemAdmin && '🔒'}
-        </li>
+        {isSystemAdmin && (
+          <>
+            <li
+              className={`sidebar-menu-item ${activeLayout === 'settings' ? 'active' : ''}`}
+              onClick={() => handleMenuClick('settings')}
+            >
+              ⚙️ ตั้งค่าระบบ
+            </li>
+            <li
+              className={`sidebar-menu-item ${activeLayout === 'audit_log' ? 'active' : ''}`}
+              onClick={() => handleMenuClick('audit_log')}
+            >
+              📜 ประวัติระบบ (Audit Log)
+            </li>
+          </>
+        )}
 
         <div className="sidebar-menu-divider"></div>
 
@@ -345,20 +347,24 @@ export default function App() {
           >
             ค้นหา
           </button>
-          <button
-            className={`layout-toggle-btn ${activeLayout === 'settings' ? 'active' : ''}`}
-            onClick={() => changeLayout('settings')}
-            title="Settings Panel"
-          >
-            ตั้งค่า
-          </button>
-          <button
-            className={`layout-toggle-btn ${activeLayout === 'audit_log' ? 'active' : ''}`}
-            onClick={() => changeLayout('audit_log')}
-            title="Audit Log"
-          >
-            ประวัติระบบ
-          </button>
+          {isSystemAdmin && (
+            <>
+              <button
+                className={`layout-toggle-btn ${activeLayout === 'settings' ? 'active' : ''}`}
+                onClick={() => handleMenuClick('settings')}
+                title="Settings Panel"
+              >
+                ตั้งค่า
+              </button>
+              <button
+                className={`layout-toggle-btn ${activeLayout === 'audit_log' ? 'active' : ''}`}
+                onClick={() => handleMenuClick('audit_log')}
+                title="Audit Log"
+              >
+                ประวัติระบบ
+              </button>
+            </>
+          )}
         </div>
 
         {/* Font Scaling Buttons */}
@@ -641,20 +647,22 @@ export default function App() {
               >
                 🛠️ งานซ่อมอุปกรณ์
               </li>
-              <li
-                className={`sidebar-menu-item ${activeLayout === 'settings' ? 'active' : ''}`}
-                onClick={() => { setIsMobileMenuOpen(false); handleMenuClick('settings'); }}
-                style={!isSystemAdmin ? { opacity: 0.75 } : {}}
-              >
-                ⚙️ ตั้งค่าระบบ {!isSystemAdmin && '🔒'}
-              </li>
-              <li
-                className={`sidebar-menu-item ${activeLayout === 'audit_log' ? 'active' : ''}`}
-                onClick={() => { setIsMobileMenuOpen(false); handleMenuClick('audit_log'); }}
-                style={!isSystemAdmin ? { opacity: 0.75 } : {}}
-              >
-                📜 ประวัติระบบ (Audit Log) {!isSystemAdmin && '🔒'}
-              </li>
+              {isSystemAdmin && (
+                <>
+                  <li
+                    className={`sidebar-menu-item ${activeLayout === 'settings' ? 'active' : ''}`}
+                    onClick={() => { setIsMobileMenuOpen(false); handleMenuClick('settings'); }}
+                  >
+                    ⚙️ ตั้งค่าระบบ
+                  </li>
+                  <li
+                    className={`sidebar-menu-item ${activeLayout === 'audit_log' ? 'active' : ''}`}
+                    onClick={() => { setIsMobileMenuOpen(false); handleMenuClick('audit_log'); }}
+                  >
+                    📜 ประวัติระบบ (Audit Log)
+                  </li>
+                </>
+              )}
 
               <div className="sidebar-menu-divider"></div>
 
