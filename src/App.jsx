@@ -150,6 +150,15 @@ export default function App() {
     openRepairForm(asset, tab);
   };
 
+  const handleOpenCustodianModal = (item) => {
+    if (!isAdmin) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+    setActiveCustodianAsset(item);
+    setIsCustodianModalOpen(true);
+  };
+
   const handleGuardedDeleteAsset = (id) => {
     if (!isAdmin) {
       setIsLoginModalOpen(true);
@@ -441,10 +450,7 @@ export default function App() {
               onRepairAsset={handleOpenRepairForm}
               onPrintAsset={openPrintAsset}
               onViewRepairHistory={(asset) => handleOpenRepairForm(asset, 'history')}
-              onManageCustodian={(item) => {
-                setActiveCustodianAsset(item);
-                setIsCustodianModalOpen(true);
-              }}
+              onManageCustodian={handleOpenCustodianModal}
               initialSearchQuery={searchQueryFromLanding}
             />
           </div>
