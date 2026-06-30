@@ -525,7 +525,6 @@ export default function App() {
             onDeleteSeller={handleDeleteSeller}
             onImportAssets={importAssetsData}
             categoryDepreciationYears={categoryDepreciationYears}
-            onUpdateCategoryDepreciation={handleUpdateCategoryDepreciationYears}
           />
         )}
 
