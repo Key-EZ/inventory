@@ -114,12 +114,12 @@ export default function App() {
 
   // --- Auth Guards ---
   const handleMenuClick = (layout) => {
-    if ((layout === 'settings' || layout === 'audit_log') && !isSystemAdmin) {
+    if (layout === 'settings' && !isSystemAdmin) {
       alert('เฉพาะผู้ใช้งานระดับ Admin เท่านั้นที่สามารถเข้าใช้งานเมนูนี้ได้');
       setIsLoginModalOpen(true);
       return;
     }
-    if (layout === 'repair_jobs' && !isAdmin) {
+    if ((layout === 'audit_log' || layout === 'repair_jobs') && !isAdmin) {
       setIsLoginModalOpen(true);
       return;
     }
@@ -200,8 +200,8 @@ export default function App() {
   };
 
   const handleGuardedClearAuditLogs = () => {
-    if (!isAdmin) {
-      setIsLoginModalOpen(true);
+    if (!isSystemAdmin) {
+      alert('เฉพาะผู้ใช้งานระดับ Admin เท่านั้นที่สามารถล้างประวัติระบบได้');
       return;
     }
     handleClearAuditLogs();
@@ -249,21 +249,19 @@ export default function App() {
           🛠️ งานซ่อมอุปกรณ์
         </li>
         {isSystemAdmin && (
-          <>
-            <li
-              className={`sidebar-menu-item ${activeLayout === 'settings' ? 'active' : ''}`}
-              onClick={() => handleMenuClick('settings')}
-            >
-              ⚙️ ตั้งค่าระบบ
-            </li>
-            <li
-              className={`sidebar-menu-item ${activeLayout === 'audit_log' ? 'active' : ''}`}
-              onClick={() => handleMenuClick('audit_log')}
-            >
-              📜 ประวัติระบบ (Audit Log)
-            </li>
-          </>
+          <li
+            className={`sidebar-menu-item ${activeLayout === 'settings' ? 'active' : ''}`}
+            onClick={() => handleMenuClick('settings')}
+          >
+            ⚙️ ตั้งค่าระบบ
+          </li>
         )}
+        <li
+          className={`sidebar-menu-item ${activeLayout === 'audit_log' ? 'active' : ''}`}
+          onClick={() => handleMenuClick('audit_log')}
+        >
+          📜 ประวัติระบบ (Audit Log)
+        </li>
 
         <div className="sidebar-menu-divider"></div>
 
@@ -542,6 +540,7 @@ export default function App() {
           <AuditLogPanel
             auditLogs={auditLogs}
             onClearLogs={handleGuardedClearAuditLogs}
+            isSystemAdmin={isSystemAdmin}
           />
         )}
       </BaseLayout>
@@ -656,21 +655,19 @@ export default function App() {
                 🛠️ งานซ่อมอุปกรณ์
               </li>
               {isSystemAdmin && (
-                <>
-                  <li
-                    className={`sidebar-menu-item ${activeLayout === 'settings' ? 'active' : ''}`}
-                    onClick={() => { setIsMobileMenuOpen(false); handleMenuClick('settings'); }}
-                  >
-                    ⚙️ ตั้งค่าระบบ
-                  </li>
-                  <li
-                    className={`sidebar-menu-item ${activeLayout === 'audit_log' ? 'active' : ''}`}
-                    onClick={() => { setIsMobileMenuOpen(false); handleMenuClick('audit_log'); }}
-                  >
-                    📜 ประวัติระบบ (Audit Log)
-                  </li>
-                </>
+                <li
+                  className={`sidebar-menu-item ${activeLayout === 'settings' ? 'active' : ''}`}
+                  onClick={() => { setIsMobileMenuOpen(false); handleMenuClick('settings'); }}
+                >
+                  ⚙️ ตั้งค่าระบบ
+                </li>
               )}
+              <li
+                className={`sidebar-menu-item ${activeLayout === 'audit_log' ? 'active' : ''}`}
+                onClick={() => { setIsMobileMenuOpen(false); handleMenuClick('audit_log'); }}
+              >
+                📜 ประวัติระบบ (Audit Log)
+              </li>
 
               <div className="sidebar-menu-divider"></div>
 

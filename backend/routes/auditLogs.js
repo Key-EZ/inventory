@@ -13,8 +13,8 @@ router.get('/', async (req, res) => {
   }
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    if (decoded.role !== 'ADMIN') {
-      return res.status(403).json({ success: false, message: 'Forbidden: Admin access required' });
+    if (decoded.role !== 'ADMIN' && decoded.role !== 'CUSTODIAN') {
+      return res.status(403).json({ success: false, message: 'Forbidden: Unauthorized role' });
     }
     const dbData = await readDb();
     res.json(dbData.auditLogs);

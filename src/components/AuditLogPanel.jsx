@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 
-export default function AuditLogPanel({ auditLogs = [], onClearLogs }) {
+export default function AuditLogPanel({ auditLogs = [], onClearLogs, isSystemAdmin }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAction, setSelectedAction] = useState('ทั้งหมด');
   const [startDate, setStartDate] = useState('');
@@ -154,9 +154,11 @@ export default function AuditLogPanel({ auditLogs = [], onClearLogs }) {
           <button className="button-secondary" onClick={handlePrint} title="สั่งพิมพ์รายงาน">
             🖨️ พิมพ์ประวัติ
           </button>
-          <button className="btn-cancel" onClick={onClearLogs} title="ล้างประวัติกิจกรรมทั้งหมด">
-            🗑️ ล้างประวัติ
-          </button>
+          {isSystemAdmin && (
+            <button className="btn-cancel" onClick={onClearLogs} title="ล้างประวัติกิจกรรมทั้งหมด">
+              🗑️ ล้างประวัติ
+            </button>
+          )}
         </div>
       </div>
 
