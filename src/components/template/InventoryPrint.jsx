@@ -18,7 +18,7 @@ function AutoFitText({ text, maxFontSize = 13.5, minFontSize = 8, className = ''
         const container = containerRef.current;
 
         const observer = new ResizeObserver((entries) => {
-            for (let entry of entries) {
+            for (const entry of entries) {
                 const containerWidth = entry.contentRect.width;
                 if (containerWidth <= 0) continue;
 

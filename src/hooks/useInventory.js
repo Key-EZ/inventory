@@ -26,7 +26,7 @@ export default function useInventory() {
         let parsed = JSON.parse(saved);
         let migrated = false;
         parsed = parsed.map(asset => {
-          let tempAsset = { ...asset };
+          const tempAsset = { ...asset };
           let assetUpdated = false;
 
           if (tempAsset.asset_code && tempAsset.asset_code.includes('-')) {
@@ -91,9 +91,9 @@ export default function useInventory() {
           if (tempAsset.warranty_detail !== undefined && tempAsset.warranty_start_date === undefined) {
             migrated = true;
             assetUpdated = true;
-            let startDate = tempAsset.delivery_date || tempAsset.delivery_document_date || '';
+            const startDate = tempAsset.delivery_date || tempAsset.delivery_document_date || '';
             let endDate = '';
-            let company = tempAsset.seller_name || '';
+            const company = tempAsset.seller_name || '';
             const warrantyStr = tempAsset.warranty_detail || '';
             
             const dateMatch = warrantyStr.match(/สิ้นสุด\s*([^\s]+\s+[^\s]+\s+[^\s]+)\s*โดย/);

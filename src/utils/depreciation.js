@@ -16,7 +16,7 @@ export function calculateDepreciation(assetCode, unitPrice, categoryName, catego
   // calculateDepreciation(assetCode, unitPrice, asOfDateStr)
   // calculateDepreciation(assetCode, unitPrice, categoryName, categoryDepreciationYears, asOfDateStr)
   let catName = categoryName;
-  let depMapping = categoryDepreciationYears;
+  const depMapping = categoryDepreciationYears;
   let dateStr = asOfDateStr;
 
   if (typeof categoryName === 'string' && !categoryDepreciationYears) {
