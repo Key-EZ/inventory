@@ -305,6 +305,7 @@ export default function useInventory() {
   const saveCategoryDepreciationYears = (mapping) => {
     setCategoryDepreciationYears(mapping);
     localStorage.setItem('inventory_category_depreciation_years', JSON.stringify(mapping));
+    saveSettingsBackend({ categoryDepreciationYears: mapping });
   };
 
   const [auditLogs, setAuditLogs] = useState(() => {
