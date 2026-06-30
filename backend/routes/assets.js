@@ -90,6 +90,11 @@ router.delete('/:id', async (req, res) => {
 
   const asset = dbData.assets[index];
   dbData.assets.splice(index, 1);
+
+  if (dbData.repairRequests) {
+    dbData.repairRequests = dbData.repairRequests.filter(r => r.asset_id !== req.params.id);
+  }
+
   addAuditLogServer(dbData, 'ลบ', `ลบข้อมูลครุภัณฑ์ออกจากระบบ: ${asset.name} รหัส ${asset.asset_code}`, req.user.name);
   await writeDb(dbData);
 
