@@ -4,13 +4,13 @@ import { addAuditLogServer } from '../utils/helpers.js';
 
 const router = express.Router();
 
-router.get('/', (req, res) => {
-  const dbData = readDb();
+router.get('/', async (req, res) => {
+  const dbData = await readDb();
   res.json(dbData.repairRequests || []);
 });
 
-router.post('/', (req, res) => {
-  const dbData = readDb();
+router.post('/', async (req, res) => {
+  const dbData = await readDb();
   const reqObj = req.body;
 
   const newRequest = {
@@ -34,13 +34,13 @@ router.post('/', (req, res) => {
 
   dbData.repairRequests.push(newRequest);
   addAuditLogServer(dbData, 'แจ้งซ่อม', `ยื่นคำขอส่งซ่อมสำหรับครุภัณฑ์: ${assetName}`, req.user.name);
-  writeDb(dbData);
+  await writeDb(dbData);
 
   res.status(201).json(newRequest);
 });
 
-router.put('/:id/start', (req, res) => {
-  const dbData = readDb();
+router.put('/:id/start', async (req, res) => {
+  const dbData = await readDb();
   const index = dbData.repairRequests.findIndex(r => r.id === req.params.id);
 
   if (index === -1) {
@@ -54,13 +54,13 @@ router.put('/:id/start', (req, res) => {
   const assetName = asset ? asset.name : 'ไม่ระบุชื่อครุภัณฑ์';
 
   addAuditLogServer(dbData, 'ดำเนินการซ่อม', `รับงานซ่อมและกำลังดำเนินการสำหรับครุภัณฑ์: ${assetName}`, req.user.name);
-  writeDb(dbData);
+  await writeDb(dbData);
 
   res.json(reqObj);
 });
 
-router.put('/:id/reject', (req, res) => {
-  const dbData = readDb();
+router.put('/:id/reject', async (req, res) => {
+  const dbData = await readDb();
   const index = dbData.repairRequests.findIndex(r => r.id === req.params.id);
 
   if (index === -1) {
@@ -75,13 +75,13 @@ router.put('/:id/reject', (req, res) => {
   const assetName = asset ? asset.name : 'ไม่ระบุชื่อครุภัณฑ์';
 
   addAuditLogServer(dbData, 'ปฏิเสธคำซ่อม', `ปฏิเสธคำส่งซ่อมสำหรับครุภัณฑ์: ${assetName} (สาเหตุ: ${reqObj.rejection_reason})`, req.user.name);
-  writeDb(dbData);
+  await writeDb(dbData);
 
   res.json(reqObj);
 });
 
-router.put('/:id/complete', (req, res) => {
-  const dbData = readDb();
+router.put('/:id/complete', async (req, res) => {
+  const dbData = await readDb();
   const index = dbData.repairRequests.findIndex(r => r.id === req.params.id);
 
   if (index === -1) {
@@ -114,7 +114,7 @@ router.put('/:id/complete', (req, res) => {
     addAuditLogServer(dbData, 'ซ่อมเสร็จสิ้น', `บันทึกซ่อมบำรุงครุภัณฑ์เสร็จสมบูรณ์: ${asset.name} (ค่าใช้จ่าย: ${reqObj.repair_cost} บาท)`, req.user.name);
   }
 
-  writeDb(dbData);
+  await writeDb(dbData);
   res.json(reqObj);
 });
 

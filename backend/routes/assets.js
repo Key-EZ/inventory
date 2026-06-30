@@ -5,13 +5,13 @@ import { addAuditLogServer } from '../utils/helpers.js';
 
 const router = express.Router();
 
-router.get('/', (req, res) => {
-  const dbData = readDb();
+router.get('/', async (req, res) => {
+  const dbData = await readDb();
   res.json(dbData.assets);
 });
 
-router.get('/:id', (req, res) => {
-  const dbData = readDb();
+router.get('/:id', async (req, res) => {
+  const dbData = await readDb();
   const asset = dbData.assets.find(a => a.id === req.params.id);
   if (!asset) {
     return res.status(404).json({ success: false, message: 'ไม่พบข้อมูลครุภัณฑ์/ทรัพย์สิน' });
@@ -19,8 +19,8 @@ router.get('/:id', (req, res) => {
   res.json(asset);
 });
 
-router.post('/', (req, res) => {
-  const dbData = readDb();
+router.post('/', async (req, res) => {
+  const dbData = await readDb();
   const assetData = req.body;
 
   // Perform backend depreciation calculations
@@ -41,13 +41,13 @@ router.post('/', (req, res) => {
 
   dbData.assets.push(newAsset);
   addAuditLogServer(dbData, 'ลงทะเบียน', `ลงทะเบียนครุภัณฑ์ใหม่: ${newAsset.name} รหัส ${newAsset.asset_code}`, req.user.name);
-  writeDb(dbData);
+  await writeDb(dbData);
 
   res.status(201).json(newAsset);
 });
 
-router.put('/:id', (req, res) => {
-  const dbData = readDb();
+router.put('/:id', async (req, res) => {
+  const dbData = await readDb();
   const index = dbData.assets.findIndex(a => a.id === req.params.id);
 
   if (index === -1) {
@@ -75,13 +75,13 @@ router.put('/:id', (req, res) => {
 
   dbData.assets[index] = updatedAsset;
   addAuditLogServer(dbData, 'แก้ไข', `แก้ไขข้อมูลครุภัณฑ์: ${updatedAsset.name} รหัส ${updatedAsset.asset_code}`, req.user.name);
-  writeDb(dbData);
+  await writeDb(dbData);
 
   res.json(updatedAsset);
 });
 
-router.delete('/:id', (req, res) => {
-  const dbData = readDb();
+router.delete('/:id', async (req, res) => {
+  const dbData = await readDb();
   const index = dbData.assets.findIndex(a => a.id === req.params.id);
 
   if (index === -1) {
@@ -91,7 +91,7 @@ router.delete('/:id', (req, res) => {
   const asset = dbData.assets[index];
   dbData.assets.splice(index, 1);
   addAuditLogServer(dbData, 'ลบ', `ลบข้อมูลครุภัณฑ์ออกจากระบบ: ${asset.name} รหัส ${asset.asset_code}`, req.user.name);
-  writeDb(dbData);
+  await writeDb(dbData);
 
   res.json({ success: true, message: 'ลบข้อมูลครุภัณฑ์เรียบร้อยแล้ว' });
 });

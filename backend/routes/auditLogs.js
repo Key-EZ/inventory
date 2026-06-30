@@ -5,7 +5,7 @@ import { JWT_SECRET } from '../middleware/auth.js';
 
 const router = express.Router();
 
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
   if (!token) {
@@ -16,18 +16,18 @@ router.get('/', (req, res) => {
     if (decoded.role !== 'ADMIN') {
       return res.status(403).json({ success: false, message: 'Forbidden: Admin access required' });
     }
-    const dbData = readDb();
+    const dbData = await readDb();
     res.json(dbData.auditLogs);
   } catch {
     return res.status(401).json({ success: false, message: 'Unauthorized: Invalid token' });
   }
 });
 
-router.delete('/', (req, res) => {
+router.delete('/', async (req, res) => {
   if (req.user.role !== 'ADMIN') {
     return res.status(403).json({ success: false, message: 'Forbidden: Admin access required' });
   }
-  const dbData = readDb();
+  const dbData = await readDb();
   dbData.auditLogs = [
     {
       id: `log-${Date.now()}-clear`,
@@ -37,7 +37,7 @@ router.delete('/', (req, res) => {
       user: req.user.name
     }
   ];
-  writeDb(dbData);
+  await writeDb(dbData);
   res.json({ success: true, message: 'ล้างประวัติการใช้งานระบบเรียบร้อยแล้ว' });
 });
 

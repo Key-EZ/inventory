@@ -4,8 +4,8 @@ import { addAuditLogServer, recalculateAllAssetsDepreciation } from '../utils/he
 
 const router = express.Router();
 
-router.get('/', (req, res) => {
-  const dbData = readDb();
+router.get('/', async (req, res) => {
+  const dbData = await readDb();
   res.json({
     divisions: dbData.divisions,
     departments: dbData.departments,
@@ -22,11 +22,11 @@ router.get('/', (req, res) => {
   });
 });
 
-router.put('/', (req, res) => {
+router.put('/', async (req, res) => {
   if (req.user.role !== 'ADMIN') {
     return res.status(403).json({ success: false, message: 'Forbidden: Admin access required' });
   }
-  const dbData = readDb();
+  const dbData = await readDb();
   const keys = [
     'divisions', 'departments', 'custodians', 'positions', 'brands',
     'locations', 'landBuildingCategories', 'equipmentCategories',
@@ -55,17 +55,17 @@ router.put('/', (req, res) => {
     addAuditLogServer(dbData, 'ตั้งค่าระบบ', 'ปรับปรุงการตั้งค่าระบบและบัญชีตัวเลือกมาสเตอร์ลิสต์', req.user.name);
   }
 
-  writeDb(dbData);
+  await writeDb(dbData);
   res.json({ success: true, message: 'บันทึกการตั้งค่าระบบเรียบร้อยแล้ว' });
 });
 
-router.post('/reset', (req, res) => {
+router.post('/reset', async (req, res) => {
   if (req.user.role !== 'ADMIN') {
     return res.status(403).json({ success: false, message: 'Forbidden: Admin access required' });
   }
   const defaultData = getDefaultData();
   addAuditLogServer(defaultData, 'ระบบ', 'รีเซ็ตระบบกลับสู่การตั้งค่ามาตรฐานและข้อมูลตัวอย่าง', req.user.name);
-  writeDb(defaultData);
+  await writeDb(defaultData);
   res.json({ success: true, message: 'รีเซ็ตข้อมูลระบบเป็นค่าเริ่มต้นเสร็จสิ้น' });
 });
 

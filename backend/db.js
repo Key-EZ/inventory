@@ -2,6 +2,10 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { calculateDepreciation } from './depreciation.js';
+import mysql from 'mysql2/promise';
+
+let pool = null;
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -516,27 +520,82 @@ export const getDefaultData = () => {
   };
 };
 
-export const readDb = () => {
-  if (!fs.existsSync(DB_PATH)) {
+export const initMysql = async () => {
+  const host = process.env.DB_HOST || '192.168.1.12';
+  const user = process.env.DB_USER || 'root';
+  const password = process.env.DB_PASSWORD || '40753';
+  const port = parseInt(process.env.DB_PORT || '3306');
+  const database = process.env.DB_NAME || 'inventory';
+
+  console.log(`Connecting to MySQL server at ${host}:${port} as ${user}...`);
+  
+  // 1. Connect without database to ensure database exists
+  const connection = await mysql.createConnection({ host, user, password, port });
+  await connection.query(`CREATE DATABASE IF NOT EXISTS \`${database}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`);
+  await connection.end();
+
+  // 2. Create connection pool with database
+  pool = mysql.createPool({
+    host,
+    user,
+    password,
+    port,
+    database,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+  });
+
+  // 3. Create table if not exists
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS kv_store (
+      \`key\` VARCHAR(100) PRIMARY KEY,
+      \`value\` LONGTEXT NOT NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  `);
+
+  console.log('MySQL initialization completed successfully.');
+
+  // 4. Seed initial data if kv_store is empty
+  const [rows] = await pool.query('SELECT `value` FROM kv_store WHERE `key` = "app_data"');
+  if (rows.length === 0) {
+    console.log('Seeding initial mock data to MySQL...');
     const defaultData = getDefaultData();
-    writeDb(defaultData);
-    return defaultData;
+    await writeDb(defaultData);
+  }
+};
+
+export const readDb = async () => {
+  if (!pool) {
+    throw new Error('MySQL connection pool is not initialized. Call initMysql() first.');
   }
   try {
-    const data = fs.readFileSync(DB_PATH, 'utf8');
-    return JSON.parse(data);
+    const [rows] = await pool.query('SELECT `value` FROM kv_store WHERE `key` = "app_data"');
+    if (rows.length === 0) {
+      const defaultData = getDefaultData();
+      await writeDb(defaultData);
+      return defaultData;
+    }
+    return JSON.parse(rows[0].value);
   } catch (error) {
-    console.error('Failed to read db file, returning default data', error);
+    console.error('Failed to read database from MySQL, returning default data', error);
     return getDefaultData();
   }
 };
 
-export const writeDb = (data) => {
+export const writeDb = async (data) => {
+  if (!pool) {
+    throw new Error('MySQL connection pool is not initialized. Call initMysql() first.');
+  }
   try {
-    fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2), 'utf8');
+    const jsonStr = JSON.stringify(data);
+    await pool.query(
+      'INSERT INTO kv_store (`key`, `value`) VALUES ("app_data", ?) ON DUPLICATE KEY UPDATE `value` = ?',
+      [jsonStr, jsonStr]
+    );
     return true;
   } catch (error) {
-    console.error('Failed to write db file', error);
+    console.error('Failed to write database to MySQL', error);
     return false;
   }
 };
