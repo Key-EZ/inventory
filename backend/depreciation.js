@@ -3,6 +3,8 @@
  * 
  * @param {string} assetCode - Code in XXX/YY/ZZZZ format
  * @param {number} unitPrice - Price per unit
+ * @param {string} categoryName - Name of the category
+ * @param {Object} categoryDepreciationYears - Dictionary of category depreciation years
  * @param {string} [asOfDateStr] - Target date for calculation (default is today)
  * @returns {Object} { accumulatedDepreciation, bookValue, depreciationRatePercent }
  */

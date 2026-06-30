@@ -1,5 +1,4 @@
 import useAssetForm from '../../hooks/useAssetForm';
-import { defaultDepartments } from '../../utils/mockData';
 
 export default function AssetForm({
   asset,
@@ -7,6 +6,8 @@ export default function AssetForm({
   locations = [],
   landBuildingCategories = [],
   equipmentCategories = [],
+  categoryDepreciationYears = {},
+  departments = [],
   onSubmit,
   onClose,
   sellers = [],
@@ -31,6 +32,7 @@ export default function AssetForm({
     equipmentCategories,
     landBuildingCategories,
     sellers,
+    categoryDepreciationYears,
     onSubmit,
     onClose,
     categoryDepreciationYears
@@ -180,7 +182,7 @@ export default function AssetForm({
                 </div>
                 <div className="form-group col">
                   <label>
-                    ที่ตั้งพัสดุ *
+                    ที่ตั้งพัสดุ
                     <span className="tooltip-trigger" data-tooltip="สถานที่ตั้งของครุภัณฑ์หรือทรัพย์สินสำหรับการตรวจสอบพัสดุประจำปี">?</span>
                   </label>
                   <select
@@ -188,7 +190,6 @@ export default function AssetForm({
                     value={formData.location}
                     onChange={handleChange}
                     className={errors.location ? 'input-error' : ''}
-                    required
                   >
                     <option value="">-- เลือกสถานที่ตั้ง --</option>
                     {locations.map(loc => (
@@ -198,16 +199,15 @@ export default function AssetForm({
                   {errors.location && <span className="error-text">{errors.location}</span>}
                 </div>
                 <div className="form-group col">
-                  <label>ส่วนราชการเจ้าของพัสดุ *</label>
+                  <label>ส่วนราชการเจ้าของพัสดุ</label>
                   <select
                     name="responsibleDepartment"
                     value={formData.responsibleDepartment}
                     onChange={handleChange}
                     className={errors.responsibleDepartment ? 'input-error' : ''}
-                    required
                   >
                     <option value="">-- เลือกส่วนราชการ --</option>
-                    {defaultDepartments.map(d => (
+                    {departments.map(d => (
                       <option key={d} value={d}>{d}</option>
                     ))}
                   </select>

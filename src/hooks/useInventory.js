@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { calculateDepreciation } from '../utils/depreciation';
 import {
   getSeedAssets,
   defaultDivisions,
@@ -286,6 +287,38 @@ export default function useInventory() {
     return defaultAgencies;
   });
 
+  const [categoryDepreciationYears, setCategoryDepreciationYears] = useState(() => {
+    const saved = localStorage.getItem('inventory_category_depreciation_years');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.warn('Failed to parse category depreciation years', e);
+      }
+    }
+    const defaultMapping = {
+      'ที่ดินที่มีกรรมสิทธิ์': 0,
+      'อาคารสำนักงาน': 20,
+      'สิ่งปลูกสร้าง': 20,
+      'ครุภัณฑ์สำนักงาน': 10,
+      'ครุภัณฑ์คอมพิวเตอร์': 5,
+      'ครุภัณฑ์ยานพาหนะและขนส่ง': 5,
+      'ครุภัณฑ์ไฟฟ้าและวิทยุ': 5,
+      'ครุภัณฑ์โฆษณาและเผยแพร่': 5,
+      'ครุภัณฑ์งานบ้านงานครัว': 5,
+      'ครุภัณฑ์วิทยาศาสตร์และการแพทย์': 10,
+      'ครุภัณฑ์กีฬา': 5,
+      'สินทรัพย์ไม่มีตัวตนอื่น': 5
+    };
+    localStorage.setItem('inventory_category_depreciation_years', JSON.stringify(defaultMapping));
+    return defaultMapping;
+  });
+
+  const saveCategoryDepreciationYears = (mapping) => {
+    setCategoryDepreciationYears(mapping);
+    localStorage.setItem('inventory_category_depreciation_years', JSON.stringify(mapping));
+  };
+
   const [auditLogs, setAuditLogs] = useState(() => {
     const saved = localStorage.getItem('inventory_audit_logs');
     if (saved) {
@@ -357,50 +390,171 @@ export default function useInventory() {
     return seedReqs;
   });
 
+  // --- Auth States ---
+  const [currentUser, setCurrentUser] = useState(() => {
+    const saved = sessionStorage.getItem('inventory_user');
+    return saved ? JSON.parse(saved) : null;
+  });
+  const [token, setToken] = useState(() => {
+    return sessionStorage.getItem('inventory_token') || null;
+  });
+  const [isBackendOnline, setIsBackendOnline] = useState(false);
+  const isAdmin = !!currentUser;
+  const isSystemAdmin = currentUser?.role === 'ADMIN';
+
+  // --- Backend Sync useEffect ---
+  useEffect(() => {
+    const initData = async () => {
+      try {
+        const headers = {};
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+        
+        // Fetch Settings
+        const settingsRes = await fetch('http://localhost:5000/api/settings', { headers });
+        if (!settingsRes.ok) throw new Error('Failed to fetch settings');
+        const settings = await settingsRes.json();
+        
+        setDivisions(settings.divisions);
+        setDepartments(settings.departments);
+        setCustodians(settings.custodians);
+        setPositions(settings.positions);
+        setBrands(settings.brands);
+        setLocations(settings.locations);
+        setLandBuildingCategories(settings.landBuildingCategories);
+        setEquipmentCategories(settings.equipmentCategories);
+        setCategoryDepreciationYears(settings.categoryDepreciationYears);
+        setAgencies(settings.agencies);
+        setSellers(settings.sellers);
+        setLandingBadgeText(settings.landingBadgeText);
+
+        // Fetch Assets
+        const assetsRes = await fetch('http://localhost:5000/api/assets', { headers });
+        if (!assetsRes.ok) throw new Error('Failed to fetch assets');
+        const fetchedAssets = await assetsRes.json();
+        setAssets(fetchedAssets);
+
+        // Fetch Repairs
+        const repairsRes = await fetch('http://localhost:5000/api/repairs', { headers });
+        if (!repairsRes.ok) throw new Error('Failed to fetch repairs');
+        const fetchedRepairs = await repairsRes.json();
+        setRepairRequests(fetchedRepairs);
+
+        // Fetch Audit Logs
+        const logsRes = await fetch('http://localhost:5000/api/audit-logs', { headers });
+        if (!logsRes.ok) throw new Error('Failed to fetch audit logs');
+        const fetchedLogs = await logsRes.json();
+        setAuditLogs(fetchedLogs);
+
+        setIsBackendOnline(true);
+      } catch (err) {
+        console.warn('Backend server offline, running in offline LocalStorage fallback mode.', err);
+        setIsBackendOnline(false);
+      }
+    };
+    initData();
+  }, [token]);
+
+  const saveSettingsBackend = async (updatedFields) => {
+    if (isBackendOnline) {
+      try {
+        const res = await fetch('http://localhost:5000/api/settings', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(updatedFields)
+        });
+        if (res.ok) {
+          const logsRes = await fetch('http://localhost:5000/api/audit-logs', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (logsRes.ok) setAuditLogs(await logsRes.json());
+          
+          const assetsRes = await fetch('http://localhost:5000/api/assets');
+          if (assetsRes.ok) setAssets(await assetsRes.json());
+        }
+      } catch (err) {
+        console.warn('Failed to save settings to backend', err);
+      }
+    }
+  };
+
+  const loginAdmin = async (username, password) => {
+    const res = await fetch('http://localhost:5000/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      sessionStorage.setItem('inventory_token', data.token);
+      sessionStorage.setItem('inventory_user', JSON.stringify(data.user));
+      setToken(data.token);
+      setCurrentUser(data.user);
+      return data;
+    } else {
+      throw new Error(data.message || 'Login failed');
+    }
+  };
+
+  const loginSSO = async (email) => {
+    const res = await fetch('http://localhost:5000/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      sessionStorage.setItem('inventory_token', data.token);
+      sessionStorage.setItem('inventory_user', JSON.stringify(data.user));
+      setToken(data.token);
+      setCurrentUser(data.user);
+      return data;
+    } else {
+      throw new Error(data.message || 'SSO Login failed');
+    }
+  };
+
+  const logout = () => {
+    sessionStorage.removeItem('inventory_token');
+    sessionStorage.removeItem('inventory_user');
+    setToken(null);
+    setCurrentUser(null);
+  };
+
+  const handleLoginSuccess = (newToken, newUser) => {
+    sessionStorage.setItem('inventory_token', newToken);
+    sessionStorage.setItem('inventory_user', JSON.stringify(newUser));
+    setToken(newToken);
+    setCurrentUser(newUser);
+  };
+
   // --- Storage Helper ---
   const saveAssetsToStateAndStorage = (newAssetsList) => {
     setAssets(newAssetsList);
     localStorage.setItem('inventory_assets', JSON.stringify(newAssetsList));
   };
 
-  const recalculateAssets = (assetList, mapping = categoryDepreciationYears) => {
-    return assetList.map(asset => {
-      const calc = calculateDepreciation(
+  const recalculateAllAssetsDepreciation = (updatedMapping = categoryDepreciationYears, currentAssets = assets) => {
+    const updatedAssets = currentAssets.map(asset => {
+      const dep = calculateDepreciation(
         asset.asset_code,
         asset.unit_price,
-        undefined,
         asset.category,
-        mapping
+        updatedMapping
       );
       return {
         ...asset,
-        depreciation_rate_percent: calc.depreciationRatePercent,
-        accumulated_depreciation: calc.accumulatedDepreciation
+        depreciation_rate_percent: dep.depreciation_rate_percent,
+        accumulated_depreciation: dep.accumulated_depreciation,
+        book_value: dep.book_value
       };
     });
-  };
-
-  const saveCategoryDepreciationYears = (mapping, currentAssets = assets) => {
-    setCategoryDepreciationYears(mapping);
-    localStorage.setItem('inventory_category_depreciation_years', JSON.stringify(mapping));
-    const updatedAssets = recalculateAssets(currentAssets, mapping);
-    saveAssetsToStateAndStorage(updatedAssets);
-  };
-
-  const handleUpdateCategoryDepreciationYears = (categoryName, years) => {
-    const updated = { ...categoryDepreciationYears };
-    if (years === null || years === undefined || years === '') {
-      delete updated[categoryName];
-    } else {
-      const parsed = parseInt(years);
-      if (isNaN(parsed) || parsed < 0) {
-        delete updated[categoryName];
-      } else {
-        updated[categoryName] = parsed;
-      }
-    }
-    saveCategoryDepreciationYears(updated, assets);
-    addAuditLog('ตั้งค่าระบบ', `กำหนดค่าเสื่อมหมวดหมู่ "${categoryName}" เป็น ${years !== '' ? years : 'ค่าเริ่มต้น'} ปี`);
+    setAssets(updatedAssets);
+    localStorage.setItem('inventory_assets', JSON.stringify(updatedAssets));
   };
 
   // --- Audit Log Helpers ---
@@ -410,7 +564,7 @@ export default function useInventory() {
       timestamp: new Date().toISOString(),
       action,
       details,
-      user: 'ผู้ใช้งานระบบ'
+      user: currentUser ? currentUser.name : 'ผู้ใช้งานระบบ'
     };
     setAuditLogs(prevLogs => {
       const updated = [newLog, ...prevLogs];
@@ -419,14 +573,30 @@ export default function useInventory() {
     });
   };
 
-  const handleClearAuditLogs = () => {
+  const handleClearAuditLogs = async () => {
     if (window.confirm('คุณต้องการลบประวัติการใช้งานระบบทั้งหมดใช่หรือไม่? (การดำเนินการนี้ไม่สามารถย้อนกลับได้)')) {
+      if (isBackendOnline) {
+        try {
+          const res = await fetch('http://localhost:5000/api/audit-logs', {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (res.ok) {
+            const fetchedLogs = await res.json();
+            setAuditLogs(fetchedLogs);
+            return;
+          }
+        } catch (err) {
+          console.warn('API error, falling back to local clear', err);
+        }
+      }
+
       const newLog = {
         id: `log-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         timestamp: new Date().toISOString(),
         action: 'ระบบ',
         details: 'ล้างประวัติการใช้งานระบบ (Audit Log) ทั้งหมด',
-        user: 'ผู้ใช้งานระบบ'
+        user: currentUser ? currentUser.name : 'ผู้ใช้งานระบบ'
       };
       setAuditLogs([newLog]);
       localStorage.setItem('inventory_audit_logs', JSON.stringify([newLog]));
@@ -437,82 +607,147 @@ export default function useInventory() {
   const saveDivisions = (list) => {
     setDivisions(list);
     localStorage.setItem('inventory_divisions', JSON.stringify(list));
+    saveSettingsBackend({ divisions: list });
   };
 
   const saveDepartments = (list) => {
     setDepartments(list);
     localStorage.setItem('inventory_departments', JSON.stringify(list));
+    saveSettingsBackend({ departments: list });
   };
 
   const saveCustodians = (list) => {
     setCustodians(list);
     localStorage.setItem('inventory_custodians', JSON.stringify(list));
+    saveSettingsBackend({ custodians: list });
   };
 
   const savePositions = (list) => {
     setPositions(list);
     localStorage.setItem('inventory_positions', JSON.stringify(list));
+    saveSettingsBackend({ positions: list });
   };
 
   const saveBrands = (list) => {
     setBrands(list);
     localStorage.setItem('inventory_brands', JSON.stringify(list));
+    saveSettingsBackend({ brands: list });
   };
 
   const saveLocations = (list) => {
     setLocations(list);
     localStorage.setItem('inventory_locations', JSON.stringify(list));
+    saveSettingsBackend({ locations: list });
   };
 
   const saveLandBuildingCategories = (list) => {
     setLandBuildingCategories(list);
     localStorage.setItem('inventory_land_building_categories', JSON.stringify(list));
+    saveSettingsBackend({ landBuildingCategories: list });
   };
 
   const saveEquipmentCategories = (list) => {
     setEquipmentCategories(list);
     localStorage.setItem('inventory_equipment_categories', JSON.stringify(list));
+    saveSettingsBackend({ equipmentCategories: list });
   };
 
   const saveAgencies = (list) => {
     setAgencies(list);
     localStorage.setItem('inventory_agencies', JSON.stringify(list));
+    saveSettingsBackend({ agencies: list });
   };
 
   const handleSaveLandingBadge = (newText) => {
     setLandingBadgeText(newText);
     localStorage.setItem('inventory_landing_badge', newText);
+    saveSettingsBackend({ landingBadgeText: newText });
   };
 
   // --- CRUD Operations ---
-  const handleSubmitForm = (assetData) => {
+  const handleSubmitForm = async (assetData) => {
     const index = assets.findIndex(a => a.id === assetData.id);
-    let updatedAssets;
 
+    if (isBackendOnline) {
+      try {
+        const method = index >= 0 ? 'PUT' : 'POST';
+        const url = index >= 0 ? `http://localhost:5000/api/assets/${assetData.id}` : 'http://localhost:5000/api/assets';
+        const res = await fetch(url, {
+          method,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(assetData)
+        });
+        if (res.ok) {
+          const updatedAsset = await res.json();
+          setAssets(prev => {
+            const list = [...prev];
+            if (index >= 0) {
+              list[index] = updatedAsset;
+            } else {
+              list.unshift(updatedAsset);
+            }
+            return list;
+          });
+
+          // Refresh logs
+          const logsRes = await fetch('http://localhost:5000/api/audit-logs', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (logsRes.ok) setAuditLogs(await logsRes.json());
+          return;
+        }
+      } catch (err) {
+        console.warn('API error, falling back to local storage update', err);
+      }
+    }
+
+    // Fallback
+    let updatedAssets;
     if (index >= 0) {
-      // Edit
       updatedAssets = [...assets];
       updatedAssets[index] = assetData;
       addAuditLog('ครุภัณฑ์', `แก้ไขข้อมูลครุภัณฑ์: ${assetData.name || 'ไม่ระบุชื่อ'} (${assetData.asset_code || 'ไม่ระบุรหัส'})`);
     } else {
-      // Add new
       updatedAssets = [assetData, ...assets];
       addAuditLog('ครุภัณฑ์', `เพิ่มครุภัณฑ์ใหม่: ${assetData.name || 'ไม่ระบุชื่อ'} (${assetData.asset_code || 'ไม่ระบุรหัส'})`);
     }
-
     saveAssetsToStateAndStorage(updatedAssets);
   };
 
-  const handleDeleteAsset = (id) => {
+  const handleDeleteAsset = async (id) => {
     const assetToDelete = assets.find(a => a.id === id);
     const assetName = assetToDelete?.name || 'ครุภัณฑ์นี้';
     const assetCode = assetToDelete?.asset_code || 'ไม่ระบุรหัส';
 
     if (window.confirm(`คุณต้องการลบข้อมูลครุภัณฑ์ "${assetName}" ใช่หรือไม่?`)) {
+      if (isBackendOnline) {
+        try {
+          const res = await fetch(`http://localhost:5000/api/assets/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (res.ok) {
+            setAssets(prev => prev.filter(a => a.id !== id));
+            setRepairRequests(prev => prev.filter(req => req.asset_id !== id));
+
+            // Refresh logs
+            const logsRes = await fetch('http://localhost:5000/api/audit-logs', {
+              headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (logsRes.ok) setAuditLogs(await logsRes.json());
+            return;
+          }
+        } catch (err) {
+          console.warn('API error, falling back to local storage delete', err);
+        }
+      }
+
       const filtered = assets.filter(a => a.id !== id);
       saveAssetsToStateAndStorage(filtered);
 
-      // Filter out and remove all repair requests associated with the deleted asset
       const filteredRequests = repairRequests.filter(req => req.asset_id !== id);
       setRepairRequests(filteredRequests);
       localStorage.setItem('inventory_repair_requests', JSON.stringify(filteredRequests));
@@ -521,8 +756,23 @@ export default function useInventory() {
     }
   };
 
-  const handleResetDemoData = () => {
+  const handleResetDemoData = async () => {
     if (window.confirm('คุณต้องการรีเซ็ตข้อมูลทั้งหมดและดาวน์โหลดข้อมูลครุภัณฑ์ตัวอย่าง 8 รายการกลับมาใช่หรือไม่? (ข้อมูลเดิมของคุณจะถูกแทนที่)')) {
+      if (isBackendOnline) {
+        try {
+          const res = await fetch('http://localhost:5000/api/settings/reset', {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (res.ok) {
+            window.location.reload();
+            return;
+          }
+        } catch (err) {
+          console.warn('API error, falling back to local storage reset', err);
+        }
+      }
+
       const seed = getSeedAssets();
       saveAssetsToStateAndStorage(seed);
       saveDivisions(defaultDivisions);
@@ -534,6 +784,22 @@ export default function useInventory() {
       saveLandBuildingCategories(defaultLandBuildingCategories);
       saveEquipmentCategories(defaultEquipmentCategories);
       saveAgencies(defaultAgencies);
+
+      const defaultMapping = {
+        'ที่ดินที่มีกรรมสิทธิ์': 0,
+        'อาคารสำนักงาน': 20,
+        'สิ่งปลูกสร้าง': 20,
+        'ครุภัณฑ์สำนักงาน': 10,
+        'ครุภัณฑ์คอมพิวเตอร์': 5,
+        'ครุภัณฑ์ยานพาหนะและขนส่ง': 5,
+        'ครุภัณฑ์ไฟฟ้าและวิทยุ': 5,
+        'ครุภัณฑ์โฆษณาและเผยแพร่': 5,
+        'ครุภัณฑ์งานบ้านงานครัว': 5,
+        'ครุภัณฑ์วิทยาศาสตร์และการแพทย์': 10,
+        'ครุภัณฑ์กีฬา': 5,
+        'สินทรัพย์ไม่มีตัวตนอื่น': 5
+      };
+      saveCategoryDepreciationYears(defaultMapping);
 
       const dellAsset = seed.find(a => a.asset_code === '412/67/0001');
       const toyotaAsset = seed.find(a => a.asset_code === '312/64/0001');
@@ -577,7 +843,34 @@ export default function useInventory() {
   };
 
   // --- Repair Operations ---
-  const handleCreateRepairRequest = (assetId, problemDesc) => {
+  const handleCreateRepairRequest = async (assetId, problemDesc) => {
+    if (isBackendOnline) {
+      try {
+        const res = await fetch('http://localhost:5000/api/repairs', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ asset_id: assetId, problem_description: problemDesc })
+        });
+        if (res.ok) {
+          const newRequest = await res.json();
+          setRepairRequests(prev => [newRequest, ...prev]);
+          setAssets(prev => prev.map(a => a.id === assetId ? { ...a, status: 'ชำรุด' } : a));
+
+          // Refresh logs
+          const logsRes = await fetch('http://localhost:5000/api/audit-logs', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (logsRes.ok) setAuditLogs(await logsRes.json());
+          return;
+        }
+      } catch (err) {
+        console.warn('API error, falling back to local repair creation', err);
+      }
+    }
+
     const newRequest = {
       id: `repair-${Date.now()}`,
       asset_id: assetId,
@@ -609,7 +902,30 @@ export default function useInventory() {
     addAuditLog('งานซ่อม', `แจ้งซ่อมอุปกรณ์สำหรับครุภัณฑ์รหัส: ${assetCode} (ปัญหา: ${problemDesc})`);
   };
 
-  const handleStartRepairJob = (requestId) => {
+  const handleStartRepairJob = async (requestId) => {
+    if (isBackendOnline) {
+      try {
+        const res = await fetch(`http://localhost:5000/api/repairs/${requestId}/start`, {
+          method: 'PUT',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const updatedReq = await res.json();
+          setRepairRequests(prev => prev.map(r => r.id === requestId ? updatedReq : r));
+          setAssets(prev => prev.map(a => a.id === updatedReq.asset_id ? { ...a, status: 'กำลังซ่อม' } : a));
+
+          // Refresh logs
+          const logsRes = await fetch('http://localhost:5000/api/audit-logs', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (logsRes.ok) setAuditLogs(await logsRes.json());
+          return;
+        }
+      } catch (err) {
+        console.warn('API error, falling back to local start job', err);
+      }
+    }
+
     let targetAssetId = null;
     const updated = repairRequests.map(req => {
       if (req.id === requestId) {
@@ -636,7 +952,34 @@ export default function useInventory() {
     }
   };
 
-  const handleRejectRepairJob = (requestId, reason) => {
+  const handleRejectRepairJob = async (requestId, reason) => {
+    if (isBackendOnline) {
+      try {
+        const res = await fetch(`http://localhost:5000/api/repairs/${requestId}/reject`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ reason })
+        });
+        if (res.ok) {
+          const updatedReq = await res.json();
+          setRepairRequests(prev => prev.map(r => r.id === requestId ? updatedReq : r));
+          setAssets(prev => prev.map(a => a.id === updatedReq.asset_id ? { ...a, status: 'ใช้งาน' } : a));
+
+          // Refresh logs
+          const logsRes = await fetch('http://localhost:5000/api/audit-logs', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (logsRes.ok) setAuditLogs(await logsRes.json());
+          return;
+        }
+      } catch (err) {
+        console.warn('API error, falling back to local reject job', err);
+      }
+    }
+
     const updated = repairRequests.map(req => {
       if (req.id === requestId) {
         return { ...req, status: 'REJECTED', rejection_reason: reason };
@@ -654,7 +997,37 @@ export default function useInventory() {
     }
   };
 
-  const handleCompleteRepairJob = (requestId, cost, contractor, approvalDate, documentNumber, notes) => {
+  const handleCompleteRepairJob = async (requestId, cost, contractor, approvalDate, documentNumber, notes) => {
+    if (isBackendOnline) {
+      try {
+        const res = await fetch(`http://localhost:5000/api/repairs/${requestId}/complete`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ cost, contractor, approvalDate, documentNumber, notes })
+        });
+        if (res.ok) {
+          const updatedReq = await res.json();
+          setRepairRequests(prev => prev.map(r => r.id === requestId ? updatedReq : r));
+
+          // Fetch updated assets
+          const assetsRes = await fetch('http://localhost:5000/api/assets');
+          if (assetsRes.ok) setAssets(await assetsRes.json());
+
+          // Refresh logs
+          const logsRes = await fetch('http://localhost:5000/api/audit-logs', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (logsRes.ok) setAuditLogs(await logsRes.json());
+          return;
+        }
+      } catch (err) {
+        console.warn('API error, falling back to local complete job', err);
+      }
+    }
+
     let targetRequest = null;
     const updatedRequests = repairRequests.map(req => {
       if (req.id === requestId) {
@@ -681,7 +1054,7 @@ export default function useInventory() {
       if (assetIndex >= 0) {
         const updatedAssets = [...assets];
         const asset = updatedAssets[assetIndex];
-        
+
         const newMaintenanceLog = {
           id: `maint-${Date.now()}`,
           approval_date: approvalDate,
@@ -818,80 +1191,88 @@ export default function useInventory() {
   };
 
   // --- Land Category CRUD ---
-  const handleAddLandCategory = (cat) => {
+  const handleAddLandCategory = (cat, years = 20) => {
     saveLandBuildingCategories([...landBuildingCategories, cat]);
-    addAuditLog('ตั้งค่าระบบ', `เพิ่มหมวดหมู่ที่ดิน พ.ด.1: ${cat}`);
+    const updatedMapping = { ...categoryDepreciationYears };
+    updatedMapping[cat] = parseInt(years) >= 0 ? parseInt(years) : 20;
+    saveCategoryDepreciationYears(updatedMapping);
+    addAuditLog('ตั้งค่าระบบ', `เพิ่มหมวดหมู่ที่ดิน พ.ด.1: ${cat} (ค่าเสื่อม ${years} ปี)`);
   };
 
-  const handleEditLandCategory = (oldCat, newCat) => {
+  const handleEditLandCategory = (oldCat, newCat, newYears) => {
     saveLandBuildingCategories(landBuildingCategories.map(c => c === oldCat ? newCat : c));
     
     const updatedMapping = { ...categoryDepreciationYears };
-    if (updatedMapping[oldCat] !== undefined) {
-      updatedMapping[newCat] = updatedMapping[oldCat];
-      delete updatedMapping[oldCat];
-      setCategoryDepreciationYears(updatedMapping);
-      localStorage.setItem('inventory_category_depreciation_years', JSON.stringify(updatedMapping));
+    if (newYears !== undefined) {
+      updatedMapping[newCat] = parseInt(newYears) >= 0 ? parseInt(newYears) : 20;
+    } else {
+      updatedMapping[newCat] = updatedMapping[oldCat] !== undefined ? updatedMapping[oldCat] : 20;
     }
+    if (oldCat !== newCat) {
+      delete updatedMapping[oldCat];
+    }
+    saveCategoryDepreciationYears(updatedMapping);
 
-    const renamedAssets = assets.map(a => 
+    const updatedAssets = assets.map(a => 
       (a.asset_type === 'LAND_BUILDING' && a.category === oldCat) 
         ? { ...a, category: newCat } 
         : a
     );
-    saveAssetsToStateAndStorage(recalculateAssets(renamedAssets, updatedMapping));
-    addAuditLog('ตั้งค่าระบบ', `แก้ไขหมวดหมู่ที่ดิน พ.ด.1 จาก "${oldCat}" เป็น "${newCat}"`);
+    recalculateAllAssetsDepreciation(updatedMapping, updatedAssets);
+    
+    addAuditLog('ตั้งค่าระบบ', `แก้ไขหมวดหมู่ที่ดิน พ.ด.1: ${oldCat} -> ${newCat} (${updatedMapping[newCat]} ปี)`);
   };
 
   const handleDeleteLandCategory = (cat) => {
     saveLandBuildingCategories(landBuildingCategories.filter(c => c !== cat));
-    
     const updatedMapping = { ...categoryDepreciationYears };
-    if (updatedMapping[cat] !== undefined) {
-      delete updatedMapping[cat];
-      setCategoryDepreciationYears(updatedMapping);
-      localStorage.setItem('inventory_category_depreciation_years', JSON.stringify(updatedMapping));
-    }
-
+    delete updatedMapping[cat];
+    saveCategoryDepreciationYears(updatedMapping);
+    
+    recalculateAllAssetsDepreciation(updatedMapping, assets);
     addAuditLog('ตั้งค่าระบบ', `ลบหมวดหมู่ที่ดิน พ.ด.1: ${cat}`);
   };
 
   // --- Equipment Category CRUD ---
-  const handleAddEquipmentCategory = (cat) => {
+  const handleAddEquipmentCategory = (cat, years = 5) => {
     saveEquipmentCategories([...equipmentCategories, cat]);
-    addAuditLog('ตั้งค่าระบบ', `เพิ่มหมวดหมู่ครุภัณฑ์ พ.ด.2: ${cat}`);
+    const updatedMapping = { ...categoryDepreciationYears };
+    updatedMapping[cat] = parseInt(years) >= 0 ? parseInt(years) : 5;
+    saveCategoryDepreciationYears(updatedMapping);
+    addAuditLog('ตั้งค่าระบบ', `เพิ่มหมวดหมู่ครุภัณฑ์ พ.ด.2: ${cat} (ค่าเสื่อม ${years} ปี)`);
   };
 
-  const handleEditEquipmentCategory = (oldCat, newCat) => {
+  const handleEditEquipmentCategory = (oldCat, newCat, newYears) => {
     saveEquipmentCategories(equipmentCategories.map(c => c === oldCat ? newCat : c));
     
     const updatedMapping = { ...categoryDepreciationYears };
-    if (updatedMapping[oldCat] !== undefined) {
-      updatedMapping[newCat] = updatedMapping[oldCat];
-      delete updatedMapping[oldCat];
-      setCategoryDepreciationYears(updatedMapping);
-      localStorage.setItem('inventory_category_depreciation_years', JSON.stringify(updatedMapping));
+    if (newYears !== undefined) {
+      updatedMapping[newCat] = parseInt(newYears) >= 0 ? parseInt(newYears) : 5;
+    } else {
+      updatedMapping[newCat] = updatedMapping[oldCat] !== undefined ? updatedMapping[oldCat] : 5;
     }
+    if (oldCat !== newCat) {
+      delete updatedMapping[oldCat];
+    }
+    saveCategoryDepreciationYears(updatedMapping);
 
-    const renamedAssets = assets.map(a => 
+    const updatedAssets = assets.map(a => 
       (a.asset_type === 'EQUIPMENT' && a.category === oldCat) 
         ? { ...a, category: newCat } 
         : a
     );
-    saveAssetsToStateAndStorage(recalculateAssets(renamedAssets, updatedMapping));
-    addAuditLog('ตั้งค่าระบบ', `แก้ไขหมวดหมู่ครุภัณฑ์ พ.ด.2 จาก "${oldCat}" เป็น "${newCat}"`);
+    recalculateAllAssetsDepreciation(updatedMapping, updatedAssets);
+    
+    addAuditLog('ตั้งค่าระบบ', `แก้ไขหมวดหมู่ครุภัณฑ์ พ.ด.2: ${oldCat} -> ${newCat} (${updatedMapping[newCat]} ปี)`);
   };
 
   const handleDeleteEquipmentCategory = (cat) => {
     saveEquipmentCategories(equipmentCategories.filter(c => c !== cat));
-    
     const updatedMapping = { ...categoryDepreciationYears };
-    if (updatedMapping[cat] !== undefined) {
-      delete updatedMapping[cat];
-      setCategoryDepreciationYears(updatedMapping);
-      localStorage.setItem('inventory_category_depreciation_years', JSON.stringify(updatedMapping));
-    }
-
+    delete updatedMapping[cat];
+    saveCategoryDepreciationYears(updatedMapping);
+    
+    recalculateAllAssetsDepreciation(updatedMapping, assets);
     addAuditLog('ตั้งค่าระบบ', `ลบหมวดหมู่ครุภัณฑ์ พ.ด.2: ${cat}`);
   };
 
@@ -934,6 +1315,7 @@ export default function useInventory() {
   const saveSellers = (list) => {
     setSellers(list);
     localStorage.setItem('inventory_sellers', JSON.stringify(list));
+    saveSettingsBackend({ sellers: list });
   };
 
   const handleAddSeller = (seller) => {
@@ -1132,6 +1514,7 @@ export default function useInventory() {
     landingBadgeText,
     landBuildingCategories,
     equipmentCategories,
+    categoryDepreciationYears,
     agencies,
     auditLogs,
     repairRequests,
@@ -1177,7 +1560,14 @@ export default function useInventory() {
     handleEditSeller,
     handleDeleteSeller,
     importAssetsData,
-    categoryDepreciationYears,
-    handleUpdateCategoryDepreciationYears
+    currentUser,
+    isAdmin,
+    isSystemAdmin,
+    token,
+    isBackendOnline,
+    loginAdmin,
+    loginSSO,
+    logout,
+    handleLoginSuccess
   };
 }

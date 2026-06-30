@@ -11,6 +11,7 @@ import GetRepair from './components/repair/GetRepair';
 import RepairJobs from './components/repair/RepairJobs';
 import AuditLogPanel from './components/AuditLogPanel';
 import RepairRequestPrint from './components/template/RepairRequestPrint';
+import LoginModal from './components/LoginModal';
 
 import useAppLayout from './hooks/useAppLayout';
 import useInventory from './hooks/useInventory';
@@ -18,6 +19,7 @@ import useInventory from './hooks/useInventory';
 export default function App() {
   const [activeCustodianAsset, setActiveCustodianAsset] = useState(null);
   const [isCustodianModalOpen, setIsCustodianModalOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   const {
     activeLayout,
@@ -58,6 +60,7 @@ export default function App() {
     landingBadgeText,
     landBuildingCategories,
     equipmentCategories,
+    categoryDepreciationYears,
     agencies,
     auditLogs,
     repairRequests,
@@ -102,9 +105,107 @@ export default function App() {
     handleEditSeller,
     handleDeleteSeller,
     importAssetsData,
-    categoryDepreciationYears,
-    handleUpdateCategoryDepreciationYears
+    currentUser,
+    isAdmin,
+    isSystemAdmin,
+    logout,
+    handleLoginSuccess
   } = useInventory();
+
+  // --- Auth Guards ---
+  const handleMenuClick = (layout) => {
+    if ((layout === 'settings' || layout === 'audit_log') && !isSystemAdmin) {
+      alert('เฉพาะผู้ใช้งานระดับ Admin เท่านั้นที่สามารถเข้าใช้งานเมนูนี้ได้');
+      setIsLoginModalOpen(true);
+      return;
+    }
+    if (layout === 'repair_jobs' && !isAdmin) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+    changeLayout(layout);
+  };
+
+  const handleOpenAddForm = () => {
+    if (!isAdmin) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+    openAddForm();
+  };
+
+  const handleOpenEditForm = (asset) => {
+    if (!isAdmin) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+    openEditForm(asset);
+  };
+
+  const handleOpenRepairForm = (asset, tab) => {
+    if (!isAdmin) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+    openRepairForm(asset, tab);
+  };
+
+  const handleOpenCustodianModal = (item) => {
+    if (!isAdmin) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+    setActiveCustodianAsset(item);
+    setIsCustodianModalOpen(true);
+  };
+
+  const handleGuardedDeleteAsset = (id) => {
+    if (!isAdmin) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+    handleDeleteAsset(id);
+  };
+
+  const handleGuardedResetDemoData = () => {
+    if (!isAdmin) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+    handleResetDemoData();
+  };
+
+  const handleGuardedStartRepairJob = (requestId) => {
+    if (!isAdmin) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+    handleStartRepairJob(requestId);
+  };
+
+  const handleGuardedRejectRepairJob = (requestId, reason) => {
+    if (!isAdmin) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+    handleRejectRepairJob(requestId, reason);
+  };
+
+  const handleGuardedCompleteRepairJob = (requestId, cost, contractor, approvalDate, documentNumber, notes) => {
+    if (!isAdmin) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+    handleCompleteRepairJob(requestId, cost, contractor, approvalDate, documentNumber, notes);
+  };
+
+  const handleGuardedClearAuditLogs = () => {
+    if (!isAdmin) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+    handleClearAuditLogs();
+  };
 
   // --- Sub-components / Props ---
 
@@ -124,48 +225,70 @@ export default function App() {
       <ul className="sidebar-menu">
         <li
           className={`sidebar-menu-item ${activeLayout === 'sidebar' ? 'active' : ''}`}
-          onClick={() => changeLayout('sidebar')}
+          onClick={() => handleMenuClick('sidebar')}
         >
           📋 ทะเบียนครุภัณฑ์
         </li>
         <li
           className={`sidebar-menu-item ${activeLayout === 'bento' ? 'active' : ''}`}
-          onClick={() => changeLayout('bento')}
+          onClick={() => handleMenuClick('bento')}
         >
           📊 Dashboard
         </li>
         <li
           className={`sidebar-menu-item ${activeLayout === 'centered' ? 'active' : ''}`}
-          onClick={() => changeLayout('centered')}
+          onClick={() => handleMenuClick('centered')}
         >
           🔍 ค้นหา
         </li>
 
         <li
           className={`sidebar-menu-item ${activeLayout === 'repair_jobs' ? 'active' : ''}`}
-          onClick={() => changeLayout('repair_jobs')}
+          onClick={() => handleMenuClick('repair_jobs')}
         >
           🛠️ งานซ่อมอุปกรณ์
         </li>
-        <li
-          className={`sidebar-menu-item ${activeLayout === 'settings' ? 'active' : ''}`}
-          onClick={() => changeLayout('settings')}
-        >
-          ⚙️ ตั้งค่าระบบ
-        </li>
-        <li
-          className={`sidebar-menu-item ${activeLayout === 'audit_log' ? 'active' : ''}`}
-          onClick={() => changeLayout('audit_log')}
-        >
-          📜 ประวัติระบบ (Audit Log)
-        </li>
+        {isSystemAdmin && (
+          <>
+            <li
+              className={`sidebar-menu-item ${activeLayout === 'settings' ? 'active' : ''}`}
+              onClick={() => handleMenuClick('settings')}
+            >
+              ⚙️ ตั้งค่าระบบ
+            </li>
+            <li
+              className={`sidebar-menu-item ${activeLayout === 'audit_log' ? 'active' : ''}`}
+              onClick={() => handleMenuClick('audit_log')}
+            >
+              📜 ประวัติระบบ (Audit Log)
+            </li>
+          </>
+        )}
 
         <div className="sidebar-menu-divider"></div>
 
-        <li className="sidebar-menu-item" onClick={openAddForm}>
+        {/* Authentication Menu Item */}
+        {currentUser ? (
+          <>
+            <li className="sidebar-menu-item" style={{ cursor: 'default', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+              👤 {currentUser.name} ({currentUser.role === 'ADMIN' ? 'Admin' : 'SSO'})
+            </li>
+            <li className="sidebar-menu-item" onClick={logout} style={{ color: 'rgb(220, 38, 38)' }}>
+              🔓 ออกจากระบบ
+            </li>
+          </>
+        ) : (
+          <li className="sidebar-menu-item" onClick={() => setIsLoginModalOpen(true)} style={{ color: '#4f46e5', fontWeight: 'bold' }}>
+            🔒 เข้าสู่ระบบ Admin/SSO
+          </li>
+        )}
+
+        <div className="sidebar-menu-divider"></div>
+
+        <li className="sidebar-menu-item" onClick={handleOpenAddForm}>
           ➕ ลงทะเบียนครุภัณฑ์ใหม่
         </li>
-        <li className="sidebar-menu-item" onClick={handleResetDemoData}>
+        <li className="sidebar-menu-item" onClick={handleGuardedResetDemoData}>
           🔄 รีเซ็ตข้อมูลตัวอย่าง
         </li>
       </ul>
@@ -233,20 +356,24 @@ export default function App() {
           >
             ค้นหา
           </button>
-          <button
-            className={`layout-toggle-btn ${activeLayout === 'settings' ? 'active' : ''}`}
-            onClick={() => changeLayout('settings')}
-            title="Settings Panel"
-          >
-            ตั้งค่า
-          </button>
-          <button
-            className={`layout-toggle-btn ${activeLayout === 'audit_log' ? 'active' : ''}`}
-            onClick={() => changeLayout('audit_log')}
-            title="Audit Log"
-          >
-            ประวัติระบบ
-          </button>
+          {isSystemAdmin && (
+            <>
+              <button
+                className={`layout-toggle-btn ${activeLayout === 'settings' ? 'active' : ''}`}
+                onClick={() => handleMenuClick('settings')}
+                title="Settings Panel"
+              >
+                ตั้งค่า
+              </button>
+              <button
+                className={`layout-toggle-btn ${activeLayout === 'audit_log' ? 'active' : ''}`}
+                onClick={() => handleMenuClick('audit_log')}
+                title="Audit Log"
+              >
+                ประวัติระบบ
+              </button>
+            </>
+          )}
         </div>
 
         {/* Font Scaling Buttons */}
@@ -312,21 +439,18 @@ export default function App() {
                 <h2>ทะเบียนครุภัณฑ์ทั้งหมด</h2>
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>บันทึกรายละเอียด รายการ ราคา วันที่ได้มา และค่าเสื่อมสะสม</p>
               </div>
-              <button className="button-primary" onClick={openAddForm}>
+              <button className="button-primary" onClick={handleOpenAddForm}>
                 ➕ ลงทะเบียนครุภัณฑ์ใหม่
               </button>
             </div>
             <AssetTable
               assets={assets}
-              onEditAsset={openEditForm}
-              onDeleteAsset={handleDeleteAsset}
-              onRepairAsset={openRepairForm}
+              onEditAsset={handleOpenEditForm}
+              onDeleteAsset={handleGuardedDeleteAsset}
+              onRepairAsset={handleOpenRepairForm}
               onPrintAsset={openPrintAsset}
-              onViewRepairHistory={(asset) => openRepairForm(asset, 'history')}
-              onManageCustodian={(item) => {
-                setActiveCustodianAsset(item);
-                setIsCustodianModalOpen(true);
-              }}
+              onViewRepairHistory={(asset) => handleOpenRepairForm(asset, 'history')}
+              onManageCustodian={handleOpenCustodianModal}
               initialSearchQuery={searchQueryFromLanding}
             />
           </div>
@@ -335,8 +459,8 @@ export default function App() {
         {activeLayout === 'bento' && (
           <BentoDashboard
             assets={assets}
-            onAddClick={openAddForm}
-            onResetDemo={handleResetDemoData}
+            onAddClick={handleOpenAddForm}
+            onResetDemo={handleGuardedResetDemoData}
             onViewDetails={() => changeLayout('sidebar')}
           />
         )}
@@ -345,8 +469,8 @@ export default function App() {
           <CenteredLanding
             assets={assets}
             onNavigate={navigateFromLanding}
-            onAddClick={openAddForm}
-            onEditAsset={openEditForm}
+            onAddClick={handleOpenAddForm}
+            onEditAsset={handleOpenEditForm}
             landingBadgeText={landingBadgeText}
           />
         )}
@@ -360,6 +484,7 @@ export default function App() {
             divisions={divisions}
             departments={departments}
             positions={positions}
+            categoryDepreciationYears={categoryDepreciationYears}
             brands={brands}
             locations={locations}
             landingBadgeText={landingBadgeText}
@@ -408,16 +533,16 @@ export default function App() {
           <RepairJobs
             assets={assets}
             repairRequests={repairRequests}
-            onStartRepairJob={handleStartRepairJob}
-            onRejectRepairJob={handleRejectRepairJob}
-            onCompleteRepairJob={handleCompleteRepairJob}
+            onStartRepairJob={handleGuardedStartRepairJob}
+            onRejectRepairJob={handleGuardedRejectRepairJob}
+            onCompleteRepairJob={handleGuardedCompleteRepairJob}
           />
         )}
 
         {activeLayout === 'audit_log' && (
           <AuditLogPanel
             auditLogs={auditLogs}
-            onClearLogs={handleClearAuditLogs}
+            onClearLogs={handleGuardedClearAuditLogs}
           />
         )}
       </BaseLayout>
@@ -431,12 +556,22 @@ export default function App() {
           locations={locations}
           landBuildingCategories={landBuildingCategories}
           equipmentCategories={equipmentCategories}
+          categoryDepreciationYears={categoryDepreciationYears}
           agencies={agencies}
           positions={positions}
+          departments={departments}
           onSubmit={handleSubmitForm}
           onClose={closeForm}
           sellers={sellers}
           categoryDepreciationYears={categoryDepreciationYears}
+        />
+      )}
+
+      {isLoginModalOpen && (
+        <LoginModal
+          onClose={() => setIsLoginModalOpen(false)}
+          onLoginSuccess={handleLoginSuccess}
+          custodians={custodians}
         />
       )}
 
@@ -498,48 +633,70 @@ export default function App() {
             <ul className="sidebar-menu">
               <li
                 className={`sidebar-menu-item ${activeLayout === 'sidebar' ? 'active' : ''}`}
-                onClick={() => changeLayout('sidebar')}
+                onClick={() => { setIsMobileMenuOpen(false); handleMenuClick('sidebar'); }}
               >
                 📋 ทะเบียนครุภัณฑ์
               </li>
               <li
                 className={`sidebar-menu-item ${activeLayout === 'bento' ? 'active' : ''}`}
-                onClick={() => changeLayout('bento')}
+                onClick={() => { setIsMobileMenuOpen(false); handleMenuClick('bento'); }}
               >
                 📊 Dashboard
               </li>
               <li
                 className={`sidebar-menu-item ${activeLayout === 'centered' ? 'active' : ''}`}
-                onClick={() => changeLayout('centered')}
+                onClick={() => { setIsMobileMenuOpen(false); handleMenuClick('centered'); }}
               >
                 🔍 ค้นหา
               </li>
 
               <li
                 className={`sidebar-menu-item ${activeLayout === 'repair_jobs' ? 'active' : ''}`}
-                onClick={() => changeLayout('repair_jobs')}
+                onClick={() => { setIsMobileMenuOpen(false); handleMenuClick('repair_jobs'); }}
               >
                 🛠️ งานซ่อมอุปกรณ์
               </li>
-              <li
-                className={`sidebar-menu-item ${activeLayout === 'settings' ? 'active' : ''}`}
-                onClick={() => changeLayout('settings')}
-              >
-                ⚙️ ตั้งค่าระบบ
-              </li>
-              <li
-                className={`sidebar-menu-item ${activeLayout === 'audit_log' ? 'active' : ''}`}
-                onClick={() => changeLayout('audit_log')}
-              >
-                📜 ประวัติระบบ (Audit Log)
-              </li>
+              {isSystemAdmin && (
+                <>
+                  <li
+                    className={`sidebar-menu-item ${activeLayout === 'settings' ? 'active' : ''}`}
+                    onClick={() => { setIsMobileMenuOpen(false); handleMenuClick('settings'); }}
+                  >
+                    ⚙️ ตั้งค่าระบบ
+                  </li>
+                  <li
+                    className={`sidebar-menu-item ${activeLayout === 'audit_log' ? 'active' : ''}`}
+                    onClick={() => { setIsMobileMenuOpen(false); handleMenuClick('audit_log'); }}
+                  >
+                    📜 ประวัติระบบ (Audit Log)
+                  </li>
+                </>
+              )}
 
               <div className="sidebar-menu-divider"></div>
 
-              <li className="sidebar-menu-item" onClick={() => { setIsMobileMenuOpen(false); openAddForm(); }}>
+              {/* Mobile Auth */}
+              {currentUser ? (
+                <>
+                  <li className="sidebar-menu-item" style={{ cursor: 'default', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                    👤 {currentUser.name}
+                  </li>
+                  <li className="sidebar-menu-item" onClick={() => { setIsMobileMenuOpen(false); logout(); }} style={{ color: 'rgb(220, 38, 38)' }}>
+                    🔓 ออกจากระบบ
+                  </li>
+                </>
+              ) : (
+                <li className="sidebar-menu-item" onClick={() => { setIsMobileMenuOpen(false); setIsLoginModalOpen(true); }} style={{ color: '#4f46e5', fontWeight: 'bold' }}>
+                  🔒 เข้าสู่ระบบ Admin/SSO
+                </li>
+              )}
+
+              <div className="sidebar-menu-divider"></div>
+
+              <li className="sidebar-menu-item" onClick={() => { setIsMobileMenuOpen(false); handleOpenAddForm(); }}>
                 ➕ ลงทะเบียนครุภัณฑ์ใหม่
               </li>
-              <li className="sidebar-menu-item" onClick={() => { setIsMobileMenuOpen(false); handleResetDemoData(); }}>
+              <li className="sidebar-menu-item" onClick={() => { setIsMobileMenuOpen(false); handleGuardedResetDemoData(); }}>
                 🔄 รีเซ็ตข้อมูลตัวอย่าง
               </li>
             </ul>
