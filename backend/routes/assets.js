@@ -34,9 +34,9 @@ router.post('/', async (req, res) => {
   const newAsset = {
     ...assetData,
     id: `asset-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-    depreciation_rate_percent: dep.depreciation_rate_percent,
-    accumulated_depreciation: dep.accumulated_depreciation,
-    book_value: dep.book_value
+    depreciation_rate_percent: dep.depreciationRatePercent,
+    accumulated_depreciation: dep.accumulatedDepreciation,
+    book_value: dep.bookValue
   };
 
   dbData.assets.push(newAsset);
@@ -68,9 +68,9 @@ router.put('/:id', async (req, res) => {
   const updatedAsset = {
     ...oldAsset,
     ...assetData,
-    depreciation_rate_percent: dep.depreciation_rate_percent,
-    accumulated_depreciation: dep.accumulated_depreciation,
-    book_value: dep.book_value
+    depreciation_rate_percent: dep.depreciationRatePercent,
+    accumulated_depreciation: dep.accumulatedDepreciation,
+    book_value: dep.bookValue
   };
 
   dbData.assets[index] = updatedAsset;

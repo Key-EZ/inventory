@@ -537,9 +537,9 @@ export default function useInventory() {
       );
       return {
         ...asset,
-        depreciation_rate_percent: dep.depreciation_rate_percent,
-        accumulated_depreciation: dep.accumulated_depreciation,
-        book_value: dep.book_value
+        depreciation_rate_percent: dep.depreciationRatePercent,
+        accumulated_depreciation: dep.accumulatedDepreciation,
+        book_value: dep.bookValue
       };
     });
     setAssets(updatedAssets);

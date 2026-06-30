@@ -80,12 +80,13 @@ export default function InventoryPrint({ asset, onClose }) {
 
     if (!asset) return null;
 
-    const getYearsDepreciation = (price, ratePercent) => {
+    const getYearsDepreciation = (price, ratePercent, startYearBE) => {
         const priceVal = parseFloat(price) || 0;
         const rate = parseFloat(ratePercent) || 10;
+        const startYear = parseInt(startYearBE) || 2567;
         if (rate <= 0) {
             return Array.from({ length: 5 }, (_, i) => ({
-                year: `ปีที่ ${i + 1}`,
+                year: `พ.ศ. ${startYear + i}`,
                 rate: "0.00",
                 balance: priceVal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
             }));
@@ -102,7 +103,7 @@ export default function InventoryPrint({ asset, onClose }) {
             }
             const balance = Math.max(1, priceVal - accumDep);
             return {
-                year: `ปีที่ ${yearNum}`,
+                year: `พ.ศ. ${startYear + i}`,
                 rate: rate.toFixed(2),
                 balance: balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
             };
@@ -120,11 +121,6 @@ export default function InventoryPrint({ asset, onClose }) {
             yearBE = parts[1];
         }
 
-        const depRate = (asset.depreciation_rate_percent !== undefined && asset.depreciation_rate_percent !== null)
-            ? asset.depreciation_rate_percent
-            : 10;
-        const depList = getYearsDepreciation(asset.unit_price, depRate);
-
         let displayAcquiredDate = `พ.ศ. 25${yearBE}`;
         let displayYear = `25${yearBE}`;
 
@@ -141,6 +137,11 @@ export default function InventoryPrint({ asset, onClose }) {
                 }
             }
         }
+
+        const depRate = (asset.depreciation_rate_percent !== undefined && asset.depreciation_rate_percent !== null)
+            ? asset.depreciation_rate_percent
+            : 10;
+        const depList = getYearsDepreciation(asset.unit_price, depRate, displayYear);
 
         // Map custodian history list dynamically
         const historyRows = [];
