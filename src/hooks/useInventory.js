@@ -1181,15 +1181,26 @@ export default function useInventory() {
 
   // --- Land Category CRUD ---
   const handleAddLandCategory = (cat, years = 20) => {
-    saveLandBuildingCategories([...landBuildingCategories, cat]);
+    const updatedCategories = [...landBuildingCategories, cat];
+    setLandBuildingCategories(updatedCategories);
+    localStorage.setItem('inventory_land_building_categories', JSON.stringify(updatedCategories));
+
     const updatedMapping = { ...categoryDepreciationYears };
     updatedMapping[cat] = parseInt(years) >= 0 ? parseInt(years) : 20;
-    saveCategoryDepreciationYears(updatedMapping);
+    setCategoryDepreciationYears(updatedMapping);
+    localStorage.setItem('inventory_category_depreciation_years', JSON.stringify(updatedMapping));
+
+    saveSettingsBackend({
+      landBuildingCategories: updatedCategories,
+      categoryDepreciationYears: updatedMapping
+    });
     addAuditLog('ตั้งค่าระบบ', `เพิ่มหมวดหมู่ที่ดิน พ.ด.1: ${cat} (ค่าเสื่อม ${years} ปี)`);
   };
 
   const handleEditLandCategory = (oldCat, newCat, newYears) => {
-    saveLandBuildingCategories(landBuildingCategories.map(c => c === oldCat ? newCat : c));
+    const updatedCategories = landBuildingCategories.map(c => c === oldCat ? newCat : c);
+    setLandBuildingCategories(updatedCategories);
+    localStorage.setItem('inventory_land_building_categories', JSON.stringify(updatedCategories));
     
     const updatedMapping = { ...categoryDepreciationYears };
     if (newYears !== undefined) {
@@ -1200,7 +1211,8 @@ export default function useInventory() {
     if (oldCat !== newCat) {
       delete updatedMapping[oldCat];
     }
-    saveCategoryDepreciationYears(updatedMapping);
+    setCategoryDepreciationYears(updatedMapping);
+    localStorage.setItem('inventory_category_depreciation_years', JSON.stringify(updatedMapping));
 
     const updatedAssets = assets.map(a => 
       (a.asset_type === 'LAND_BUILDING' && a.category === oldCat) 
@@ -1209,30 +1221,54 @@ export default function useInventory() {
     );
     recalculateAllAssetsDepreciation(updatedMapping, updatedAssets);
     
+    saveSettingsBackend({
+      landBuildingCategories: updatedCategories,
+      categoryDepreciationYears: updatedMapping
+    });
     addAuditLog('ตั้งค่าระบบ', `แก้ไขหมวดหมู่ที่ดิน พ.ด.1: ${oldCat} -> ${newCat} (${updatedMapping[newCat]} ปี)`);
   };
 
   const handleDeleteLandCategory = (cat) => {
-    saveLandBuildingCategories(landBuildingCategories.filter(c => c !== cat));
+    const updatedCategories = landBuildingCategories.filter(c => c !== cat);
+    setLandBuildingCategories(updatedCategories);
+    localStorage.setItem('inventory_land_building_categories', JSON.stringify(updatedCategories));
+
     const updatedMapping = { ...categoryDepreciationYears };
     delete updatedMapping[cat];
-    saveCategoryDepreciationYears(updatedMapping);
+    setCategoryDepreciationYears(updatedMapping);
+    localStorage.setItem('inventory_category_depreciation_years', JSON.stringify(updatedMapping));
     
     recalculateAllAssetsDepreciation(updatedMapping, assets);
+
+    saveSettingsBackend({
+      landBuildingCategories: updatedCategories,
+      categoryDepreciationYears: updatedMapping
+    });
     addAuditLog('ตั้งค่าระบบ', `ลบหมวดหมู่ที่ดิน พ.ด.1: ${cat}`);
   };
 
   // --- Equipment Category CRUD ---
   const handleAddEquipmentCategory = (cat, years = 5) => {
-    saveEquipmentCategories([...equipmentCategories, cat]);
+    const updatedCategories = [...equipmentCategories, cat];
+    setEquipmentCategories(updatedCategories);
+    localStorage.setItem('inventory_equipment_categories', JSON.stringify(updatedCategories));
+
     const updatedMapping = { ...categoryDepreciationYears };
     updatedMapping[cat] = parseInt(years) >= 0 ? parseInt(years) : 5;
-    saveCategoryDepreciationYears(updatedMapping);
+    setCategoryDepreciationYears(updatedMapping);
+    localStorage.setItem('inventory_category_depreciation_years', JSON.stringify(updatedMapping));
+
+    saveSettingsBackend({
+      equipmentCategories: updatedCategories,
+      categoryDepreciationYears: updatedMapping
+    });
     addAuditLog('ตั้งค่าระบบ', `เพิ่มหมวดหมู่ครุภัณฑ์ พ.ด.2: ${cat} (ค่าเสื่อม ${years} ปี)`);
   };
 
   const handleEditEquipmentCategory = (oldCat, newCat, newYears) => {
-    saveEquipmentCategories(equipmentCategories.map(c => c === oldCat ? newCat : c));
+    const updatedCategories = equipmentCategories.map(c => c === oldCat ? newCat : c);
+    setEquipmentCategories(updatedCategories);
+    localStorage.setItem('inventory_equipment_categories', JSON.stringify(updatedCategories));
     
     const updatedMapping = { ...categoryDepreciationYears };
     if (newYears !== undefined) {
@@ -1243,7 +1279,8 @@ export default function useInventory() {
     if (oldCat !== newCat) {
       delete updatedMapping[oldCat];
     }
-    saveCategoryDepreciationYears(updatedMapping);
+    setCategoryDepreciationYears(updatedMapping);
+    localStorage.setItem('inventory_category_depreciation_years', JSON.stringify(updatedMapping));
 
     const updatedAssets = assets.map(a => 
       (a.asset_type === 'EQUIPMENT' && a.category === oldCat) 
@@ -1252,16 +1289,29 @@ export default function useInventory() {
     );
     recalculateAllAssetsDepreciation(updatedMapping, updatedAssets);
     
+    saveSettingsBackend({
+      equipmentCategories: updatedCategories,
+      categoryDepreciationYears: updatedMapping
+    });
     addAuditLog('ตั้งค่าระบบ', `แก้ไขหมวดหมู่ครุภัณฑ์ พ.ด.2: ${oldCat} -> ${newCat} (${updatedMapping[newCat]} ปี)`);
   };
 
   const handleDeleteEquipmentCategory = (cat) => {
-    saveEquipmentCategories(equipmentCategories.filter(c => c !== cat));
+    const updatedCategories = equipmentCategories.filter(c => c !== cat);
+    setEquipmentCategories(updatedCategories);
+    localStorage.setItem('inventory_equipment_categories', JSON.stringify(updatedCategories));
+
     const updatedMapping = { ...categoryDepreciationYears };
     delete updatedMapping[cat];
-    saveCategoryDepreciationYears(updatedMapping);
+    setCategoryDepreciationYears(updatedMapping);
+    localStorage.setItem('inventory_category_depreciation_years', JSON.stringify(updatedMapping));
     
     recalculateAllAssetsDepreciation(updatedMapping, assets);
+
+    saveSettingsBackend({
+      equipmentCategories: updatedCategories,
+      categoryDepreciationYears: updatedMapping
+    });
     addAuditLog('ตั้งค่าระบบ', `ลบหมวดหมู่ครุภัณฑ์ พ.ด.2: ${cat}`);
   };
 
