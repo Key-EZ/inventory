@@ -37,6 +37,7 @@ export default function useAssetForm({
     deliveryDocumentDate: asset ? asset.delivery_document_date || '' : '',
     sellerName: asset ? asset.seller_name || '' : (sellers[0] || ''),
     unitPrice: asset ? asset.unit_price || 0 : 0,
+    budgetOwner: asset ? asset.budget_owner || '' : '',
     responsibleDepartment: asset ? asset.responsible_department || '' : '',
     status: asset ? asset.status || 'ใช้งาน' : 'ใช้งาน',
     
@@ -148,16 +149,6 @@ export default function useAssetForm({
     }
 
     const custodianHistory = asset?.custodian_history || [];
-    let finalBudgetOwner = asset?.budget_owner || '';
-    if (custodianHistory.length > 0) {
-      const sorted = [...custodianHistory].sort((a, b) => {
-        const yA = parseInt(a.year) || 0;
-        const yB = parseInt(b.year) || 0;
-        return yB - yA;
-      });
-      finalBudgetOwner = sorted[0]?.budget_owner || '';
-    }
-
     const payload = {
       id: asset?.id || generateNewAssetId(),
       asset_type: formData.assetType,
@@ -170,7 +161,7 @@ export default function useAssetForm({
       delivery_document_date: formData.deliveryDocumentDate,
       seller_name: formData.sellerName,
       unit_price: parseFloat(formData.unitPrice) || 0,
-      budget_owner: finalBudgetOwner,
+      budget_owner: formData.budgetOwner,
       responsible_department: formData.responsibleDepartment,
       status: formData.status,
 

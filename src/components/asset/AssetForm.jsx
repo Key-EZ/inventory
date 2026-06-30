@@ -196,6 +196,9 @@ export default function AssetForm({
                   </select>
                   {errors.location && <span className="error-text">{errors.location}</span>}
                 </div>
+              </div>
+
+              <div className="form-row">
                 <div className="form-group col">
                   <label>ส่วนราชการเจ้าของพัสดุ</label>
                   <select
@@ -210,6 +213,19 @@ export default function AssetForm({
                     ))}
                   </select>
                   {errors.responsibleDepartment && <span className="error-text">{errors.responsibleDepartment}</span>}
+                </div>
+                <div className="form-group col">
+                  <label>
+                    แหล่งงบประมาณ
+                    <span className="tooltip-trigger" data-tooltip="แหล่งที่มาของงบประมาณที่ใช้จัดหา เช่น งบประจำปี งบอุดหนุนเฉพาะกิจ เงินสะสม">?</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="budgetOwner"
+                    value={formData.budgetOwner}
+                    onChange={handleChange}
+                    placeholder="เช่น งบประจำปี, เงินสะสม"
+                  />
                 </div>
               </div>
 
