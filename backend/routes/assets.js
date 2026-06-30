@@ -101,4 +101,69 @@ router.delete('/:id', async (req, res) => {
   res.json({ success: true, message: 'ลบข้อมูลครุภัณฑ์เรียบร้อยแล้ว' });
 });
 
+router.post('/import', async (req, res) => {
+  const { assets: importedAssets, mode } = req.body;
+  if (!Array.isArray(importedAssets)) {
+    return res.status(400).json({ success: false, message: 'Invalid assets list format' });
+  }
+
+  const dbData = await readDb();
+
+  // Perform calculations for imported assets
+  const calculatedAssets = importedAssets.map(asset => {
+    const dep = calculateDepreciation(
+      asset.asset_code,
+      asset.unit_price,
+      asset.category,
+      dbData.categoryDepreciationYears
+    );
+    return {
+      ...asset,
+      depreciation_rate_percent: dep.depreciationRatePercent,
+      accumulated_depreciation: dep.accumulatedDepreciation,
+      book_value: dep.bookValue
+    };
+  });
+
+  let addedCount = 0;
+  let updatedCount = 0;
+
+  if (mode === 'replace') {
+    dbData.assets = calculatedAssets;
+    addedCount = calculatedAssets.length;
+    // Clear repair requests since old assets are replaced
+    if (dbData.repairRequests) {
+      dbData.repairRequests = [];
+    }
+  } else {
+    // Merge mode
+    const currentAssetsMap = new Map(dbData.assets.map(a => [a.asset_code, a]));
+    calculatedAssets.forEach(newAsset => {
+      if (currentAssetsMap.has(newAsset.asset_code)) {
+        const existing = currentAssetsMap.get(newAsset.asset_code);
+        newAsset.id = existing.id;
+        if ((!newAsset.maintenances || newAsset.maintenances.length === 0) && existing.maintenances && existing.maintenances.length > 0) {
+          newAsset.maintenances = existing.maintenances;
+        }
+        currentAssetsMap.set(newAsset.asset_code, newAsset);
+        updatedCount++;
+      } else {
+        currentAssetsMap.set(newAsset.asset_code, newAsset);
+        addedCount++;
+      }
+    });
+    dbData.assets = Array.from(currentAssetsMap.values());
+  }
+
+  addAuditLogServer(dbData, 'ตั้งค่าระบบ', `นำเข้าข้อมูลครุภัณฑ์สำเร็จ (นำเข้าใหม่: ${addedCount} รายการ, อัปเดตข้อมูลเดิม: ${updatedCount} รายการ)`, req.user?.name || 'ระบบ');
+  await writeDb(dbData);
+
+  res.json({
+    success: true,
+    added: addedCount,
+    updated: updatedCount,
+    assets: dbData.assets
+  });
+});
+
 export default router;

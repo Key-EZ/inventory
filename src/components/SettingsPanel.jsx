@@ -191,7 +191,7 @@ export default function SettingsPanel({
     reader.readAsText(file, 'UTF-8');
   };
 
-  const handleConfirmImport = () => {
+  const handleConfirmImport = async () => {
     const validItems = previewData.filter(item => item._errors.length === 0);
     if (validItems.length === 0) {
       alert('ไม่มีข้อมูลที่ถูกต้องในการนำเข้า');
@@ -210,11 +210,15 @@ export default function SettingsPanel({
       delete copy._errors;
       return copy;
     });
-    const result = onImportAssets(cleanItems, importMode);
     
-    setImportResult(result);
-    setPreviewData([]);
-    setParseErrors([]);
+    try {
+      const result = await onImportAssets(cleanItems, importMode);
+      setImportResult(result);
+      setPreviewData([]);
+      setParseErrors([]);
+    } catch (err) {
+      alert('เกิดข้อผิดพลาดในการนำเข้าข้อมูล: ' + err.message);
+    }
   };
 
   const handleCancelImport = () => {

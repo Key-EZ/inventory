@@ -1374,15 +1374,13 @@ export default function useInventory() {
     addAuditLog('ตั้งค่าระบบ', `ลบรายชื่อผู้ขาย: ${seller}`);
   };
 
-  const importAssetsData = (parsedAssets, mode = 'merge') => {
+  const importAssetsData = async (parsedAssets, mode = 'merge') => {
     if (!Array.isArray(parsedAssets)) {
       return { success: false, errors: ['ข้อมูลที่นำเข้าไม่ใช่รายการอาร์เรย์ (Invalid format)'] };
     }
 
     const errors = [];
     const validAssets = [];
-    let addedCount = 0;
-    let updatedCount = 0;
 
     parsedAssets.forEach((rawAsset, idx) => {
       const rowNum = idx + 1;
@@ -1500,46 +1498,118 @@ export default function useInventory() {
     });
 
     if (listsUpdated) {
-      if (newDepts.size > departments.length) saveDepartments(Array.from(newDepts));
-      if (newLocs.size > locations.length) saveLocations(Array.from(newLocs));
-      if (newBrands.size > brands.length) saveBrands(Array.from(newBrands));
-      if (newSellers.size > sellers.length) saveSellers(Array.from(newSellers));
-      if (newLandCats.size > landBuildingCategories.length) saveLandBuildingCategories(Array.from(newLandCats));
-      if (newEquipCats.size > equipmentCategories.length) saveEquipmentCategories(Array.from(newEquipCats));
+      const updatedFields = {};
+      if (newDepts.size > departments.length) {
+        const list = Array.from(newDepts);
+        setDepartments(list);
+        localStorage.setItem('inventory_departments', JSON.stringify(list));
+        updatedFields.departments = list;
+      }
+      if (newLocs.size > locations.length) {
+        const list = Array.from(newLocs);
+        setLocations(list);
+        localStorage.setItem('inventory_locations', JSON.stringify(list));
+        updatedFields.locations = list;
+      }
+      if (newBrands.size > brands.length) {
+        const list = Array.from(newBrands);
+        setBrands(list);
+        localStorage.setItem('inventory_brands', JSON.stringify(list));
+        updatedFields.brands = list;
+      }
+      if (newSellers.size > sellers.length) {
+        const list = Array.from(newSellers);
+        setSellers(list);
+        localStorage.setItem('inventory_sellers', JSON.stringify(list));
+        updatedFields.sellers = list;
+      }
+      if (newLandCats.size > landBuildingCategories.length) {
+        const list = Array.from(newLandCats);
+        setLandBuildingCategories(list);
+        localStorage.setItem('inventory_land_building_categories', JSON.stringify(list));
+        updatedFields.landBuildingCategories = list;
+      }
+      if (newEquipCats.size > equipmentCategories.length) {
+        const list = Array.from(newEquipCats);
+        setEquipmentCategories(list);
+        localStorage.setItem('inventory_equipment_categories', JSON.stringify(list));
+        updatedFields.equipmentCategories = list;
+      }
+      if (Object.keys(updatedFields).length > 0) {
+        await saveSettingsBackend(updatedFields);
+      }
     }
 
-    let updatedList;
-    if (mode === 'replace') {
-      updatedList = validAssets;
-      addedCount = validAssets.length;
-    } else {
-      const currentAssetsMap = new Map(assets.map(a => [a.asset_code, a]));
-      validAssets.forEach(newAsset => {
-        if (currentAssetsMap.has(newAsset.asset_code)) {
-          const existing = currentAssetsMap.get(newAsset.asset_code);
-          newAsset.id = existing.id;
-          if (newAsset.maintenances.length === 0 && existing.maintenances && existing.maintenances.length > 0) {
-            newAsset.maintenances = existing.maintenances;
-          }
-          currentAssetsMap.set(newAsset.asset_code, newAsset);
-          updatedCount++;
+    if (isBackendOnline) {
+      try {
+        const res = await fetch('http://localhost:5000/api/assets/import', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ assets: validAssets, mode })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setAssets(data.assets);
+          localStorage.setItem('inventory_assets', JSON.stringify(data.assets));
+          
+          // Refresh audit logs
+          const logsRes = await fetch('http://localhost:5000/api/audit-logs', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (logsRes.ok) setAuditLogs(await logsRes.json());
+          
+          return {
+            success: true,
+            added: data.added,
+            updated: data.updated,
+            errors
+          };
         } else {
-          currentAssetsMap.set(newAsset.asset_code, newAsset);
-          addedCount++;
+          const errorMsg = await res.text();
+          return { success: false, added: 0, updated: 0, errors: [`ระบบเซิร์ฟเวอร์นำเข้าล้มเหลว: ${errorMsg}`] };
         }
-      });
-      updatedList = Array.from(currentAssetsMap.values());
+      } catch (err) {
+        return { success: false, added: 0, updated: 0, errors: [`ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์: ${err.message}`] };
+      }
+    } else {
+      let updatedList;
+      let addedCount = 0;
+      let updatedCount = 0;
+      if (mode === 'replace') {
+        updatedList = validAssets;
+        addedCount = validAssets.length;
+      } else {
+        const currentAssetsMap = new Map(assets.map(a => [a.asset_code, a]));
+        validAssets.forEach(newAsset => {
+          if (currentAssetsMap.has(newAsset.asset_code)) {
+            const existing = currentAssetsMap.get(newAsset.asset_code);
+            newAsset.id = existing.id;
+            if (newAsset.maintenances.length === 0 && existing.maintenances && existing.maintenances.length > 0) {
+              newAsset.maintenances = existing.maintenances;
+            }
+            currentAssetsMap.set(newAsset.asset_code, newAsset);
+            updatedCount++;
+          } else {
+            currentAssetsMap.set(newAsset.asset_code, newAsset);
+            addedCount++;
+          }
+        });
+        updatedList = Array.from(currentAssetsMap.values());
+      }
+
+      saveAssetsToStateAndStorage(updatedList);
+      addAuditLog('ตั้งค่าระบบ', `นำเข้าข้อมูลครุภัณฑ์สำเร็จ (นำเข้าใหม่: ${addedCount} รายการ, อัปเดตข้อมูลเดิม: ${updatedCount} รายการ)`);
+
+      return {
+        success: true,
+        added: addedCount,
+        updated: updatedCount,
+        errors
+      };
     }
-
-    saveAssetsToStateAndStorage(updatedList);
-    addAuditLog('ตั้งค่าระบบ', `นำเข้าข้อมูลครุภัณฑ์สำเร็จ (นำเข้าใหม่: ${addedCount} รายการ, อัปเดตข้อมูลเดิม: ${updatedCount} รายการ)`);
-
-    return {
-      success: true,
-      added: addedCount,
-      updated: updatedCount,
-      errors
-    };
   };
 
   return {
