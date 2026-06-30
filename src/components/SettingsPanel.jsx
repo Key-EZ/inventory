@@ -46,9 +46,7 @@ export default function SettingsPanel({
   onAddSeller,
   onEditSeller,
   onDeleteSeller,
-  onImportAssets,
-  categoryDepreciationYears = {},
-  onUpdateCategoryDepreciation
+  onImportAssets
 }) {
   const [activeTab, setActiveTab] = useState('custodians'); // 'custodians', 'org', 'options'
   const [landingBadgeInput, setLandingBadgeInput] = useState(landingBadgeText || 'ระบบดิจิทัลบริหารทรัพย์สิน');

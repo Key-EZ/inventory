@@ -10,8 +10,7 @@ export default function AssetForm({
   departments = [],
   onSubmit,
   onClose,
-  sellers = [],
-  categoryDepreciationYears = {}
+  sellers = []
 }) {
   const {
     isEdit,
@@ -34,8 +33,7 @@ export default function AssetForm({
     sellers,
     categoryDepreciationYears,
     onSubmit,
-    onClose,
-    categoryDepreciationYears
+    onClose
   });
 
   return (

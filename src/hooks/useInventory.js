@@ -13,7 +13,6 @@ import {
   defaultAgencies,
   defaultSellers
 } from '../utils/mockData';
-import { calculateDepreciation } from '../utils/depreciation';
 
 const SEED_DATE_1 = '2026-06-17T08:30:00.000Z';
 const SEED_DATE_2 = '2026-06-16T14:15:00.000Z';
@@ -262,17 +261,6 @@ export default function useInventory() {
     return defaultEquipmentCategories;
   });
 
-  const [categoryDepreciationYears, setCategoryDepreciationYears] = useState(() => {
-    const saved = localStorage.getItem('inventory_category_depreciation_years');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        console.warn('Failed to parse category depreciation years', e);
-      }
-    }
-    return {};
-  });
 
   const [agencies, setAgencies] = useState(() => {
     const saved = localStorage.getItem('inventory_agencies');
