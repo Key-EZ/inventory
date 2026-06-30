@@ -6,7 +6,7 @@
  * @param {string} [asOfDateStr] - Target date for calculation (default is today)
  * @returns {Object} { accumulatedDepreciation, bookValue, depreciationRatePercent }
  */
-export function calculateDepreciation(assetCode, unitPrice, asOfDateStr) {
+export function calculateDepreciation(assetCode, unitPrice, asOfDateStr, categoryName, categoryDepreciationYears) {
   const price = parseFloat(unitPrice) || 0;
   if (price <= 0) {
     return { accumulatedDepreciation: 0, bookValue: 0, depreciationRatePercent: 0 };
@@ -29,18 +29,28 @@ export function calculateDepreciation(assetCode, unitPrice, asOfDateStr) {
     }
   }
 
-  // Determine depreciation rate by local gov standard prefix codes
+  // Determine depreciation rate
   let rate = 10; // Default 10%
-  if (categoryCode === '101') {
-    rate = 0;   // Land (ที่ดิน) has 0% depreciation
-  } else if (categoryCode === '102' || categoryCode === '103') {
-    rate = 5;   // Buildings / Structures 5%
-  } else if (categoryCode === '412') {
-    rate = 20;  // Computer hardware 20%
-  } else if (categoryCode === '312') {
-    rate = 20;  // Vehicles 20%
-  } else if (categoryCode === '313') {
-    rate = 20;  // Electrical/Radio 20%
+  if (categoryName && categoryDepreciationYears && categoryDepreciationYears[categoryName] !== undefined) {
+    const years = parseInt(categoryDepreciationYears[categoryName]);
+    if (years === 0) {
+      rate = 0; // 0 years means no depreciation (like land)
+    } else if (years > 0) {
+      rate = 100 / years; // Straight-line rate
+    }
+  } else {
+    // Determine depreciation rate by local gov standard prefix codes
+    if (categoryCode === '101') {
+      rate = 0;   // Land (ที่ดิน) has 0% depreciation
+    } else if (categoryCode === '102' || categoryCode === '103') {
+      rate = 5;   // Buildings / Structures 5%
+    } else if (categoryCode === '412') {
+      rate = 20;  // Computer hardware 20%
+    } else if (categoryCode === '312') {
+      rate = 20;  // Vehicles 20%
+    } else if (categoryCode === '313') {
+      rate = 20;  // Electrical/Radio 20%
+    }
   }
 
   if (rate === 0) {

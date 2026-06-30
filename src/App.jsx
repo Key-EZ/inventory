@@ -101,7 +101,9 @@ export default function App() {
     handleAddSeller,
     handleEditSeller,
     handleDeleteSeller,
-    importAssetsData
+    importAssetsData,
+    categoryDepreciationYears,
+    handleUpdateCategoryDepreciationYears
   } = useInventory();
 
   // --- Sub-components / Props ---
@@ -397,6 +399,8 @@ export default function App() {
             onEditSeller={handleEditSeller}
             onDeleteSeller={handleDeleteSeller}
             onImportAssets={importAssetsData}
+            categoryDepreciationYears={categoryDepreciationYears}
+            onUpdateCategoryDepreciation={handleUpdateCategoryDepreciationYears}
           />
         )}
 
@@ -432,6 +436,7 @@ export default function App() {
           onSubmit={handleSubmitForm}
           onClose={closeForm}
           sellers={sellers}
+          categoryDepreciationYears={categoryDepreciationYears}
         />
       )}
 

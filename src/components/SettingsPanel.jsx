@@ -45,12 +45,16 @@ export default function SettingsPanel({
   onAddSeller,
   onEditSeller,
   onDeleteSeller,
-  onImportAssets
+  onImportAssets,
+  categoryDepreciationYears = {},
+  onUpdateCategoryDepreciation
 }) {
   const [activeTab, setActiveTab] = useState('custodians'); // 'custodians', 'org', 'options'
   const [landingBadgeInput, setLandingBadgeInput] = useState(landingBadgeText || 'ระบบดิจิทัลบริหารทรัพย์สิน');
   const [newLandCatInput, setNewLandCatInput] = useState('');
+  const [newLandCatYearsInput, setNewLandCatYearsInput] = useState('');
   const [newEquipCatInput, setNewEquipCatInput] = useState('');
+  const [newEquipCatYearsInput, setNewEquipCatYearsInput] = useState('');
   const [newAgencyInput, setNewAgencyInput] = useState('');
 
   // Adjust input state when badge text prop changes during render
@@ -1047,9 +1051,14 @@ export default function SettingsPanel({
                   return;
                 }
                 onAddLandCategory(val);
+                if (newLandCatYearsInput !== '') {
+                  onUpdateCategoryDepreciation(val, newLandCatYearsInput);
+                }
                 setNewLandCatInput('');
+                setNewLandCatYearsInput('');
               }}
               className="settings-inline-add-form"
+              style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}
             >
               <input
                 type="text"
@@ -1057,6 +1066,16 @@ export default function SettingsPanel({
                 onChange={(e) => setNewLandCatInput(e.target.value)}
                 placeholder="เช่น อาคารโรงยิม, ลานจอดรถ"
                 className="filter-input-element"
+                style={{ flex: 1, minWidth: '180px' }}
+              />
+              <input
+                type="number"
+                min="0"
+                value={newLandCatYearsInput}
+                onChange={(e) => setNewLandCatYearsInput(e.target.value)}
+                placeholder="ปีค่าเสื่อม (เลือกระบุ)"
+                className="filter-input-element"
+                style={{ width: '130px' }}
               />
               <button type="submit" className="button-primary" style={{ padding: '8px 16px', whiteSpace: 'nowrap' }}>
                 เพิ่ม
@@ -1065,46 +1084,70 @@ export default function SettingsPanel({
 
             <div className="settings-inline-list">
               {landBuildingCategories.length > 0 ? (
-                landBuildingCategories.map(cat => (
-                  <div key={cat} className="settings-list-row">
-                    <span className="settings-item-name">{cat}</span>
-                    <div className="settings-item-actions">
-                      <button
-                        className="btn-mini-action"
-                        onClick={() => {
-                          const newVal = prompt('แก้ไขชื่อหมวดหมู่ พ.ด.1:', cat);
-                          if (newVal === null) return;
-                          const trimmed = newVal.trim();
-                          if (!trimmed) return;
-                          if (landBuildingCategories.includes(trimmed) && trimmed !== cat) {
-                            alert('มีชื่อหมวดหมู่นี้อยู่แล้วในระบบ');
-                            return;
-                          }
-                          onEditLandCategory(cat, trimmed);
-                        }}
-                        type="button"
-                      >
-                        ✏️
-                      </button>
-                      <button
-                        className="btn-mini-action btn-mini-delete"
-                        onClick={() => {
-                          const inUse = assets.some(a => a.category === cat && a.asset_type === 'LAND_BUILDING');
-                          if (inUse) {
-                            alert(`ไม่สามารถลบหมวดหมู่ "${cat}" ได้ เนื่องจากมีทรัพย์สินใช้งานอยู่`);
-                            return;
-                          }
-                          if (window.confirm(`คุณแน่ใจว่าต้องการลบหมวดหมู่ "${cat}" ใช่หรือไม่?`)) {
-                            onDeleteLandCategory(cat);
-                          }
-                        }}
-                        type="button"
-                      >
-                        🗑️
-                      </button>
+                landBuildingCategories.map(cat => {
+                  const years = categoryDepreciationYears[cat];
+                  const displayYearsText = years !== undefined 
+                    ? (years === 0 ? 'ไม่มีค่าเสื่อมราคา (ที่ดิน)' : `อายุการใช้งาน ${years} ปี (ค่าเสื่อม ${(100 / years).toFixed(1)}% ต่อปี)`)
+                    : 'อายุการใช้งาน: ค่าเริ่มต้นตามรหัสพัสดุ';
+                  return (
+                    <div key={cat} className="settings-list-row" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '6px', padding: '12px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+                        <span className="settings-item-name" style={{ fontWeight: '600' }}>{cat}</span>
+                        <div className="settings-item-actions">
+                          <button
+                            className="btn-mini-action"
+                            onClick={() => {
+                              const newVal = prompt('แก้ไขชื่อหมวดหมู่ พ.ด.1:', cat);
+                              if (newVal === null) return;
+                              const trimmed = newVal.trim();
+                              if (!trimmed) return;
+                              if (landBuildingCategories.includes(trimmed) && trimmed !== cat) {
+                                alert('มีชื่อหมวดหมู่นี้อยู่แล้วในระบบ');
+                                return;
+                              }
+                              onEditLandCategory(cat, trimmed);
+                            }}
+                            type="button"
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            className="btn-mini-action btn-mini-delete"
+                            onClick={() => {
+                              const inUse = assets.some(a => a.category === cat && a.asset_type === 'LAND_BUILDING');
+                              if (inUse) {
+                                alert(`ไม่สามารถลบหมวดหมู่ "${cat}" ได้ เนื่องจากมีทรัพย์สินใช้งานอยู่`);
+                                return;
+                              }
+                              if (window.confirm(`คุณแน่ใจว่าต้องการลบหมวดหมู่ "${cat}" ใช่หรือไม่?`)) {
+                                onDeleteLandCategory(cat);
+                              }
+                            }}
+                            type="button"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', width: '100%', flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{displayYearsText}</span>
+                        <button
+                          type="button"
+                          className="btn-mini-action"
+                          style={{ fontSize: '0.7rem', padding: '2px 6px', height: 'auto', background: 'var(--border-color)', color: 'var(--text-color)' }}
+                          onClick={() => {
+                            const currentYears = years !== undefined ? years : '';
+                            const newYearsInput = prompt(`ระบุจำนวนปีค่าเสื่อมสภาพสำหรับ "${cat}" (ใส่ 0 สำหรับที่ดิน/ไม่มีค่าเสื่อม หรือเว้นว่างเพื่อใช้ค่าเริ่มต้น):`, currentYears);
+                            if (newYearsInput === null) return;
+                            onUpdateCategoryDepreciation(cat, newYearsInput);
+                          }}
+                        >
+                          ⚙️ กำหนดปีค่าเสื่อม
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <div className="table-empty-row">ไม่มีข้อมูลหมวดหมู่</div>
               )}
@@ -1128,9 +1171,14 @@ export default function SettingsPanel({
                   return;
                 }
                 onAddEquipmentCategory(val);
+                if (newEquipCatYearsInput !== '') {
+                  onUpdateCategoryDepreciation(val, newEquipCatYearsInput);
+                }
                 setNewEquipCatInput('');
+                setNewEquipCatYearsInput('');
               }}
               className="settings-inline-add-form"
+              style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}
             >
               <input
                 type="text"
@@ -1138,6 +1186,16 @@ export default function SettingsPanel({
                 onChange={(e) => setNewEquipCatInput(e.target.value)}
                 placeholder="เช่น ครุภัณฑ์งานสนาม, สินทรัพย์ดิจิทัล"
                 className="filter-input-element"
+                style={{ flex: 1, minWidth: '180px' }}
+              />
+              <input
+                type="number"
+                min="0"
+                value={newEquipCatYearsInput}
+                onChange={(e) => setNewEquipCatYearsInput(e.target.value)}
+                placeholder="ปีค่าเสื่อม (เลือกระบุ)"
+                className="filter-input-element"
+                style={{ width: '130px' }}
               />
               <button type="submit" className="button-primary" style={{ padding: '8px 16px', whiteSpace: 'nowrap' }}>
                 เพิ่ม
@@ -1146,46 +1204,70 @@ export default function SettingsPanel({
 
             <div className="settings-inline-list">
               {equipmentCategories.length > 0 ? (
-                equipmentCategories.map(cat => (
-                  <div key={cat} className="settings-list-row">
-                    <span className="settings-item-name">{cat}</span>
-                    <div className="settings-item-actions">
-                      <button
-                        className="btn-mini-action"
-                        onClick={() => {
-                          const newVal = prompt('แก้ไขชื่อหมวดหมู่ พ.ด.2:', cat);
-                          if (newVal === null) return;
-                          const trimmed = newVal.trim();
-                          if (!trimmed) return;
-                          if (equipmentCategories.includes(trimmed) && trimmed !== cat) {
-                            alert('มีชื่อหมวดหมู่นี้อยู่แล้วในระบบ');
-                            return;
-                          }
-                          onEditEquipmentCategory(cat, trimmed);
-                        }}
-                        type="button"
-                      >
-                        ✏️
-                      </button>
-                      <button
-                        className="btn-mini-action btn-mini-delete"
-                        onClick={() => {
-                          const inUse = assets.some(a => a.category === cat && a.asset_type === 'EQUIPMENT');
-                          if (inUse) {
-                            alert(`ไม่สามารถลบหมวดหมู่ "${cat}" ได้ เนื่องจากมีครุภัณฑ์ใช้งานอยู่`);
-                            return;
-                          }
-                          if (window.confirm(`คุณแน่ใจว่าต้องการลบหมวดหมู่ "${cat}" ใช่หรือไม่?`)) {
-                            onDeleteEquipmentCategory(cat);
-                          }
-                        }}
-                        type="button"
-                      >
-                        🗑️
-                      </button>
+                equipmentCategories.map(cat => {
+                  const years = categoryDepreciationYears[cat];
+                  const displayYearsText = years !== undefined 
+                    ? (years === 0 ? 'ไม่มีค่าเสื่อมราคา (ที่ดิน)' : `อายุการใช้งาน ${years} ปี (ค่าเสื่อม ${(100 / years).toFixed(1)}% ต่อปี)`)
+                    : 'อายุการใช้งาน: ค่าเริ่มต้นตามรหัสพัสดุ';
+                  return (
+                    <div key={cat} className="settings-list-row" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '6px', padding: '12px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+                        <span className="settings-item-name" style={{ fontWeight: '600' }}>{cat}</span>
+                        <div className="settings-item-actions">
+                          <button
+                            className="btn-mini-action"
+                            onClick={() => {
+                              const newVal = prompt('แก้ไขชื่อหมวดหมู่ พ.ด.2:', cat);
+                              if (newVal === null) return;
+                              const trimmed = newVal.trim();
+                              if (!trimmed) return;
+                              if (equipmentCategories.includes(trimmed) && trimmed !== cat) {
+                                alert('มีชื่อหมวดหมู่นี้อยู่แล้วในระบบ');
+                                return;
+                              }
+                              onEditEquipmentCategory(cat, trimmed);
+                            }}
+                            type="button"
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            className="btn-mini-action btn-mini-delete"
+                            onClick={() => {
+                              const inUse = assets.some(a => a.category === cat && a.asset_type === 'EQUIPMENT');
+                              if (inUse) {
+                                alert(`ไม่สามารถลบหมวดหมู่ "${cat}" ได้ เนื่องจากมีครุภัณฑ์ใช้งานอยู่`);
+                                return;
+                              }
+                              if (window.confirm(`คุณแน่ใจว่าต้องการลบหมวดหมู่ "${cat}" ใช่หรือไม่?`)) {
+                                onDeleteEquipmentCategory(cat);
+                              }
+                            }}
+                            type="button"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', width: '100%', flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{displayYearsText}</span>
+                        <button
+                          type="button"
+                          className="btn-mini-action"
+                          style={{ fontSize: '0.7rem', padding: '2px 6px', height: 'auto', background: 'var(--border-color)', color: 'var(--text-color)' }}
+                          onClick={() => {
+                            const currentYears = years !== undefined ? years : '';
+                            const newYearsInput = prompt(`ระบุจำนวนปีค่าเสื่อมสภาพสำหรับ "${cat}" (ใส่ 0 สำหรับที่ดิน/ไม่มีค่าเสื่อม หรือเว้นว่างเพื่อใช้ค่าเริ่มต้น):`, currentYears);
+                            if (newYearsInput === null) return;
+                            onUpdateCategoryDepreciation(cat, newYearsInput);
+                          }}
+                        >
+                          ⚙️ กำหนดปีค่าเสื่อม
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))
+                  );
+                })
               ) : (
                 <div className="table-empty-row">ไม่มีข้อมูลหมวดหมู่</div>
               )}

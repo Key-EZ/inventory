@@ -86,7 +86,7 @@ export default function InventoryPrint({ asset, onClose }) {
         if (rate <= 0) {
             return Array.from({ length: 5 }, (_, i) => ({
                 year: `ปีที่ ${i + 1}`,
-                rate: "0",
+                rate: "0.00",
                 balance: priceVal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
             }));
         }
@@ -103,7 +103,7 @@ export default function InventoryPrint({ asset, onClose }) {
             const balance = Math.max(1, priceVal - accumDep);
             return {
                 year: `ปีที่ ${yearNum}`,
-                rate: `${rate}`,
+                rate: rate.toFixed(2),
                 balance: balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
             };
         });

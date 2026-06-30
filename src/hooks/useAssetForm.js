@@ -19,7 +19,8 @@ export default function useAssetForm({
   equipmentCategories = [],
   landBuildingCategories = [],
   sellers = [],
-  onSubmit
+  onSubmit,
+  categoryDepreciationYears = {}
 }) {
   const isEdit = !!asset;
   const [activeTab, setActiveTab] = useState('general');
@@ -116,7 +117,7 @@ export default function useAssetForm({
   };
 
   // Dynamic calculations
-  const calc = calculateDepreciation(formData.assetCode, formData.unitPrice);
+  const calc = calculateDepreciation(formData.assetCode, formData.unitPrice, undefined, formData.category, categoryDepreciationYears);
   const depreciationRate = calc.depreciationRatePercent;
   const accumulatedDepreciation = calc.accumulatedDepreciation;
   const bookValue = calc.bookValue;

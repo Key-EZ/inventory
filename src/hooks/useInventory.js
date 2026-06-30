@@ -12,6 +12,7 @@ import {
   defaultAgencies,
   defaultSellers
 } from '../utils/mockData';
+import { calculateDepreciation } from '../utils/depreciation';
 
 const SEED_DATE_1 = '2026-06-17T08:30:00.000Z';
 const SEED_DATE_2 = '2026-06-16T14:15:00.000Z';
@@ -260,6 +261,18 @@ export default function useInventory() {
     return defaultEquipmentCategories;
   });
 
+  const [categoryDepreciationYears, setCategoryDepreciationYears] = useState(() => {
+    const saved = localStorage.getItem('inventory_category_depreciation_years');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.warn('Failed to parse category depreciation years', e);
+      }
+    }
+    return {};
+  });
+
   const [agencies, setAgencies] = useState(() => {
     const saved = localStorage.getItem('inventory_agencies');
     if (saved) {
@@ -348,6 +361,46 @@ export default function useInventory() {
   const saveAssetsToStateAndStorage = (newAssetsList) => {
     setAssets(newAssetsList);
     localStorage.setItem('inventory_assets', JSON.stringify(newAssetsList));
+  };
+
+  const recalculateAssets = (assetList, mapping = categoryDepreciationYears) => {
+    return assetList.map(asset => {
+      const calc = calculateDepreciation(
+        asset.asset_code,
+        asset.unit_price,
+        undefined,
+        asset.category,
+        mapping
+      );
+      return {
+        ...asset,
+        depreciation_rate_percent: calc.depreciationRatePercent,
+        accumulated_depreciation: calc.accumulatedDepreciation
+      };
+    });
+  };
+
+  const saveCategoryDepreciationYears = (mapping, currentAssets = assets) => {
+    setCategoryDepreciationYears(mapping);
+    localStorage.setItem('inventory_category_depreciation_years', JSON.stringify(mapping));
+    const updatedAssets = recalculateAssets(currentAssets, mapping);
+    saveAssetsToStateAndStorage(updatedAssets);
+  };
+
+  const handleUpdateCategoryDepreciationYears = (categoryName, years) => {
+    const updated = { ...categoryDepreciationYears };
+    if (years === null || years === undefined || years === '') {
+      delete updated[categoryName];
+    } else {
+      const parsed = parseInt(years);
+      if (isNaN(parsed) || parsed < 0) {
+        delete updated[categoryName];
+      } else {
+        updated[categoryName] = parsed;
+      }
+    }
+    saveCategoryDepreciationYears(updated, assets);
+    addAuditLog('ตั้งค่าระบบ', `กำหนดค่าเสื่อมหมวดหมู่ "${categoryName}" เป็น ${years !== '' ? years : 'ค่าเริ่มต้น'} ปี`);
   };
 
   // --- Audit Log Helpers ---
@@ -772,16 +825,34 @@ export default function useInventory() {
 
   const handleEditLandCategory = (oldCat, newCat) => {
     saveLandBuildingCategories(landBuildingCategories.map(c => c === oldCat ? newCat : c));
-    saveAssetsToStateAndStorage(assets.map(a => 
+    
+    const updatedMapping = { ...categoryDepreciationYears };
+    if (updatedMapping[oldCat] !== undefined) {
+      updatedMapping[newCat] = updatedMapping[oldCat];
+      delete updatedMapping[oldCat];
+      setCategoryDepreciationYears(updatedMapping);
+      localStorage.setItem('inventory_category_depreciation_years', JSON.stringify(updatedMapping));
+    }
+
+    const renamedAssets = assets.map(a => 
       (a.asset_type === 'LAND_BUILDING' && a.category === oldCat) 
         ? { ...a, category: newCat } 
         : a
-    ));
+    );
+    saveAssetsToStateAndStorage(recalculateAssets(renamedAssets, updatedMapping));
     addAuditLog('ตั้งค่าระบบ', `แก้ไขหมวดหมู่ที่ดิน พ.ด.1 จาก "${oldCat}" เป็น "${newCat}"`);
   };
 
   const handleDeleteLandCategory = (cat) => {
     saveLandBuildingCategories(landBuildingCategories.filter(c => c !== cat));
+    
+    const updatedMapping = { ...categoryDepreciationYears };
+    if (updatedMapping[cat] !== undefined) {
+      delete updatedMapping[cat];
+      setCategoryDepreciationYears(updatedMapping);
+      localStorage.setItem('inventory_category_depreciation_years', JSON.stringify(updatedMapping));
+    }
+
     addAuditLog('ตั้งค่าระบบ', `ลบหมวดหมู่ที่ดิน พ.ด.1: ${cat}`);
   };
 
@@ -793,16 +864,34 @@ export default function useInventory() {
 
   const handleEditEquipmentCategory = (oldCat, newCat) => {
     saveEquipmentCategories(equipmentCategories.map(c => c === oldCat ? newCat : c));
-    saveAssetsToStateAndStorage(assets.map(a => 
+    
+    const updatedMapping = { ...categoryDepreciationYears };
+    if (updatedMapping[oldCat] !== undefined) {
+      updatedMapping[newCat] = updatedMapping[oldCat];
+      delete updatedMapping[oldCat];
+      setCategoryDepreciationYears(updatedMapping);
+      localStorage.setItem('inventory_category_depreciation_years', JSON.stringify(updatedMapping));
+    }
+
+    const renamedAssets = assets.map(a => 
       (a.asset_type === 'EQUIPMENT' && a.category === oldCat) 
         ? { ...a, category: newCat } 
         : a
-    ));
+    );
+    saveAssetsToStateAndStorage(recalculateAssets(renamedAssets, updatedMapping));
     addAuditLog('ตั้งค่าระบบ', `แก้ไขหมวดหมู่ครุภัณฑ์ พ.ด.2 จาก "${oldCat}" เป็น "${newCat}"`);
   };
 
   const handleDeleteEquipmentCategory = (cat) => {
     saveEquipmentCategories(equipmentCategories.filter(c => c !== cat));
+    
+    const updatedMapping = { ...categoryDepreciationYears };
+    if (updatedMapping[cat] !== undefined) {
+      delete updatedMapping[cat];
+      setCategoryDepreciationYears(updatedMapping);
+      localStorage.setItem('inventory_category_depreciation_years', JSON.stringify(updatedMapping));
+    }
+
     addAuditLog('ตั้งค่าระบบ', `ลบหมวดหมู่ครุภัณฑ์ พ.ด.2: ${cat}`);
   };
 
@@ -1087,6 +1176,8 @@ export default function useInventory() {
     handleAddSeller,
     handleEditSeller,
     handleDeleteSeller,
-    importAssetsData
+    importAssetsData,
+    categoryDepreciationYears,
+    handleUpdateCategoryDepreciationYears
   };
 }
