@@ -33,26 +33,11 @@ export default function useInventory() {
   // --- Backend Sync useEffect ---
   useEffect(() => {
     const initData = async () => {
-      if (!token) {
-        try {
-          const check = await fetch('http://localhost:5000/api/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({})
-          });
-          if (check.status === 400 || check.status === 401) {
-            setIsBackendOnline(true);
-          }
-        } catch {
-          setIsBackendOnline(false);
-        }
-        return;
-      }
-
       try {
-        const headers = {
-          'Authorization': `Bearer ${token}`
-        };
+        const headers = {};
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
         
         // Fetch Settings
         const settingsRes = await fetch('http://localhost:5000/api/settings', { headers });
@@ -84,11 +69,14 @@ export default function useInventory() {
         const fetchedRepairs = await repairsRes.json();
         setRepairRequests(fetchedRepairs);
 
-        // Fetch Audit Logs
-        const logsRes = await fetch('http://localhost:5000/api/audit-logs', { headers });
-        if (!logsRes.ok) throw new Error('Failed to fetch audit logs');
-        const fetchedLogs = await logsRes.json();
-        setAuditLogs(fetchedLogs);
+        // Fetch Audit Logs (requires authentication)
+        if (token) {
+          const logsRes = await fetch('http://localhost:5000/api/audit-logs', { headers });
+          if (logsRes.ok) {
+            const fetchedLogs = await logsRes.json();
+            setAuditLogs(fetchedLogs);
+          }
+        }
 
         setIsBackendOnline(true);
       } catch (err) {
