@@ -108,41 +108,6 @@ router.put('/', async (req, res) => {
   }
 });
 
-router.post('/reset', async (req, res) => {
-  if (req.user.role !== 'ADMIN') {
-    return res.status(403).json({ success: false, message: 'Forbidden: Admin access required' });
-  }
-  
-  const pool = getPool();
-  const connection = await pool.getConnection();
-  try {
-    await connection.beginTransaction();
-    await connection.query('SET FOREIGN_KEY_CHECKS = 0');
-    await connection.query('TRUNCATE TABLE audit_logs');
-    await connection.query('TRUNCATE TABLE repair_requests');
-    await connection.query('TRUNCATE TABLE maintenances');
-    await connection.query('TRUNCATE TABLE assets');
-    await connection.query('TRUNCATE TABLE custodians');
-    await connection.query('TRUNCATE TABLE system_settings');
-    await connection.query('SET FOREIGN_KEY_CHECKS = 1');
-    await connection.commit();
-  } catch (err) {
-    await connection.rollback();
-    console.error('Failed to truncate tables during reset:', err);
-    return res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการล้างข้อมูลเพื่อรีเซ็ต' });
-  } finally {
-    connection.release();
-  }
 
-  try {
-    const defaultData = getDefaultData();
-    await seedRelationalDb(defaultData);
-    await addAuditLogServer('ระบบ', 'รีเซ็ตระบบกลับสู่การตั้งค่ามาตรฐานและข้อมูลตัวอย่าง', req.user.name);
-    res.json({ success: true, message: 'รีเซ็ตข้อมูลระบบเป็นค่าเริ่มต้นเสร็จสิ้น' });
-  } catch (error) {
-    console.error('Failed to seed default data during reset:', error);
-    res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการบันทึกค่าเริ่มต้นระบบ' });
-  }
-});
 
 export default router;

@@ -68,7 +68,6 @@ export default function App() {
     handleSaveLandingBadge,
     handleSubmitForm,
     handleDeleteAsset,
-    handleResetDemoData,
     handleCreateRepairRequest,
     handleStartRepairJob,
     handleRejectRepairJob,
@@ -167,13 +166,6 @@ export default function App() {
     handleDeleteAsset(id);
   };
 
-  const handleGuardedResetDemoData = () => {
-    if (!isAdmin) {
-      setIsLoginModalOpen(true);
-      return;
-    }
-    handleResetDemoData();
-  };
 
   const handleGuardedStartRepairJob = (requestId) => {
     if (!isAdmin) {
@@ -285,9 +277,6 @@ export default function App() {
 
         <li className="sidebar-menu-item" onClick={handleOpenAddForm}>
           ➕ ลงทะเบียนครุภัณฑ์ใหม่
-        </li>
-        <li className="sidebar-menu-item" onClick={handleGuardedResetDemoData}>
-          🔄 รีเซ็ตข้อมูลตัวอย่าง
         </li>
       </ul>
 
@@ -458,7 +447,6 @@ export default function App() {
           <BentoDashboard
             assets={assets}
             onAddClick={handleOpenAddForm}
-            onResetDemo={handleGuardedResetDemoData}
             onViewDetails={() => changeLayout('sidebar')}
           />
         )}
@@ -691,9 +679,6 @@ export default function App() {
 
               <li className="sidebar-menu-item" onClick={() => { setIsMobileMenuOpen(false); handleOpenAddForm(); }}>
                 ➕ ลงทะเบียนครุภัณฑ์ใหม่
-              </li>
-              <li className="sidebar-menu-item" onClick={() => { setIsMobileMenuOpen(false); handleGuardedResetDemoData(); }}>
-                🔄 รีเซ็ตข้อมูลตัวอย่าง
               </li>
             </ul>
 

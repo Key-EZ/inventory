@@ -1,5 +1,5 @@
 
-export default function BentoDashboard({ assets, onAddClick, onResetDemo, onViewDetails }) {
+export default function BentoDashboard({ assets, onAddClick, onViewDetails }) {
   // 1. Calculations
   const totalCount = assets.length;
   const totalCost = assets.reduce((sum, item) => sum + (item.unit_price || 0), 0);
@@ -64,9 +64,6 @@ export default function BentoDashboard({ assets, onAddClick, onResetDemo, onView
         <div className="bento-action-buttons">
           <button className="bento-btn-action btn-add-new" onClick={onAddClick}>
             ➕ ลงทะเบียนพัสดุใหม่
-          </button>
-          <button className="bento-btn-action btn-reset" onClick={onResetDemo}>
-            🔄 โหลดข้อมูลตัวอย่าง
           </button>
         </div>
       </div>

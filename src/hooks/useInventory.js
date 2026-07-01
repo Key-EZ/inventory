@@ -219,24 +219,6 @@ export default function useInventory() {
     }
   };
 
-  const handleResetDemoData = async () => {
-    if (window.confirm('คุณต้องการรีเซ็ตข้อมูลทั้งหมดและโหลดข้อมูลครุภัณฑ์ตัวอย่างใหม่ใช่หรือไม่? (ข้อมูลเดิมของคุณจะถูกแทนที่)')) {
-      try {
-        const res = await fetch('http://localhost:5000/api/settings/reset', {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (res.ok) {
-          window.location.reload();
-        } else {
-          alert('เกิดข้อผิดพลาดในการรีเซ็ตข้อมูลตัวอย่าง');
-        }
-      } catch (err) {
-        console.error('API error:', err);
-        alert('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์');
-      }
-    }
-  };
 
   const handleCreateRepairRequest = async (assetId, problemDescription) => {
     try {
@@ -752,7 +734,6 @@ export default function useInventory() {
     handleSaveLandingBadge,
     handleSubmitForm,
     handleDeleteAsset,
-    handleResetDemoData,
     handleCreateRepairRequest,
     handleStartRepairJob,
     handleRejectRepairJob,
