@@ -36,7 +36,7 @@ export default function LoginModal({
       const data = await response.json();
 
       if (response.ok && data.success) {
-        onLoginSuccess(data.token, data.user);
+        onLoginSuccess(data.user, data.token);
         onClose();
       } else {
         setErrorMsg(data.message || 'การเข้าสู่ระบบล้มเหลว กรุณาลองใหม่อีกครั้ง');
@@ -48,22 +48,22 @@ export default function LoginModal({
         const email = emailInput.trim().toLowerCase();
         const custodian = custodians.find(c => String(c.email).toLowerCase() === email);
         if (custodian) {
-          onLoginSuccess('offline-token-custodian', {
+          onLoginSuccess({
             name: custodian.name,
             email: custodian.email,
             role: 'CUSTODIAN'
-          });
+          }, 'offline-token-custodian');
           onClose();
         } else {
           setErrorMsg('ไม่พบอีเมลนี้ในข้อมูลพนักงานผู้ดูแล (โหมดออฟไลน์)');
         }
       } else {
         if (usernameInput.trim() === 'admin' && passwordInput === 'admin1234') {
-          onLoginSuccess('offline-token-admin', {
+          onLoginSuccess({
             name: 'admin',
             email: 'admin@system.local',
             role: 'ADMIN'
-          });
+          }, 'offline-token-admin');
           onClose();
         } else {
           setErrorMsg('ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง (โหมดออฟไลน์)');

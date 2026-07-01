@@ -770,17 +770,6 @@ export default function InventoryPrint({ asset, onClose }) {
                 <div className="print-header-title print-maint-header-title">
                     บันทึกการซ่อม/ปรับปรุงแก้ไขพัสดุ
                 </div>
-                <div className="print-maint-header-subtitle">
-                    <div>
-                        <strong>ประเภทพัสดุ:</strong> <span className="dotted-line print-maint-tag-width-180">{data.category}</span>
-                    </div>
-                    <div>
-                        <strong>ชื่อพัสดุ:</strong> <span className="dotted-line print-maint-tag-width-280">{data.assetName}</span>
-                    </div>
-                    <div>
-                        <strong>รหัสพัสดุ:</strong> <span className="dotted-line print-maint-tag-width-160">{data.assetCode}</span>
-                    </div>
-                </div>
                 <table className="card-maint-table print-maint-main-table">
                     <thead>
                         <tr className="print-maint-row-header">

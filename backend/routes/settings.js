@@ -1,72 +1,148 @@
 import express from 'express';
-import { readDb, writeDb, getDefaultData } from '../db.js';
+import { executeQuery, getPool, seedRelationalDb, getDefaultData } from '../db.js';
 import { addAuditLogServer, recalculateAllAssetsDepreciation } from '../utils/helpers.js';
 
 const router = express.Router();
 
 router.get('/', async (req, res) => {
-  const dbData = await readDb();
-  res.json({
-    divisions: dbData.divisions,
-    departments: dbData.departments,
-    custodians: dbData.custodians,
-    positions: dbData.positions,
-    brands: dbData.brands,
-    locations: dbData.locations,
-    landBuildingCategories: dbData.landBuildingCategories,
-    equipmentCategories: dbData.equipmentCategories,
-    categoryDepreciationYears: dbData.categoryDepreciationYears,
-    agencies: dbData.agencies,
-    sellers: dbData.sellers,
-    landingBadgeText: dbData.landingBadgeText
-  });
+  try {
+    const rows = await executeQuery('SELECT `key`, `value` FROM system_settings');
+    const settings = {};
+    rows.forEach(r => {
+      try {
+        settings[r.key] = JSON.parse(r.value);
+      } catch {
+        settings[r.key] = r.value;
+      }
+    });
+
+    const custodians = await executeQuery('SELECT * FROM custodians');
+    res.json({
+      divisions: settings.divisions || [],
+      departments: settings.departments || [],
+      custodians: custodians,
+      positions: settings.positions || [],
+      brands: settings.brands || [],
+      locations: settings.locations || [],
+      landBuildingCategories: settings.landBuildingCategories || [],
+      equipmentCategories: settings.equipmentCategories || [],
+      categoryDepreciationYears: settings.categoryDepreciationYears || {},
+      agencies: settings.agencies || [],
+      sellers: settings.sellers || [],
+      landingBadgeText: settings.landingBadgeText || 'ระบบดิจิทัลบริหารทรัพย์สิน'
+    });
+  } catch (error) {
+    console.error('Failed to get settings:', error);
+    res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการโหลดตั้งค่าระบบ' });
+  }
 });
 
 router.put('/', async (req, res) => {
   if (req.user.role !== 'ADMIN') {
     return res.status(403).json({ success: false, message: 'Forbidden: Admin access required' });
   }
-  const dbData = await readDb();
-  const keys = [
-    'divisions', 'departments', 'custodians', 'positions', 'brands',
-    'locations', 'landBuildingCategories', 'equipmentCategories',
-    'categoryDepreciationYears', 'agencies', 'sellers', 'landingBadgeText'
-  ];
+  
+  const pool = getPool();
+  const connection = await pool.getConnection();
+  
+  try {
+    await connection.beginTransaction();
 
-  let hasDepreciationChanged = false;
-  const oldMapping = JSON.stringify(dbData.categoryDepreciationYears);
+    const keys = [
+      'divisions', 'departments', 'positions', 'brands',
+      'locations', 'landBuildingCategories', 'equipmentCategories',
+      'categoryDepreciationYears', 'agencies', 'sellers', 'landingBadgeText'
+    ];
 
-  keys.forEach(key => {
-    if (req.body[key] !== undefined) {
-      dbData[key] = req.body[key];
-      if (key === 'categoryDepreciationYears') {
-        const newMapping = JSON.stringify(req.body[key]);
-        if (oldMapping !== newMapping) {
-          hasDepreciationChanged = true;
+    let hasDepreciationChanged = false;
+    let oldMapping = '{}';
+
+    const [oldDepRows] = await connection.query('SELECT `value` FROM system_settings WHERE `key` = "categoryDepreciationYears"');
+    if (oldDepRows.length > 0) {
+      oldMapping = oldDepRows[0].value;
+    }
+
+    for (const key of keys) {
+      if (req.body[key] !== undefined) {
+        const valStr = typeof req.body[key] === 'string' ? req.body[key] : JSON.stringify(req.body[key]);
+        await connection.query(
+          'INSERT INTO system_settings (`key`, `value`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `value` = ?',
+          [key, valStr, valStr]
+        );
+
+        if (key === 'categoryDepreciationYears') {
+          const newMapping = JSON.stringify(req.body[key]);
+          if (oldMapping !== newMapping) {
+            hasDepreciationChanged = true;
+          }
         }
       }
     }
-  });
 
-  if (hasDepreciationChanged) {
-    recalculateAllAssetsDepreciation(dbData, dbData.categoryDepreciationYears);
-    addAuditLogServer(dbData, 'ตั้งค่าระบบ', 'ปรับปรุงตารางค่าเสื่อมราคาหมวดหมู่และคำนวณข้อมูลสินทรัพย์ใหม่ทั้งหมด', req.user.name);
-  } else {
-    addAuditLogServer(dbData, 'ตั้งค่าระบบ', 'ปรับปรุงการตั้งค่าระบบและบัญชีตัวเลือกมาสเตอร์ลิสต์', req.user.name);
+    if (req.body.custodians !== undefined) {
+      await connection.query('DELETE FROM custodians');
+      for (const cust of req.body.custodians) {
+        await connection.query(
+          'INSERT INTO custodians (id, name, position, division, department, email) VALUES (?, ?, ?, ?, ?, ?)',
+          [cust.id, cust.name, cust.position || '', cust.division || '', cust.department || '', cust.email || '']
+        );
+      }
+    }
+
+    await connection.commit();
+
+    if (hasDepreciationChanged) {
+      await recalculateAllAssetsDepreciation(req.body.categoryDepreciationYears);
+      await addAuditLogServer('ตั้งค่าระบบ', 'ปรับปรุงตารางค่าเสื่อมราคาหมวดหมู่และคำนวณข้อมูลสินทรัพย์ใหม่ทั้งหมด', req.user.name);
+    } else {
+      await addAuditLogServer('ตั้งค่าระบบ', 'ปรับปรุงการตั้งค่าระบบและบัญชีตัวเลือกมาสเตอร์ลิสต์', req.user.name);
+    }
+
+    res.json({ success: true, message: 'บันทึกการตั้งค่าระบบเรียบร้อยแล้ว' });
+  } catch (error) {
+    await connection.rollback();
+    console.error('Failed to save settings:', error);
+    res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการบันทึกการตั้งค่าระบบ' });
+  } finally {
+    connection.release();
   }
-
-  await writeDb(dbData);
-  res.json({ success: true, message: 'บันทึกการตั้งค่าระบบเรียบร้อยแล้ว' });
 });
 
 router.post('/reset', async (req, res) => {
   if (req.user.role !== 'ADMIN') {
     return res.status(403).json({ success: false, message: 'Forbidden: Admin access required' });
   }
-  const defaultData = getDefaultData();
-  addAuditLogServer(defaultData, 'ระบบ', 'รีเซ็ตระบบกลับสู่การตั้งค่ามาตรฐานและข้อมูลตัวอย่าง', req.user.name);
-  await writeDb(defaultData);
-  res.json({ success: true, message: 'รีเซ็ตข้อมูลระบบเป็นค่าเริ่มต้นเสร็จสิ้น' });
+  
+  const pool = getPool();
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    await connection.query('SET FOREIGN_KEY_CHECKS = 0');
+    await connection.query('TRUNCATE TABLE audit_logs');
+    await connection.query('TRUNCATE TABLE repair_requests');
+    await connection.query('TRUNCATE TABLE maintenances');
+    await connection.query('TRUNCATE TABLE assets');
+    await connection.query('TRUNCATE TABLE custodians');
+    await connection.query('TRUNCATE TABLE system_settings');
+    await connection.query('SET FOREIGN_KEY_CHECKS = 1');
+    await connection.commit();
+  } catch (err) {
+    await connection.rollback();
+    console.error('Failed to truncate tables during reset:', err);
+    return res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการล้างข้อมูลเพื่อรีเซ็ต' });
+  } finally {
+    connection.release();
+  }
+
+  try {
+    const defaultData = getDefaultData();
+    await seedRelationalDb(defaultData);
+    await addAuditLogServer('ระบบ', 'รีเซ็ตระบบกลับสู่การตั้งค่ามาตรฐานและข้อมูลตัวอย่าง', req.user.name);
+    res.json({ success: true, message: 'รีเซ็ตข้อมูลระบบเป็นค่าเริ่มต้นเสร็จสิ้น' });
+  } catch (error) {
+    console.error('Failed to seed default data during reset:', error);
+    res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการบันทึกค่าเริ่มต้นระบบ' });
+  }
 });
 
 export default router;

@@ -217,15 +217,18 @@ export default function AssetForm({
                 <div className="form-group col">
                   <label>
                     แหล่งงบประมาณ
-                    <span className="tooltip-trigger" data-tooltip="แหล่งที่มาของงบประมาณที่ใช้จัดหา เช่น งบประจำปี งบอุดหนุนเฉพาะกิจ เงินสะสม">?</span>
+                    <span className="tooltip-trigger" data-tooltip="ส่วนราชการเจ้าของงบประมาณที่ใช้จัดหา">?</span>
                   </label>
-                  <input
-                    type="text"
+                  <select
                     name="budgetOwner"
                     value={formData.budgetOwner}
                     onChange={handleChange}
-                    placeholder="เช่น งบประจำปี, เงินสะสม"
-                  />
+                  >
+                    <option value="">-- เลือกส่วนราชการ --</option>
+                    {departments.map(d => (
+                      <option key={d} value={d}>{d}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
@@ -467,7 +470,7 @@ export default function AssetForm({
           {activeTab === 'financial' && (
             <div className="tab-panel">
               <div className="info-alert">
-                <strong>💡 การประเมินราคาและค่าเสื่อมราคาประจำปี:</strong> ค่าเสื่อมสะสมจะคิดคำนวณอัตโนมัติตามหลักบัญชีท้องถิ่น โดยถอดปี พ.ศ. ได้มาจากกลุ่มที่ 2 ของรหัสพัสดุ (เช่น 001-<strong>67</strong>-0001 = ได้มาระหว่างปี พ.ศ. 2567)
+                <strong>💡 การประเมินราคาและค่าเสื่อมราคาประจำปี:</strong> ค่าเสื่อมสะสมจะคิดคำนวณอัตโนมัติตามหลักบัญชีท้องถิ่น โดยถอดปี พ.ศ. ได้มาจากกลุ่มที่ 2 ของรหัสพัสดุ (เช่น 001/<strong>67</strong>/0001 = ได้มาระหว่างปี พ.ศ. 2567)
               </div>
               <div className="form-row bg-accent-row">
                 <div className="form-group col">

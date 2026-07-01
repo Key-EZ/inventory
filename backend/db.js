@@ -520,6 +520,117 @@ export const getDefaultData = () => {
   };
 };
 
+export const seedRelationalDb = async (data) => {
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    // 1. Seed system_settings keys
+    const settingsKeys = [
+      { key: 'divisions', value: JSON.stringify(data.divisions) },
+      { key: 'departments', value: JSON.stringify(data.departments) },
+      { key: 'positions', value: JSON.stringify(data.positions) },
+      { key: 'brands', value: JSON.stringify(data.brands) },
+      { key: 'locations', value: JSON.stringify(data.locations) },
+      { key: 'landBuildingCategories', value: JSON.stringify(data.landBuildingCategories) },
+      { key: 'equipmentCategories', value: JSON.stringify(data.equipmentCategories) },
+      { key: 'categoryDepreciationYears', value: JSON.stringify(data.categoryDepreciationYears) },
+      { key: 'agencies', value: JSON.stringify(data.agencies) },
+      { key: 'sellers', value: JSON.stringify(data.sellers) },
+      { key: 'landingBadgeText', value: data.landingBadgeText || 'ระบบดิจิทัลบริหารทรัพย์สิน' },
+      { key: 'adminUser', value: JSON.stringify(data.adminUser || { username: 'admin', password: 'admin1234' }) }
+    ];
+
+    for (const item of settingsKeys) {
+      await connection.query(
+        'INSERT INTO system_settings (`key`, `value`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `value` = ?',
+        [item.key, item.value, item.value]
+      );
+    }
+
+    // 2. Seed custodians
+    if (Array.isArray(data.custodians)) {
+      for (const cust of data.custodians) {
+        await connection.query(
+          'INSERT INTO custodians (id, name, position, division, department, email) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE name=?',
+          [cust.id, cust.name, cust.position || '', cust.division || '', cust.department || '', cust.email || '', cust.name]
+        );
+      }
+    }
+
+    // 3. Seed assets and their nested maintenances
+    if (Array.isArray(data.assets)) {
+      for (const asset of data.assets) {
+        await connection.query(
+          `INSERT INTO assets (
+            id, asset_type, category, asset_code, name, location, acquisition_method,
+            delivery_document_no, delivery_document_date, seller_name, unit_price,
+            budget_owner, responsible_department, status, document_of_title, area_size,
+            building_style, manufacturer_brand, serial_number, engine_number, chassis_number,
+            vehicle_registration, color, warranty_start_date, warranty_end_date, warranty_company,
+            depreciation_rate_percent, accumulated_depreciation, book_value
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            asset.id, asset.asset_type, asset.category, asset.asset_code, asset.name, asset.location || '',
+            asset.acquisition_method || '', asset.delivery_document_no || '', asset.delivery_document_date || '',
+            asset.seller_name || '', asset.unit_price || 0, asset.budget_owner || '', asset.responsible_department || '',
+            asset.status || 'ใช้งาน', asset.document_of_title || '', asset.area_size || '', asset.building_style || '',
+            asset.manufacturer_brand || '', asset.serial_number || '', asset.engine_number || '', asset.chassis_number || '',
+            asset.vehicle_registration || '', asset.color || '', asset.warranty_start_date || '', asset.warranty_end_date || '',
+            asset.warranty_company || '', asset.depreciation_rate_percent || 0, asset.accumulated_depreciation || 0, asset.book_value || 0
+          ]
+        );
+
+        // Nested maintenances
+        if (Array.isArray(asset.maintenances)) {
+          for (const maint of asset.maintenances) {
+            await connection.query(
+              'INSERT INTO maintenances (id, asset_id, approval_date, document_number, description, cost, contractor) VALUES (?, ?, ?, ?, ?, ?, ?)',
+              [maint.id, asset.id, maint.approval_date, maint.document_number, maint.description, maint.cost || 0, maint.contractor || '']
+            );
+          }
+        }
+      }
+    }
+
+    // 4. Seed repair_requests
+    if (Array.isArray(data.repairRequests)) {
+      for (const req of data.repairRequests) {
+        await connection.query(
+          `INSERT INTO repair_requests (
+            id, asset_id, request_date, problem_description, status, rejection_reason,
+            repair_cost, contractor, approval_date, document_number, officer_notes
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            req.id, req.asset_id, req.request_date, req.problem_description, req.status || 'PENDING',
+            req.rejection_reason || '', req.repair_cost || 0, req.contractor || '', req.approval_date || '',
+            req.document_number || '', req.officer_notes || ''
+          ]
+        );
+      }
+    }
+
+    // 5. Seed audit_logs
+    if (Array.isArray(data.auditLogs)) {
+      for (const log of data.auditLogs) {
+        await connection.query(
+          'INSERT INTO audit_logs (id, timestamp, action, details, user) VALUES (?, ?, ?, ?, ?)',
+          [log.id, log.timestamp, log.action, log.details, log.user]
+        );
+      }
+    }
+
+    await connection.commit();
+    console.log('Relational seeding completed successfully.');
+  } catch (error) {
+    await connection.rollback();
+    console.error('Failed to seed relational database:', error);
+    throw error;
+  } finally {
+    connection.release();
+  }
+};
+
 export const initMysql = async () => {
   const host = process.env.DB_HOST || '192.168.1.12';
   const user = process.env.DB_USER || 'root';
@@ -546,56 +657,135 @@ export const initMysql = async () => {
     queueLimit: 0
   });
 
-  // 3. Create table if not exists
+  console.log('Creating relational tables if not exists...');
+
+  // 3. Create tables
   await pool.query(`
-    CREATE TABLE IF NOT EXISTS kv_store (
+    CREATE TABLE IF NOT EXISTS system_settings (
       \`key\` VARCHAR(100) PRIMARY KEY,
       \`value\` LONGTEXT NOT NULL
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   `);
 
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS custodians (
+      id VARCHAR(100) PRIMARY KEY,
+      name VARCHAR(255) NOT NULL,
+      position VARCHAR(255),
+      division VARCHAR(255),
+      department VARCHAR(255),
+      email VARCHAR(191) UNIQUE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS assets (
+      id VARCHAR(100) PRIMARY KEY,
+      asset_type VARCHAR(50) NOT NULL,
+      category VARCHAR(100) NOT NULL,
+      asset_code VARCHAR(100) UNIQUE NOT NULL,
+      name VARCHAR(255) NOT NULL,
+      location VARCHAR(255),
+      acquisition_method VARCHAR(50),
+      delivery_document_no VARCHAR(100),
+      delivery_document_date VARCHAR(50),
+      seller_name VARCHAR(255),
+      unit_price DECIMAL(15, 2) DEFAULT 0,
+      budget_owner VARCHAR(255),
+      responsible_department VARCHAR(255),
+      status VARCHAR(50) DEFAULT 'ใช้งาน',
+      document_of_title VARCHAR(255),
+      area_size VARCHAR(100),
+      building_style VARCHAR(255),
+      manufacturer_brand VARCHAR(255),
+      serial_number VARCHAR(255),
+      engine_number VARCHAR(255),
+      chassis_number VARCHAR(255),
+      vehicle_registration VARCHAR(255),
+      color VARCHAR(100),
+      warranty_start_date VARCHAR(50),
+      warranty_end_date VARCHAR(50),
+      warranty_company VARCHAR(255),
+      depreciation_rate_percent DECIMAL(5, 2) DEFAULT 0,
+      accumulated_depreciation DECIMAL(15, 2) DEFAULT 0,
+      book_value DECIMAL(15, 2) DEFAULT 0
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS maintenances (
+      id VARCHAR(100) PRIMARY KEY,
+      asset_id VARCHAR(100) NOT NULL,
+      approval_date VARCHAR(50) NOT NULL,
+      document_number VARCHAR(100) NOT NULL,
+      description TEXT NOT NULL,
+      cost DECIMAL(15, 2) DEFAULT 0,
+      contractor VARCHAR(255),
+      FOREIGN KEY (asset_id) REFERENCES assets(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS repair_requests (
+      id VARCHAR(100) PRIMARY KEY,
+      asset_id VARCHAR(100) NOT NULL,
+      request_date VARCHAR(50) NOT NULL,
+      problem_description TEXT NOT NULL,
+      status VARCHAR(50) DEFAULT 'PENDING',
+      rejection_reason TEXT,
+      repair_cost DECIMAL(15, 2) DEFAULT 0,
+      contractor VARCHAR(255),
+      approval_date VARCHAR(50),
+      document_number VARCHAR(100),
+      officer_notes TEXT,
+      FOREIGN KEY (asset_id) REFERENCES assets(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS audit_logs (
+      id VARCHAR(100) PRIMARY KEY,
+      timestamp VARCHAR(50) NOT NULL,
+      action VARCHAR(100) NOT NULL,
+      details TEXT NOT NULL,
+      user VARCHAR(100) NOT NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  `);
+
   console.log('MySQL initialization completed successfully.');
 
-  // 4. Seed initial data if kv_store is empty
-  const [rows] = await pool.query('SELECT `value` FROM kv_store WHERE `key` = "app_data"');
-  if (rows.length === 0) {
-    console.log('Seeding initial mock data to MySQL...');
-    const defaultData = getDefaultData();
-    await writeDb(defaultData);
-  }
-};
-
-export const readDb = async () => {
-  if (!pool) {
-    throw new Error('MySQL connection pool is not initialized. Call initMysql() first.');
-  }
-  try {
-    const [rows] = await pool.query('SELECT `value` FROM kv_store WHERE `key` = "app_data"');
-    if (rows.length === 0) {
-      const defaultData = getDefaultData();
-      await writeDb(defaultData);
-      return defaultData;
+  // 4. Seed initial relational data if assets is empty
+  const [rows] = await pool.query('SELECT COUNT(*) as count FROM assets');
+  if (rows[0].count === 0) {
+    console.log('Database empty. Checking if we have old kv_store JSON to migrate...');
+    
+    // Check if kv_store table exists and has old app_data
+    let oldAppData = null;
+    try {
+      const [kvRows] = await pool.query("SHOW TABLES LIKE 'kv_store'");
+      if (kvRows.length > 0) {
+        const [appDataRows] = await pool.query('SELECT `value` FROM kv_store WHERE `key` = "app_data"');
+        if (appDataRows.length > 0) {
+          oldAppData = JSON.parse(appDataRows[0].value);
+          console.log('Found old kv_store database JSON. Migrating it...');
+        }
+      }
+    } catch (e) {
+      console.warn('Error fetching old kv_store:', e.message);
     }
-    return JSON.parse(rows[0].value);
-  } catch (error) {
-    console.error('Failed to read database from MySQL, returning default data', error);
-    return getDefaultData();
+    
+    const seedData = oldAppData || getDefaultData();
+    await seedRelationalDb(seedData);
   }
 };
 
-export const writeDb = async (data) => {
+export const executeQuery = async (sql, params) => {
   if (!pool) {
     throw new Error('MySQL connection pool is not initialized. Call initMysql() first.');
   }
-  try {
-    const jsonStr = JSON.stringify(data);
-    await pool.query(
-      'INSERT INTO kv_store (`key`, `value`) VALUES ("app_data", ?) ON DUPLICATE KEY UPDATE `value` = ?',
-      [jsonStr, jsonStr]
-    );
-    return true;
-  } catch (error) {
-    console.error('Failed to write database to MySQL', error);
-    return false;
-  }
+  const [rows] = await pool.query(sql, params);
+  return rows;
 };
+
+export const getPool = () => pool;
+
