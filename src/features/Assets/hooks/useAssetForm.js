@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { calculateDepreciation } from '../utils/depreciation';
+import { calculateDepreciation } from '../../../utils/depreciation';
 
 const generateNewAssetId = () => `asset-${Date.now()}`;
 

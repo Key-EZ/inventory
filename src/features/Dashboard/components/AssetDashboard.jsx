@@ -1,17 +1,23 @@
+import { useMemo } from 'react';
 
-export default function BentoDashboard({ assets, onAddClick, onViewDetails }) {
+export default function AssetDashboard({ assets, onAddClick, onViewDetails }) {
   // 1. Calculations
-  const totalCount = assets.length;
-  const totalCost = assets.reduce((sum, item) => sum + (item.unit_price || 0), 0);
-  const totalDepreciation = assets.reduce((sum, item) => sum + (item.accumulated_depreciation || 0), 0);
-  const totalBookValue = assets.reduce((sum, item) => sum + (item.book_value || 0), 0);
+  const { totalCount, totalCost, totalDepreciation, totalBookValue } = useMemo(() => {
+    const totalCount = assets.length;
+    const totalCost = assets.reduce((sum, item) => sum + (item.unit_price || 0), 0);
+    const totalDepreciation = assets.reduce((sum, item) => sum + (item.accumulated_depreciation || 0), 0);
+    const totalBookValue = assets.reduce((sum, item) => sum + (item.book_value || 0), 0);
+    return { totalCount, totalCost, totalDepreciation, totalBookValue };
+  }, [assets]);
 
   // Status breakdown
-  const statusCounts = assets.reduce((acc, item) => {
-    const status = item.status || 'ใช้งาน';
-    acc[status] = (acc[status] || 0) + 1;
-    return acc;
-  }, {});
+  const statusCounts = useMemo(() => {
+    return assets.reduce((acc, item) => {
+      const status = item.status || 'ใช้งาน';
+      acc[status] = (acc[status] || 0) + 1;
+      return acc;
+    }, {});
+  }, [assets]);
 
   const statusColors = {
     'ใช้งาน': { bg: '#dcfce7', text: '#15803d', bar: '#22c55e' },
@@ -21,26 +27,32 @@ export default function BentoDashboard({ assets, onAddClick, onViewDetails }) {
   };
 
   // Location breakdown
-  const locationCounts = assets.reduce((acc, item) => {
-    const loc = item.location || 'ไม่ระบุสถานที่';
-    acc[loc] = (acc[loc] || 0) + 1;
-    return acc;
-  }, {});
+  const locationCounts = useMemo(() => {
+    return assets.reduce((acc, item) => {
+      const loc = item.location || 'ไม่ระบุสถานที่';
+      acc[loc] = (acc[loc] || 0) + 1;
+      return acc;
+    }, {});
+  }, [assets]);
 
-  const sortedLocations = Object.entries(locationCounts)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 4);
+  const sortedLocations = useMemo(() => {
+    return Object.entries(locationCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 4);
+  }, [locationCounts]);
 
   // Recent assets (sorted by acquisition year in code descending)
-  const getYear = (code) => {
-    const parts = String(code || '').split('/');
-    if (parts.length >= 2) return parseInt(parts[1]) || 0;
-    return 0;
-  };
+  const recentAssets = useMemo(() => {
+    const getYear = (code) => {
+      const parts = String(code || '').split('/');
+      if (parts.length >= 2) return parseInt(parts[1]) || 0;
+      return 0;
+    };
 
-  const recentAssets = [...assets]
-    .sort((a, b) => getYear(b.asset_code) - getYear(a.asset_code))
-    .slice(0, 4);
+    return [...assets]
+      .sort((a, b) => getYear(b.asset_code) - getYear(a.asset_code))
+      .slice(0, 4);
+  }, [assets]);
 
   return (
     <>

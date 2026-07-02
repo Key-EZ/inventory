@@ -1,4 +1,4 @@
-import useAssetForm from '../../hooks/useAssetForm';
+import useAssetForm from '../hooks/useAssetForm';
 
 export default function AssetForm({
   asset,

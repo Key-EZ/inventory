@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { login } from '../services/authService';
+
 
 export default function LoginModal({
   onClose,
@@ -25,17 +27,9 @@ export default function LoginModal({
         ? { email: emailInput.trim() } 
         : { username: usernameInput.trim(), password: passwordInput };
 
-      const response = await fetch('http://localhost:5000/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payload)
-      });
+      const data = await login(payload);
 
-      const data = await response.json();
-
-      if (response.ok && data.success) {
+      if (data.success) {
         onLoginSuccess(data.user, data.token);
         onClose();
       } else {

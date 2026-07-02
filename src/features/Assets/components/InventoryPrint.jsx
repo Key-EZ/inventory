@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { formatThaiDateString } from '../../utils/dateUtils';
+import { formatThaiDateString } from '../../../utils/dateUtils';
 import './InventoryPrint.css';
 
 function AutoFitText({ text, maxFontSize = 13.5, minFontSize = 8, className = '', style = {} }) {

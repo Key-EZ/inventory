@@ -1,20 +1,20 @@
 import { useState } from 'react';
 import BaseLayout from './components/BaseLayout';
-import AssetForm from './components/asset/AssetForm';
-import AssetTable from './components/asset/AssetTable';
-import CustodianHistoryModal from './components/asset/CustodianHistoryModal';
-import BentoDashboard from './components/BentoDashboard';
-import CenteredLanding from './components/CenteredLanding';
-import SettingsPanel from './components/SettingsPanel';
-import InventoryPrint from './components/template/InventoryPrint';
-import GetRepair from './components/repair/GetRepair';
-import RepairJobs from './components/repair/RepairJobs';
-import AuditLogPanel from './components/AuditLogPanel';
-import RepairRequestPrint from './components/template/RepairRequestPrint';
-import LoginModal from './components/LoginModal';
+import AssetForm from './features/Assets/components/AssetForm';
+import AssetTable from './features/Assets/components/AssetTable';
+import CustodianHistoryModal from './features/Assets/components/CustodianHistoryModal';
+import AssetDashboard from './features/Dashboard/components/AssetDashboard';
+import CenteredLanding from './features/Dashboard/components/CenteredLanding';
+import SettingsPanel from './features/Settings/components/SettingsPanel';
+import InventoryPrint from './features/Assets/components/InventoryPrint';
+import GetRepair from './features/Repairs/components/GetRepair';
+import RepairJobs from './features/Repairs/components/RepairJobs';
+import AuditLogPanel from './features/AuditLogs/components/AuditLogPanel';
+import RepairRequestPrint from './features/Repairs/components/RepairRequestPrint';
+import LoginModal from './features/Auth/components/LoginModal';
 
 import useAppLayout from './hooks/useAppLayout';
-import useInventory from './hooks/useInventory';
+import useInventory from './store/useInventory';
 
 export default function App() {
   const [activeCustodianAsset, setActiveCustodianAsset] = useState(null);
@@ -444,7 +444,7 @@ export default function App() {
         )}
 
         {activeLayout === 'bento' && (
-          <BentoDashboard
+          <AssetDashboard
             assets={assets}
             onAddClick={handleOpenAddForm}
             onViewDetails={() => changeLayout('sidebar')}

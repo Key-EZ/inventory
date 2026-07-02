@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import useAssetTable from '../../hooks/useAssetTable';
+import useAssetTable from '../hooks/useAssetTable';
 
 export default function AssetTable({
   assets,
