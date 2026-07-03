@@ -14,7 +14,7 @@ router.get('/', async (req, res) => {
   }
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    if (decoded.role !== 'ADMIN' && decoded.role !== 'CUSTODIAN') {
+    if (decoded.role !== 'ADMIN' && decoded.role !== 'CUSTODIAN' && decoded.role !== 'TECHNICIAN') {
       return res.status(403).json({ success: false, message: 'Forbidden: Unauthorized role' });
     }
     const auditLogs = await executeQuery('SELECT * FROM audit_logs ORDER BY timestamp DESC');

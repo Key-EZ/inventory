@@ -674,9 +674,17 @@ export const initMysql = async () => {
       position VARCHAR(255),
       division VARCHAR(255),
       department VARCHAR(255),
-      email VARCHAR(191) UNIQUE
+      email VARCHAR(191) UNIQUE,
+      role VARCHAR(50) DEFAULT 'CUSTODIAN'
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   `);
+
+  // Ensure 'role' column exists in custodians
+  const [custCols] = await pool.query("SHOW COLUMNS FROM custodians LIKE 'role'");
+  if (custCols.length === 0) {
+    await pool.query("ALTER TABLE custodians ADD COLUMN role VARCHAR(50) DEFAULT 'CUSTODIAN'");
+    console.log("Added 'role' column to custodians table.");
+  }
 
   await pool.query(`
     CREATE TABLE IF NOT EXISTS assets (

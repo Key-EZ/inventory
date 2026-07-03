@@ -65,7 +65,8 @@ export default function SettingsPanel({
     position: '',
     division: '',
     department: '',
-    email: ''
+    email: '',
+    role: 'CUSTODIAN'
   });
 
   const handleCustodianFormChange = (e) => {
@@ -81,7 +82,8 @@ export default function SettingsPanel({
       position: positions[0] || '',
       division: divisions[0] || '',
       department: departments[0] || '',
-      email: ''
+      email: '',
+      role: 'CUSTODIAN'
     });
     setIsCustFormOpen(true);
   };
@@ -93,7 +95,8 @@ export default function SettingsPanel({
       position: cust.position || positions[0] || '',
       division: cust.division || divisions[0] || '',
       department: cust.department || departments[0] || '',
-      email: cust.email || ''
+      email: cust.email || '',
+      role: cust.role || 'CUSTODIAN'
     });
     setIsCustFormOpen(true);
   };
@@ -377,6 +380,21 @@ export default function SettingsPanel({
                   placeholder="เช่น somkiat.j@office.go.th"
                 />
                 <span className="field-hint">ระบบจะใช้ email ในการยืนยันสิทธิ์ Admin/Staff/User ผ่าน SSO</span>
+              </div>
+
+              <div className="form-group">
+                <label>บทบาทผู้ใช้งาน (Role) *</label>
+                <select
+                  name="role"
+                  value={custodianForm.role}
+                  onChange={handleCustodianFormChange}
+                  required
+                >
+                  <option value="CUSTODIAN">Custodian (ผู้รับผิดชอบดูแลพัสดุ)</option>
+                  <option value="TECHNICIAN">Technician (นายช่าง/ช่างเทคนิค)</option>
+                  <option value="ADMIN">Admin (ผู้ดูแลระบบ)</option>
+                </select>
+                <span className="field-hint">สิทธิ์ในการเข้าถึงฟังก์ชันต่างๆ ของระบบ</span>
               </div>
 
               <div className="form-actions-footer">

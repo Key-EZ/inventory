@@ -270,7 +270,7 @@ export default function App() {
         {currentUser ? (
           <>
             <li className="sidebar-menu-item" style={{ cursor: 'default', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-              👤 {currentUser.name} ({currentUser.role === 'ADMIN' ? 'Admin' : 'SSO'})
+              👤 {currentUser.name} ({currentUser.role === 'ADMIN' ? 'Admin' : currentUser.role === 'TECHNICIAN' ? 'นายช่าง' : 'SSO'})
             </li>
             <li className="sidebar-menu-item" onClick={logout} style={{ color: 'rgb(220, 38, 38)' }}>
               🔓 ออกจากระบบ

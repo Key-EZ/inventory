@@ -28,7 +28,7 @@ router.post('/login', async (req, res) => {
     const rows = await executeQuery('SELECT * FROM custodians WHERE LOWER(email) = ?', [String(email).toLowerCase()]);
     if (rows.length > 0) {
       const custodian = rows[0];
-      const userPayload = { name: custodian.name, email: custodian.email, role: 'CUSTODIAN' };
+      const userPayload = { name: custodian.name, email: custodian.email, role: custodian.role || 'CUSTODIAN' };
       const token = jwt.sign(userPayload, JWT_SECRET, { expiresIn: '24h' });
       await addAuditLogServer('เข้าระบบ', `ลงชื่อเข้าใช้งานระบบด้วยบัญชี SSO: ${custodian.name}`, custodian.name);
       return res.json({ success: true, token, user: userPayload });
@@ -121,7 +121,7 @@ router.get('/auth/sso/callback', async (req, res) => {
     const rows = await executeQuery('SELECT * FROM custodians WHERE LOWER(email) = ?', [String(email).toLowerCase()]);
     if (rows.length > 0) {
       const custodian = rows[0];
-      const userPayload = { name: custodian.name, email: custodian.email, role: 'CUSTODIAN' };
+      const userPayload = { name: custodian.name, email: custodian.email, role: custodian.role || 'CUSTODIAN' };
       const localToken = jwt.sign(userPayload, JWT_SECRET, { expiresIn: '24h' });
       await addAuditLogServer('เข้าระบบ', `ลงชื่อเข้าใช้งานระบบด้วยบัญชี SSO: ${custodian.name}`, custodian.name);
 
