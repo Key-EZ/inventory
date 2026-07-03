@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import useAssetTable from '../hooks/useAssetTable';
+import useInventory from '../../../store/useInventory';
 
 export default function AssetTable({
   assets,
@@ -10,6 +11,8 @@ export default function AssetTable({
   onManageCustodian,
   initialSearchQuery = ''
 }) {
+  const { currentUser } = useInventory();
+
   const {
     search,
     filterStatus,
@@ -28,10 +31,13 @@ export default function AssetTable({
     handleClearFilters,
     setCurrentPage,
     toggleMenu,
-    closeMenu
+    closeMenu,
+    filterMyAssets,
+    handleMyAssetsChange
   } = useAssetTable({
     assets,
-    initialSearchQuery
+    initialSearchQuery,
+    currentUser
   });
 
   // Local storage persisted preferences
@@ -122,7 +128,7 @@ export default function AssetTable({
       <div className="layout-card filter-panel-card">
         <div className="filter-panel-header">
           <h3>🔍 ค้นหาและตัวกรองข้อมูล</h3>
-          {(search || filterStatus !== 'ทั้งหมด' || filterCategory !== 'ทั้งหมด' || sortBy !== 'code-asc') && (
+          {(search || filterStatus !== 'ทั้งหมด' || filterCategory !== 'ทั้งหมด' || sortBy !== 'code-asc' || filterMyAssets) && (
             <button className="btn-clear-filter" onClick={handleClearFilters}>
               ล้างตัวกรองทั้งหมด
             </button>
@@ -192,27 +198,47 @@ export default function AssetTable({
           </div>
         </div>
 
+        {currentUser && (
+          <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: '500', userSelect: 'none', color: 'var(--text-primary)' }}>
+              <input
+                type="checkbox"
+                checked={filterMyAssets}
+                onChange={(e) => handleMyAssetsChange(e.target.checked)}
+                style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+              />
+              📋 เฉพาะครุภัณฑ์ในความรับผิดชอบของฉัน ({currentUser.name})
+            </label>
+          </div>
+        )}
+
         {/* Active Filter Tags */}
-        {(search || filterStatus !== 'ทั้งหมด' || filterCategory !== 'ทั้งหมด') && (
+        {(search || filterStatus !== 'ทั้งหมด' || filterCategory !== 'ทั้งหมด' || filterMyAssets) && (
           <div className="filter-tags-container">
             <span className="filter-tags-label">ตัวกรองที่เลือก:</span>
             {search && (
-              <span className="filter-tag">
-                ค้นหา: "{search}"
-                <button className="btn-clear-tag" onClick={() => handleSearchChange('')}>×</button>
-              </span>
+               <span className="filter-tag">
+                 ค้นหา: "{search}"
+                 <button className="btn-clear-tag" onClick={() => handleSearchChange('')}>×</button>
+               </span>
             )}
             {filterStatus !== 'ทั้งหมด' && (
-              <span className="filter-tag">
-                สถานะ: {filterStatus}
-                <button className="btn-clear-tag" onClick={() => handleStatusChange('ทั้งหมด')}>×</button>
-              </span>
+               <span className="filter-tag">
+                 สถานะ: {filterStatus}
+                 <button className="btn-clear-tag" onClick={() => handleStatusChange('ทั้งหมด')}>×</button>
+               </span>
             )}
             {filterCategory !== 'ทั้งหมด' && (
-              <span className="filter-tag">
-                หมวดหมู่: {filterCategory}
-                <button className="btn-clear-tag" onClick={() => handleCategoryChange('ทั้งหมด')}>×</button>
-              </span>
+               <span className="filter-tag">
+                 หมวดหมู่: {filterCategory}
+                 <button className="btn-clear-tag" onClick={() => handleCategoryChange('ทั้งหมด')}>×</button>
+               </span>
+            )}
+            {filterMyAssets && (
+               <span className="filter-tag">
+                 👤 ครุภัณฑ์ของฉัน
+                 <button className="btn-clear-tag" onClick={() => handleMyAssetsChange(false)}>×</button>
+               </span>
             )}
           </div>
         )}

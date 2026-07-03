@@ -1,10 +1,11 @@
 import { useState, useMemo } from 'react';
 
-export default function useAssetTable({ assets, initialSearchQuery = '' }) {
+export default function useAssetTable({ assets, initialSearchQuery = '', currentUser }) {
   const [search, setSearch] = useState(initialSearchQuery);
   const [filterStatus, setFilterStatus] = useState('ทั้งหมด');
   const [filterCategory, setFilterCategory] = useState('ทั้งหมด');
   const [sortBy, setSortBy] = useState('code-asc');
+  const [filterMyAssets, setFilterMyAssets] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [openMenuId, setOpenMenuId] = useState(null);
 
@@ -43,6 +44,21 @@ export default function useAssetTable({ assets, initialSearchQuery = '' }) {
       result = result.filter(item => item.category === filterCategory);
     }
 
+    // 4. My Assets Filter (assigned to logged-in custodian)
+    if (filterMyAssets && currentUser) {
+      result = result.filter(item => {
+        if (!item.custodian_history || item.custodian_history.length === 0) return false;
+        // Sort by year descending to get the latest custodian
+        const sorted = [...item.custodian_history].sort((a, b) => {
+          const yearA = parseInt(a.year) || 0;
+          const yearB = parseInt(b.year) || 0;
+          return yearB - yearA;
+        });
+        const currentCustodian = sorted[0].custodian_name || '';
+        return currentCustodian.toLowerCase() === currentUser.name.toLowerCase();
+      });
+    }
+
     // 5. Sorting
     result.sort((a, b) => {
       const getYear = (code) => {
@@ -70,7 +86,7 @@ export default function useAssetTable({ assets, initialSearchQuery = '' }) {
     });
 
     return result;
-  }, [assets, search, filterStatus, filterCategory, sortBy]);
+  }, [assets, search, filterStatus, filterCategory, sortBy, filterMyAssets, currentUser]);
 
   // Clean event handlers that reset pagination to prevent dual render passes
   const handleSearchChange = (val) => {
@@ -93,11 +109,17 @@ export default function useAssetTable({ assets, initialSearchQuery = '' }) {
     setCurrentPage(1);
   };
 
+  const handleMyAssetsChange = (val) => {
+    setFilterMyAssets(val);
+    setCurrentPage(1);
+  };
+
   const handleClearFilters = () => {
     setSearch('');
     setFilterStatus('ทั้งหมด');
     setFilterCategory('ทั้งหมด');
     setSortBy('code-asc');
+    setFilterMyAssets(false);
     setCurrentPage(1);
   };
 
@@ -134,6 +156,8 @@ export default function useAssetTable({ assets, initialSearchQuery = '' }) {
     handleClearFilters,
     setCurrentPage,
     toggleMenu,
-    closeMenu
+    closeMenu,
+    filterMyAssets,
+    handleMyAssetsChange
   };
 }
