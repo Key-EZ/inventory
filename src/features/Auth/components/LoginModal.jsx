@@ -5,7 +5,9 @@ import { login } from '../services/authService';
 export default function LoginModal({
   onClose,
   onLoginSuccess,
-  custodians = []
+  custodians = [],
+  ssoError,
+  setSsoError
 }) {
   const [activeTab, setActiveTab] = useState('sso'); // 'sso' | 'admin'
   const [emailInput, setEmailInput] = useState('');
@@ -99,7 +101,7 @@ export default function LoginModal({
           </button>
         </div>
 
-        {errorMsg && (
+        {(errorMsg || ssoError) && (
           <div style={{
             backgroundColor: 'rgba(239, 68, 68, 0.1)',
             borderLeft: '4px solid rgb(239, 68, 68)',
@@ -109,53 +111,45 @@ export default function LoginModal({
             fontSize: '0.875rem',
             marginBottom: '16px'
           }}>
-            {errorMsg}
+            {errorMsg || ssoError}
           </div>
         )}
 
         <form onSubmit={handleSubmit}>
           {activeTab === 'sso' ? (
             /* SSO Login Form */
-            <div className="form-group" style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', fontWeight: 600, marginBottom: '6px' }}>SSO E-mail *</label>
-              <input
-                type="email"
-                value={emailInput}
-                onChange={(e) => setEmailInput(e.target.value)}
-                placeholder="เช่น somchai.j@office.go.th"
-                className="filter-input-element"
-                style={{ width: '100%', padding: '10px' }}
-                required
-              />
-              
-              {/* SSO suggestions helper */}
-              {ssoSuggestions.length > 0 && (
-                <div style={{ marginTop: '12px', padding: '10px', backgroundColor: 'var(--bg-card-sub)', borderRadius: '6px' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>
-                    อีเมลสำหรับทดสอบในฐานข้อมูล (SSO Demo):
-                  </span>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                    {ssoSuggestions.map(c => (
-                      <button
-                        key={c.id}
-                        type="button"
-                        onClick={() => setEmailInput(c.email)}
-                        style={{
-                          fontSize: '0.7rem',
-                          padding: '4px 8px',
-                          borderRadius: '4px',
-                          border: '1px solid var(--border-light)',
-                          backgroundColor: 'var(--bg-main)',
-                          color: 'var(--text-primary)',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        {c.name} ({c.email.split('@')[0]})
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
+            <div style={{ textAlign: 'center', padding: '12px 0 20px 0' }}>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: '20px' }}>
+                เข้าสู่ระบบอย่างปลอดภัยโดยใช้บัญชีร่วมขององค์กรผ่าน Authentik
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  if (setSsoError) setSsoError(null);
+                  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+                  window.location.href = `${apiBaseUrl}/auth/sso/redirect`;
+                }}
+                className="button-primary"
+                style={{
+                  width: '100%',
+                  padding: '14px',
+                  fontSize: '1rem',
+                  fontWeight: 'bold',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  backgroundColor: '#4f46e5',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 6px -1px rgba(79, 70, 229, 0.2), 0 2px 4px -1px rgba(79, 70, 229, 0.1)',
+                  transition: 'all 0.2s ease-in-out'
+                }}
+              >
+                🔑 เข้าสู่ระบบด้วย Authentik
+              </button>
             </div>
           ) : (
             /* Admin Login Form */
@@ -205,14 +199,16 @@ export default function LoginModal({
             >
               ยกเลิก
             </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="button-primary"
-              style={{ flex: 1, padding: '12px' }}
-            >
-              {loading ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ'}
-            </button>
+            {activeTab === 'admin' && (
+              <button
+                type="submit"
+                disabled={loading}
+                className="button-primary"
+                style={{ flex: 1, padding: '12px' }}
+              >
+                {loading ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ'}
+              </button>
+            )}
           </div>
         </form>
       </div>

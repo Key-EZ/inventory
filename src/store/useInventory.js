@@ -27,8 +27,52 @@ export default function useInventory() {
     return sessionStorage.getItem('inventory_token') || null;
   });
   const [isBackendOnline, setIsBackendOnline] = useState(false);
+  const [ssoError, setSsoError] = useState(null);
   const isAdmin = !!currentUser;
   const isSystemAdmin = currentUser?.role === 'ADMIN';
+
+  const handleLoginSuccess = (user, token) => {
+    sessionStorage.setItem('inventory_user', JSON.stringify(user));
+    sessionStorage.setItem('inventory_token', token);
+    setCurrentUser(user);
+    setToken(token);
+  };
+
+  const logout = () => {
+    sessionStorage.removeItem('inventory_user');
+    sessionStorage.removeItem('inventory_token');
+    setCurrentUser(null);
+    setToken(null);
+  };
+
+  // --- Check URL for SSO parameters ---
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const ssoToken = params.get('sso_token');
+    const ssoUserJson = params.get('sso_user');
+    const ssoErr = params.get('sso_error');
+
+    if (ssoToken && ssoUserJson) {
+      try {
+        const decodedUser = JSON.parse(decodeURIComponent(ssoUserJson));
+        handleLoginSuccess(decodedUser, ssoToken);
+        setSsoError(null);
+        
+        // Clean URL query parameters
+        const newUrl = window.location.pathname + window.location.hash;
+        window.history.replaceState({}, document.title, newUrl);
+      } catch (err) {
+        console.error('Failed to parse SSO user parameter:', err);
+        setSsoError('ข้อมูลผู้ใช้งาน SSO รูปแบบไม่ถูกต้อง');
+      }
+    } else if (ssoErr) {
+      setSsoError(decodeURIComponent(ssoErr));
+      
+      // Clean URL query parameters
+      const newUrl = window.location.pathname + window.location.hash;
+      window.history.replaceState({}, document.title, newUrl);
+    }
+  }, []);
 
   // --- Backend Sync useEffect ---
   useEffect(() => {
@@ -688,19 +732,7 @@ export default function useInventory() {
     }
   };
 
-  const logout = () => {
-    sessionStorage.removeItem('inventory_user');
-    sessionStorage.removeItem('inventory_token');
-    setCurrentUser(null);
-    setToken(null);
-  };
-
-  const handleLoginSuccess = (user, token) => {
-    sessionStorage.setItem('inventory_user', JSON.stringify(user));
-    sessionStorage.setItem('inventory_token', token);
-    setCurrentUser(user);
-    setToken(token);
-  };
+  // (logout and handleLoginSuccess moved to top of useInventory hook)
 
   return {
     assets,
@@ -763,6 +795,8 @@ export default function useInventory() {
     isSystemAdmin,
     token,
     isBackendOnline,
+    ssoError,
+    setSsoError,
     loginAdmin,
     loginSSO,
     logout,

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import BaseLayout from './components/BaseLayout';
 import AssetForm from './features/Assets/components/AssetForm';
 import AssetTable from './features/Assets/components/AssetTable';
@@ -108,8 +108,17 @@ export default function App() {
     isAdmin,
     isSystemAdmin,
     logout,
-    handleLoginSuccess
+    handleLoginSuccess,
+    ssoError,
+    setSsoError
   } = useInventory();
+
+  // --- Auto-open Login Modal if SSO fails ---
+  useEffect(() => {
+    if (ssoError) {
+      setIsLoginModalOpen(true);
+    }
+  }, [ssoError]);
 
   // --- Auth Guards ---
   const handleMenuClick = (layout) => {
@@ -555,9 +564,14 @@ export default function App() {
 
       {isLoginModalOpen && (
         <LoginModal
-          onClose={() => setIsLoginModalOpen(false)}
+          onClose={() => {
+            setIsLoginModalOpen(false);
+            if (ssoError) setSsoError(null);
+          }}
           onLoginSuccess={handleLoginSuccess}
           custodians={custodians}
+          ssoError={ssoError}
+          setSsoError={setSsoError}
         />
       )}
 
