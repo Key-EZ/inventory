@@ -2925,7 +2925,7 @@ body.modal-print-open {
   /* A4 page standard margins */
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
   box-sizing: border-box;
-  font-family: 'Sarabun', 'TH Sarabun PSK', sans-serif;
+  font-family: 'TH Sarabun New', 'TH Sarabun PSK', 'Sarabun', sans-serif;
   line-height: 1.5;
   font-size: 16px;
   /* 16px for Sarabun represents standard font scale */

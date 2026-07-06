@@ -20,13 +20,7 @@ export default function RepairRequestPrint({ repairRequest, asset, onClose }) {
   const agency = localStorage.getItem('print_rr_agency') || 'เทศบาลตำบลเสาธงหิน';
   const docNo = localStorage.getItem('print_rr_docNo') || 'ทบ. ๕๑๐๐๘/';
   
-  let docDate = '';
-  if (repairRequest?.request_date) {
-    const dateParts = repairRequest.request_date.split('T')[0].split('-');
-    if (dateParts.length === 3) {
-      docDate = `${dateParts[2]}/${dateParts[1]}/${parseInt(dateParts[0]) + 543}`;
-    }
-  }
+  const docDate = repairRequest?.request_date || '';
 
   const subject = localStorage.getItem('print_rr_subject') || 'ขออนุมัติซ่อมแซมครุภัณฑ์';
   const requesterName = localStorage.getItem('print_rr_requesterName') || 'นายสมชาย ใจดี';

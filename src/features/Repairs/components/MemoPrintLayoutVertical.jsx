@@ -1,3 +1,5 @@
+import { toThaiDigits, formatThaiFullDate } from '../../../utils/thaiNumberUtils';
+
 export default function MemoPrintLayoutVertical({
   asset,
   repairRequest,
@@ -43,18 +45,18 @@ export default function MemoPrintLayoutVertical({
         <tbody>
           <tr>
             <td style={{ width: '97%' }}>
-              <strong>ส่วนราชการ</strong> <span style={{ width: '80%' }}>{agency}</span>
+              <strong>ส่วนราชการ</strong> <span style={{ width: '80%' }}>{toThaiDigits(agency)}</span>
             </td>
           </tr>
           <tr>
             <td style={{ width: '97%' }}>
-              <strong>ที่</strong> <span style={{ width: '47%' }}>{docNo}</span>
-              <strong>วันที่</strong> <span style={{ width: '40%' }}>{docDate}</span>
+              <strong>ที่</strong> <span style={{ width: '47%' }}>{toThaiDigits(docNo)}</span>
+              <strong>วันที่</strong> <span style={{ width: '40%' }}>{formatThaiFullDate(docDate)}</span>
             </td>
           </tr>
           <tr>
             <td>
-              <strong>เรื่อง</strong> <span style={{ width: '90%', fontWeight: 'bold' }}>{subject}</span>
+              <strong>เรื่อง</strong> <span style={{ width: '90%', fontWeight: 'bold' }}>{toThaiDigits(subject)}</span>
             </td>
           </tr>
         </tbody>
@@ -67,10 +69,10 @@ export default function MemoPrintLayoutVertical({
         </div>
 
         <div className="memo-paragraph">
-          ด้วยกอง {asset.responsible_department || 'งานพัสดุ'} มีความประสงค์จะขออนุมัติ
-          ดำเนินการซ่อมแซมทรัพย์สินครุภัณฑ์ประเภท {asset.category || 'ครุภัณฑ์'} ประจำหน่วยงาน
-          รหัสครุภัณฑ์ {asset.asset_code} รายการ {asset.name}
-          ซึ่งได้เกิดการชำรุดเสียหาย โดยมีอาการชำรุดเสียหายคือ {repairRequest.problem_description}
+          ด้วยกอง {toThaiDigits(asset.responsible_department) || 'งานพัสดุ'} มีความประสงค์จะขออนุมัติ
+          ดำเนินการซ่อมแซมทรัพย์สินครุภัณฑ์ประเภท {toThaiDigits(asset.category) || 'ครุภัณฑ์'} ประจำหน่วยงาน
+          รหัสครุภัณฑ์ {toThaiDigits(asset.asset_code)} รายการ {toThaiDigits(asset.name)}
+          ซึ่งได้เกิดการชำรุดเสียหาย โดยมีอาการชำรุดเสียหายคือ {toThaiDigits(repairRequest.problem_description)}
           ส่งผลให้ไม่สามารถใช้งานราชการเพื่อตอบสนองการปฏิบัติงานได้อย่างสมบูรณ์และปกติ
         </div>
 
@@ -88,8 +90,8 @@ export default function MemoPrintLayoutVertical({
         <div>&nbsp;</div>
         <div className="memo-signature-block">
           <div style={{ marginBottom: '24px' }}>(ลงชื่อ)............................................................ ผู้แจ้ง/รายงาน</div>
-          <div>( {requesterName} )</div>
-          <div style={{ fontSize: '14px', color: '#333', marginTop: '2px' }}>ตำแหน่ง {requesterPosition}</div>
+          <div>( {toThaiDigits(requesterName)} )</div>
+          <div style={{ fontSize: '14px', color: '#333', marginTop: '2px' }}>ตำแหน่ง {toThaiDigits(requesterPosition)}</div>
         </div>
       </div>
 
@@ -98,7 +100,7 @@ export default function MemoPrintLayoutVertical({
       {/* Committee Inspection Section */}
       <div style={{ fontSize: '15px', fontWeight: 'bold', marginBottom: '8px' }}>📋 ความเห็นของเจ้าหน้าที่พัสดุ / บันทึกผลการตรวจสภาพครุภัณฑ์</div>
       <div style={{ textIndent: '1.5cm', fontSize: '14.5px', lineHeight: '1.6' }}>
-        ได้ดำเนินการตรวจสอบสภาพความชำรุดเสียหายของครุภัณฑ์ <strong>{asset.name} (รหัส {asset.asset_code})</strong> แล้ว ปรากฏว่าเกิดการชำรุดเสียหายตามสภาพจริงดังกล่าว เห็นควรดำเนินการจัดจ้างซ่อมแซมให้อยู่ในสภาพใช้งานราชการได้ตามปกติ โดยประมาณการค่าซ่อมแซมเบื้องต้นเป็นเงินสุทธิ <span className="dotted-line" style={{ width: '120px', textAlign: 'center', fontWeight: 'bold' }}>{estimatedCost ? parseFloat(estimatedCost).toLocaleString() : '........................'}</span> บาท
+        ได้ดำเนินการตรวจสอบสภาพความชำรุดเสียหายของครุภัณฑ์ <strong>{toThaiDigits(asset.name)} (รหัส {toThaiDigits(asset.asset_code)})</strong> แล้ว ปรากฏว่าเกิดการชำรุดเสียหายตามสภาพจริงดังกล่าว เห็นควรดำเนินการจัดจ้างซ่อมแซมให้อยู่ในสภาพใช้งานราชการได้ตามปกติ โดยประมาณการค่าซ่อมแซมเบื้องต้นเป็นเงินสุทธิ <span className="dotted-line" style={{ width: '120px', textAlign: 'center', fontWeight: 'bold' }}>{estimatedCost ? toThaiDigits(parseFloat(estimatedCost).toLocaleString()) : '........................'}</span> บาท
       </div>
 
       {/* Committee Table */}
@@ -106,19 +108,19 @@ export default function MemoPrintLayoutVertical({
         <tbody>
           <tr>
             <td style={{ width: '45%' }}>
-              1. (ลงชื่อ)............................................................ ประธานกรรมการ
-              <div style={{ paddingLeft: '50px', fontSize: '13.5px', marginTop: '2px' }}>( {comm1Name} ) {comm1Position}</div>
+              ๑. (ลงชื่อ)............................................................ ประธานกรรมการ
+              <div style={{ paddingLeft: '50px', fontSize: '13.5px', marginTop: '2px' }}>( {toThaiDigits(comm1Name)} ) {toThaiDigits(comm1Position)}</div>
             </td>
             <td style={{ width: '10%' }}>&nbsp;</td>
             <td style={{ width: '45%' }}>
-              2. (ลงชื่อ)............................................................ กรรมการ
-              <div style={{ paddingLeft: '50px', fontSize: '13.5px', marginTop: '2px' }}>( {comm2Name} ) {comm2Position}</div>
+              ๒. (ลงชื่อ)............................................................ กรรมการ
+              <div style={{ paddingLeft: '50px', fontSize: '13.5px', marginTop: '2px' }}>( {toThaiDigits(comm2Name)} ) {toThaiDigits(comm2Position)}</div>
             </td>
           </tr>
           <tr>
             <td style={{ width: '45%', paddingTop: '10px' }}>
-              3. (ลงชื่อ)............................................................ กรรมการ
-              <div style={{ paddingLeft: '50px', fontSize: '13.5px', marginTop: '2px' }}>( {comm3Name} ) {comm3Position}</div>
+              ๓. (ลงชื่อ)............................................................ กรรมการ
+              <div style={{ paddingLeft: '50px', fontSize: '13.5px', marginTop: '2px' }}>( {toThaiDigits(comm3Name)} ) {toThaiDigits(comm3Position)}</div>
             </td>
             <td colSpan="2">&nbsp;</td>
           </tr>
@@ -134,8 +136,8 @@ export default function MemoPrintLayoutVertical({
           <div style={{ marginBottom: '16px' }}>[  ] อื่นๆ ..............................................................</div>
           <div style={{ textAlign: 'center' }}>
             <div style={{ marginBottom: '18px' }}>(ลงชื่อ)............................................................ ผู้ตรวจ</div>
-            <div>( {budgetAuditorName} )</div>
-            <div style={{ fontSize: '13px', marginTop: '2px' }}>{budgetAuditorPosition}</div>
+            <div>( {toThaiDigits(budgetAuditorName)} )</div>
+            <div style={{ fontSize: '13px', marginTop: '2px' }}>{toThaiDigits(budgetAuditorPosition)}</div>
           </div>
         </div>
 
@@ -144,8 +146,8 @@ export default function MemoPrintLayoutVertical({
           <div style={{ marginBottom: '24px' }}>เห็นควรเสนอผ่านปลัดเทศบาล เพื่อเสนออนุมัติต่อไป</div>
           <div style={{ textAlign: 'center' }}>
             <div style={{ marginBottom: '18px' }}>(ลงชื่อ)............................................................ ผอ.กอง</div>
-            <div>( {directorName} )</div>
-            <div style={{ fontSize: '13px', marginTop: '2px' }}>{directorPosition}</div>
+            <div>( {toThaiDigits(directorName)} )</div>
+            <div style={{ fontSize: '13px', marginTop: '2px' }}>{toThaiDigits(directorPosition)}</div>
           </div>
         </div>
       </div>
@@ -157,23 +159,23 @@ export default function MemoPrintLayoutVertical({
           <div style={{ fontWeight: 'bold', marginBottom: '8px', textAlign: 'left' }}>👔 ความเห็นของปลัดเทศบาล</div>
           <div style={{ marginBottom: '24px', textAlign: 'left' }}>[  ] เห็นควรอนุมัติเพื่อดำเนินราชการต่อไป</div>
           <div style={{ marginBottom: '18px' }}>(ลงชื่อ)............................................................ ปลัดเทศบาล</div>
-          <div>( {clerkName} )</div>
-          <div style={{ fontSize: '13px', marginTop: '2px' }}>{clerkPosition}</div>
+          <div>( {toThaiDigits(clerkName)} )</div>
+          <div style={{ fontSize: '13px', marginTop: '2px' }}>{toThaiDigits(clerkPosition)}</div>
         </div>
 
         <div style={{ paddingLeft: '5px', textAlign: 'center' }}>
           <div style={{ fontWeight: 'bold', marginBottom: '8px', textAlign: 'left' }}>👑 คำสั่ง/อนุมัติ นายกเทศมนตรี</div>
-          <div style={{ marginBottom: '24px', textAlign: 'left' }}>[  ] อนุมัติการแจ้งซ่อมและแต่งตั้งคณะกรรมการ</div>
+          <div style={{ marginBottom: '24px', textAlign: 'left' }}>[  ] ออนุมัติการแจ้งซ่อมและแต่งตั้งคณะกรรมการ</div>
           <div style={{ marginBottom: '18px' }}>(ลงชื่อ)............................................................ นายกเทศมนตรี</div>
-          <div>( {mayorName} )</div>
-          <div style={{ fontSize: '13px', marginTop: '2px' }}>{mayorPosition}</div>
+          <div>( {toThaiDigits(mayorName)} )</div>
+          <div style={{ fontSize: '13px', marginTop: '2px' }}>{toThaiDigits(mayorPosition)}</div>
         </div>
       </div>
 
       {/* Footer Notes (If any) */}
       {notes && (
         <div style={{ marginTop: '25px', fontSize: '12px', color: '#555', fontStyle: 'italic', borderTop: '1px solid #eee', paddingTop: '8px' }}>
-          <strong>หมายเหตุ:</strong> {notes}
+          <strong>หมายเหตุ:</strong> {toThaiDigits(notes)}
         </div>
       )}
     </div>
