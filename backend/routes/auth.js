@@ -43,10 +43,17 @@ router.post('/login', async (req, res) => {
 router.get('/auth/sso/redirect', (req, res) => {
   const authentikUrl = process.env.AUTHENTIK_URL ? process.env.AUTHENTIK_URL.replace(/\/+$/, '') : '';
   const clientId = process.env.SSO_CLIENT_ID;
-  const redirectUri = process.env.SSO_REDIRECT_URI;
+  let redirectUri = process.env.SSO_REDIRECT_URI;
 
   if (!authentikUrl || !clientId || !redirectUri) {
     return res.status(500).json({ success: false, message: 'SSO configuration is incomplete in .env' });
+  }
+
+  // Dynamically resolve localhost redirectUri to current host IP for network devices
+  if (redirectUri.includes('localhost') || redirectUri.includes('127.0.0.1')) {
+    const host = req.headers.host;
+    const protocol = req.headers['x-forwarded-proto'] || 'http';
+    redirectUri = `${protocol}://${host}/api/auth/sso/callback`;
   }
 
   const authUrl = `${authentikUrl}/application/o/authorize/?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&scope=openid+profile+email`;
@@ -56,7 +63,14 @@ router.get('/auth/sso/redirect', (req, res) => {
 // GET /api/auth/sso/callback - Receives authorization code from Authentik
 router.get('/auth/sso/callback', async (req, res) => {
   const { code, error, error_description } = req.query;
-  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+  
+  let frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+  // Dynamically resolve localhost frontendUrl to current host IP for network devices
+  if (frontendUrl.includes('localhost') || frontendUrl.includes('127.0.0.1')) {
+    const hostName = req.headers.host.split(':')[0];
+    const protocol = req.headers['x-forwarded-proto'] || 'http';
+    frontendUrl = `${protocol}://${hostName}:5173`;
+  }
 
   if (error) {
     console.error('Authentik authorization error:', error, error_description);
@@ -71,7 +85,14 @@ router.get('/auth/sso/callback', async (req, res) => {
     const authentikUrl = process.env.AUTHENTIK_URL ? process.env.AUTHENTIK_URL.replace(/\/+$/, '') : '';
     const clientId = process.env.SSO_CLIENT_ID;
     const clientSecret = process.env.SSO_CLIENT_SECRET;
-    const redirectUri = process.env.SSO_REDIRECT_URI;
+    let redirectUri = process.env.SSO_REDIRECT_URI;
+
+    // Dynamically resolve localhost redirectUri to current host IP for network devices
+    if (redirectUri && (redirectUri.includes('localhost') || redirectUri.includes('127.0.0.1'))) {
+      const host = req.headers.host;
+      const protocol = req.headers['x-forwarded-proto'] || 'http';
+      redirectUri = `${protocol}://${host}/api/auth/sso/callback`;
+    }
 
     // Exchange auth code for token
     const tokenResponse = await fetch(`${authentikUrl}/application/o/token/`, {
