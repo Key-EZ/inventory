@@ -41,7 +41,7 @@ router.post('/login', async (req, res) => {
 
 // GET /api/auth/sso/redirect - Redirects to Authentik login page
 router.get('/auth/sso/redirect', (req, res) => {
-  const authentikUrl = process.env.AUTHENTIK_URL;
+  const authentikUrl = process.env.AUTHENTIK_URL ? process.env.AUTHENTIK_URL.replace(/\/+$/, '') : '';
   const clientId = process.env.SSO_CLIENT_ID;
   const redirectUri = process.env.SSO_REDIRECT_URI;
 
@@ -68,7 +68,7 @@ router.get('/auth/sso/callback', async (req, res) => {
   }
 
   try {
-    const authentikUrl = process.env.AUTHENTIK_URL;
+    const authentikUrl = process.env.AUTHENTIK_URL ? process.env.AUTHENTIK_URL.replace(/\/+$/, '') : '';
     const clientId = process.env.SSO_CLIENT_ID;
     const clientSecret = process.env.SSO_CLIENT_SECRET;
     const redirectUri = process.env.SSO_REDIRECT_URI;

@@ -50,6 +50,15 @@ export default function RepairRequestPrint({ repairRequest, asset, onClose }) {
 
   return (
     <div className="memo-print-layout">
+      {/* Dynamic style override to force portrait printing */}
+      <style>{`
+        @media print {
+          @page {
+            size: A4 portrait !important;
+            margin: 15mm 15mm 15mm 20mm !important;
+          }
+        }
+      `}</style>
       <div className="memo-preview-area">
         <div className="no-print-zone" style={{ display: 'flex', gap: '12px', marginBottom: '24px', justifyContent: 'center' }}>
           <button onClick={handlePrint} className="print-btn">

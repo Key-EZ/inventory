@@ -126,7 +126,7 @@ export default function LoginModal({
                 type="button"
                 onClick={() => {
                   if (setSsoError) setSsoError(null);
-                  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+                  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || (typeof window !== 'undefined' ? `http://${window.location.hostname}:5000/api` : 'http://localhost:5000/api');
                   window.location.href = `${apiBaseUrl}/auth/sso/redirect`;
                 }}
                 className="button-primary"

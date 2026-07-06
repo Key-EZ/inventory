@@ -33,9 +33,15 @@ const HEADER_MAPPING = {
   'depreciation_rate_percent': 'depreciation_rate_percent',
   'accumulated_depreciation': 'accumulated_depreciation',
   'book_value': 'book_value',
+  'model': 'model',
+  'type': 'type',
+  'appearance': 'appearance',
 
   // Thai mappings
   'รหัสพัสดุ': 'asset_code',
+  'แบบ': 'model',
+  'ชนิด': 'type',
+  'ลักษณะ': 'appearance',
   'รหัสครุภัณฑ์': 'asset_code',
   'รหัสทรัพย์สิน': 'asset_code',
   'ชื่อพัสดุ': 'name',

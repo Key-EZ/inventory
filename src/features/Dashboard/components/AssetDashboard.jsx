@@ -58,7 +58,7 @@ export default function AssetDashboard({ assets, onAddClick, onViewDetails }) {
     <>
       {/* 1. Quick Stats: Total Count */}
       <div className="layout-card bento-card col-span-1">
-        <span className="bento-label">จำนวนพัสดุในระบบ</span>
+        <span className="bento-label">จำนวนครุภัณฑ์ในระบบ</span>
         <div className="bento-value highlight-num">{totalCount} <span className="bento-unit">รายการ</span></div>
         <div className="bento-desc">คุมทะเบียน พ.ด.1 และ พ.ด.2 รวมกัน</div>
       </div>
@@ -102,7 +102,7 @@ export default function AssetDashboard({ assets, onAddClick, onViewDetails }) {
             const count = statusCounts[statusName] || 0;
             const percentage = totalCount > 0 ? (count / totalCount) * 100 : 0;
             const theme = statusColors[statusName] || { bg: '#f1f5f9', text: '#475569', bar: '#64748b' };
-            
+
             return (
               <div key={statusName} className="status-progress-item">
                 <div className="status-progress-info">
@@ -146,7 +146,7 @@ export default function AssetDashboard({ assets, onAddClick, onViewDetails }) {
       {/* 8. Recent Additions */}
       <div className="layout-card bento-card col-span-4">
         <div className="flex-center-between margin-bottom-sm">
-          <h3 className="bento-section-title">พัสดุทะเบียนล่าจัดตั้ง (ปีล่าสุด)</h3>
+          <h3 className="bento-section-title">ครุภัณฑ์ล่าสุด (ปีล่าสุด)</h3>
           <span className="bento-link" onClick={onViewDetails}>ดูทั้งหมดในตาราง ➔</span>
         </div>
         <div className="bento-recent-table-wrapper">
@@ -174,8 +174,8 @@ export default function AssetDashboard({ assets, onAddClick, onViewDetails }) {
                       <td>
                         <div className="recent-name">{asset.name}</div>
                         <div className="recent-brand">
-                          {asset.asset_type === 'LAND_BUILDING' 
-                            ? (asset.document_of_title || 'พ.ด.1') 
+                          {asset.asset_type === 'LAND_BUILDING'
+                            ? (asset.document_of_title || 'พ.ด.1')
                             : `${asset.manufacturer_brand || ''} ${asset.serial_number || ''}`}
                         </div>
                       </td>

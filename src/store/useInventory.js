@@ -1,5 +1,10 @@
 import { useState, useEffect } from 'react';
 
+const API_BASE_URL = typeof window !== 'undefined'
+  ? `http://${window.location.hostname}:5000/api`
+  : 'http://localhost:5000/api';
+
+
 export default function useInventory() {
   // --- States ---
   const [assets, setAssets] = useState([]);
@@ -84,7 +89,7 @@ export default function useInventory() {
         }
         
         // Fetch Settings
-        const settingsRes = await fetch('http://localhost:5000/api/settings', { headers });
+        const settingsRes = await fetch(API_BASE_URL + '/settings', { headers });
         if (!settingsRes.ok) throw new Error('Failed to fetch settings');
         const settings = await settingsRes.json();
         
@@ -102,20 +107,20 @@ export default function useInventory() {
         setLandingBadgeText(settings.landingBadgeText || 'ระบบดิจิทัลบริหารทรัพย์สิน');
 
         // Fetch Assets
-        const assetsRes = await fetch('http://localhost:5000/api/assets', { headers });
+        const assetsRes = await fetch(API_BASE_URL + '/assets', { headers });
         if (!assetsRes.ok) throw new Error('Failed to fetch assets');
         const fetchedAssets = await assetsRes.json();
         setAssets(fetchedAssets);
 
         // Fetch Repairs
-        const repairsRes = await fetch('http://localhost:5000/api/repairs', { headers });
+        const repairsRes = await fetch(API_BASE_URL + '/repairs', { headers });
         if (!repairsRes.ok) throw new Error('Failed to fetch repairs');
         const fetchedRepairs = await repairsRes.json();
         setRepairRequests(fetchedRepairs);
 
         // Fetch Audit Logs (requires authentication)
         if (token) {
-          const logsRes = await fetch('http://localhost:5000/api/audit-logs', { headers });
+          const logsRes = await fetch(API_BASE_URL + '/audit-logs', { headers });
           if (logsRes.ok) {
             const fetchedLogs = await logsRes.json();
             setAuditLogs(fetchedLogs);
@@ -133,7 +138,7 @@ export default function useInventory() {
 
   const saveSettingsBackend = async (updatedFields) => {
     try {
-      const res = await fetch('http://localhost:5000/api/settings', {
+      const res = await fetch(API_BASE_URL + '/settings', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -157,13 +162,13 @@ export default function useInventory() {
   const handleClearAuditLogs = async () => {
     if (window.confirm('คุณต้องการลบประวัติการใช้งานระบบทั้งหมดใช่หรือไม่? (การกระทำนี้ไม่สามารถย้อนกลับได้)')) {
       try {
-        const res = await fetch('http://localhost:5000/api/audit-logs', {
+        const res = await fetch(API_BASE_URL + '/audit-logs', {
           method: 'DELETE',
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.ok) {
           // Re-fetch logs
-          const logsRes = await fetch('http://localhost:5000/api/audit-logs', {
+          const logsRes = await fetch(API_BASE_URL + '/audit-logs', {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           if (logsRes.ok) setAuditLogs(await logsRes.json());
@@ -185,7 +190,7 @@ export default function useInventory() {
     const index = assets.findIndex(a => a.id === assetData.id);
     try {
       const method = index >= 0 ? 'PUT' : 'POST';
-      const url = index >= 0 ? `http://localhost:5000/api/assets/${assetData.id}` : 'http://localhost:5000/api/assets';
+      const url = index >= 0 ? `${API_BASE_URL}/assets/${assetData.id}` : API_BASE_URL + '/assets';
       const res = await fetch(url, {
         method,
         headers: {
@@ -207,7 +212,7 @@ export default function useInventory() {
         });
 
         // Refresh logs
-        const logsRes = await fetch('http://localhost:5000/api/audit-logs', {
+        const logsRes = await fetch(API_BASE_URL + '/audit-logs', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (logsRes.ok) setAuditLogs(await logsRes.json());
@@ -227,7 +232,7 @@ export default function useInventory() {
 
     if (window.confirm(`คุณต้องการลบข้อมูลครุภัณฑ์ "${assetName}" ใช่หรือไม่?`)) {
       try {
-        const res = await fetch(`http://localhost:5000/api/assets/${id}`, {
+        const res = await fetch(`${API_BASE_URL}/assets/${id}`, {
           method: 'DELETE',
           headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -236,7 +241,7 @@ export default function useInventory() {
           setRepairRequests(prev => prev.filter(req => req.asset_id !== id));
 
           // Refresh logs
-          const logsRes = await fetch('http://localhost:5000/api/audit-logs', {
+          const logsRes = await fetch(API_BASE_URL + '/audit-logs', {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           if (logsRes.ok) setAuditLogs(await logsRes.json());
@@ -254,7 +259,7 @@ export default function useInventory() {
 
   const handleCreateRepairRequest = async (assetId, problemDescription) => {
     try {
-      const res = await fetch('http://localhost:5000/api/repairs', {
+      const res = await fetch(API_BASE_URL + '/repairs', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -272,7 +277,7 @@ export default function useInventory() {
         setRepairRequests(prev => [newRequest, ...prev]);
 
         // Refresh logs
-        const logsRes = await fetch('http://localhost:5000/api/audit-logs', {
+        const logsRes = await fetch(API_BASE_URL + '/audit-logs', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (logsRes.ok) setAuditLogs(await logsRes.json());
@@ -290,7 +295,7 @@ export default function useInventory() {
 
   const handleStartRepairJob = async (requestId) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/repairs/${requestId}/start`, {
+      const res = await fetch(`${API_BASE_URL}/repairs/${requestId}/start`, {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -299,7 +304,7 @@ export default function useInventory() {
         setRepairRequests(prev => prev.map(r => r.id === requestId ? updated : r));
 
         // Refresh logs
-        const logsRes = await fetch('http://localhost:5000/api/audit-logs', {
+        const logsRes = await fetch(API_BASE_URL + '/audit-logs', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (logsRes.ok) setAuditLogs(await logsRes.json());
@@ -312,7 +317,7 @@ export default function useInventory() {
 
   const handleRejectRepairJob = async (requestId, reason) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/repairs/${requestId}/reject`, {
+      const res = await fetch(`${API_BASE_URL}/repairs/${requestId}/reject`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -331,7 +336,7 @@ export default function useInventory() {
         }
 
         // Refresh logs
-        const logsRes = await fetch('http://localhost:5000/api/audit-logs', {
+        const logsRes = await fetch(API_BASE_URL + '/audit-logs', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (logsRes.ok) setAuditLogs(await logsRes.json());
@@ -344,7 +349,7 @@ export default function useInventory() {
 
   const handleCompleteRepairJob = async (requestId, cost, contractor, approvalDate, documentNumber, notes) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/repairs/${requestId}/complete`, {
+      const res = await fetch(`${API_BASE_URL}/repairs/${requestId}/complete`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -357,7 +362,7 @@ export default function useInventory() {
         setRepairRequests(prev => prev.map(r => r.id === requestId ? updatedRequest : r));
 
         // Re-fetch assets to get updated maintenance logs
-        const assetsRes = await fetch('http://localhost:5000/api/assets', {
+        const assetsRes = await fetch(API_BASE_URL + '/assets', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (assetsRes.ok) {
@@ -367,7 +372,7 @@ export default function useInventory() {
         }
 
         // Refresh logs
-        const logsRes = await fetch('http://localhost:5000/api/audit-logs', {
+        const logsRes = await fetch(API_BASE_URL + '/audit-logs', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (logsRes.ok) setAuditLogs(await logsRes.json());
@@ -660,7 +665,7 @@ export default function useInventory() {
     }
 
     try {
-      const res = await fetch('http://localhost:5000/api/assets/import', {
+      const res = await fetch(API_BASE_URL + '/assets/import', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -673,7 +678,7 @@ export default function useInventory() {
         setAssets(data.assets);
         
         // Refresh audit logs
-        const logsRes = await fetch('http://localhost:5000/api/audit-logs', {
+        const logsRes = await fetch(API_BASE_URL + '/audit-logs', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (logsRes.ok) setAuditLogs(await logsRes.json());
@@ -696,7 +701,7 @@ export default function useInventory() {
   // --- Auth Session CRUD ---
   const loginAdmin = async (username, password) => {
     try {
-      const res = await fetch('http://localhost:5000/api/login', {
+      const res = await fetch(API_BASE_URL + '/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
@@ -715,7 +720,7 @@ export default function useInventory() {
 
   const loginSSO = async (email) => {
     try {
-      const res = await fetch('http://localhost:5000/api/login', {
+      const res = await fetch(API_BASE_URL + '/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })

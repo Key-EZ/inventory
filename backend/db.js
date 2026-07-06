@@ -568,8 +568,8 @@ export const seedRelationalDb = async (data) => {
             budget_owner, responsible_department, status, document_of_title, area_size,
             building_style, manufacturer_brand, serial_number, engine_number, chassis_number,
             vehicle_registration, color, warranty_start_date, warranty_end_date, warranty_company,
-            depreciation_rate_percent, accumulated_depreciation, book_value
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            depreciation_rate_percent, accumulated_depreciation, book_value, model, type, appearance
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             asset.id, asset.asset_type, asset.category, asset.asset_code, asset.name, asset.location || '',
             asset.acquisition_method || '', asset.delivery_document_no || '', asset.delivery_document_date || '',
@@ -577,7 +577,8 @@ export const seedRelationalDb = async (data) => {
             asset.status || 'ใช้งาน', asset.document_of_title || '', asset.area_size || '', asset.building_style || '',
             asset.manufacturer_brand || '', asset.serial_number || '', asset.engine_number || '', asset.chassis_number || '',
             asset.vehicle_registration || '', asset.color || '', asset.warranty_start_date || '', asset.warranty_end_date || '',
-            asset.warranty_company || '', asset.depreciation_rate_percent || 0, asset.accumulated_depreciation || 0, asset.book_value || 0
+            asset.warranty_company || '', asset.depreciation_rate_percent || 0, asset.accumulated_depreciation || 0, asset.book_value || 0,
+            asset.model || '', asset.type || '', asset.appearance || ''
           ]
         );
 
@@ -716,9 +717,29 @@ export const initMysql = async () => {
       warranty_company VARCHAR(255),
       depreciation_rate_percent DECIMAL(5, 2) DEFAULT 0,
       accumulated_depreciation DECIMAL(15, 2) DEFAULT 0,
-      book_value DECIMAL(15, 2) DEFAULT 0
+      book_value DECIMAL(15, 2) DEFAULT 0,
+      model VARCHAR(255) NULL,
+      type VARCHAR(255) NULL,
+      appearance VARCHAR(255) NULL
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   `);
+
+  // Ensure model, type, appearance columns exist in assets
+  const [modelCols] = await pool.query("SHOW COLUMNS FROM assets LIKE 'model'");
+  if (modelCols.length === 0) {
+    await pool.query("ALTER TABLE assets ADD COLUMN model VARCHAR(255) NULL");
+    console.log("Added 'model' column to assets table.");
+  }
+  const [typeCols] = await pool.query("SHOW COLUMNS FROM assets LIKE 'type'");
+  if (typeCols.length === 0) {
+    await pool.query("ALTER TABLE assets ADD COLUMN type VARCHAR(255) NULL");
+    console.log("Added 'type' column to assets table.");
+  }
+  const [appearanceCols] = await pool.query("SHOW COLUMNS FROM assets LIKE 'appearance'");
+  if (appearanceCols.length === 0) {
+    await pool.query("ALTER TABLE assets ADD COLUMN appearance VARCHAR(255) NULL");
+    console.log("Added 'appearance' column to assets table.");
+  }
 
   await pool.query(`
     CREATE TABLE IF NOT EXISTS maintenances (

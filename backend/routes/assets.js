@@ -94,8 +94,8 @@ router.post('/', async (req, res) => {
         budget_owner, responsible_department, status, document_of_title, area_size,
         building_style, manufacturer_brand, serial_number, engine_number, chassis_number,
         vehicle_registration, color, warranty_start_date, warranty_end_date, warranty_company,
-        depreciation_rate_percent, accumulated_depreciation, book_value
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        depreciation_rate_percent, accumulated_depreciation, book_value, model, type, appearance
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         newAssetId, assetData.asset_type, assetData.category, assetData.asset_code, assetData.name, assetData.location || '',
         assetData.acquisition_method || '', assetData.delivery_document_no || '', assetData.delivery_document_date || '',
@@ -103,7 +103,8 @@ router.post('/', async (req, res) => {
         assetData.status || 'ใช้งาน', assetData.document_of_title || '', assetData.area_size || '', assetData.building_style || '',
         assetData.manufacturer_brand || '', assetData.serial_number || '', assetData.engine_number || '', assetData.chassis_number || '',
         assetData.vehicle_registration || '', assetData.color || '', assetData.warranty_start_date || '', assetData.warranty_end_date || '',
-        assetData.warranty_company || '', dep.depreciationRatePercent, dep.accumulatedDepreciation, dep.bookValue
+        assetData.warranty_company || '', dep.depreciationRatePercent, dep.accumulatedDepreciation, dep.bookValue,
+        assetData.model || '', assetData.type || '', assetData.appearance || ''
       ]
     );
     
@@ -154,7 +155,7 @@ router.put('/:id', async (req, res) => {
         budget_owner = ?, responsible_department = ?, status = ?, document_of_title = ?, area_size = ?,
         building_style = ?, manufacturer_brand = ?, serial_number = ?, engine_number = ?, chassis_number = ?,
         vehicle_registration = ?, color = ?, warranty_start_date = ?, warranty_end_date = ?, warranty_company = ?,
-        depreciation_rate_percent = ?, accumulated_depreciation = ?, book_value = ?
+        depreciation_rate_percent = ?, accumulated_depreciation = ?, book_value = ?, model = ?, type = ?, appearance = ?
       WHERE id = ?`,
       [
         assetData.asset_type, assetData.category, assetData.asset_code, assetData.name, assetData.location || '',
@@ -163,7 +164,8 @@ router.put('/:id', async (req, res) => {
         assetData.status || 'ใช้งาน', assetData.document_of_title || '', assetData.area_size || '', assetData.building_style || '',
         assetData.manufacturer_brand || '', assetData.serial_number || '', assetData.engine_number || '', assetData.chassis_number || '',
         assetData.vehicle_registration || '', assetData.color || '', assetData.warranty_start_date || '', assetData.warranty_end_date || '',
-        assetData.warranty_company || '', dep.depreciationRatePercent, dep.accumulatedDepreciation, dep.bookValue, req.params.id
+        assetData.warranty_company || '', dep.depreciationRatePercent, dep.accumulatedDepreciation, dep.bookValue,
+        assetData.model || '', assetData.type || '', assetData.appearance || '', req.params.id
       ]
     );
     

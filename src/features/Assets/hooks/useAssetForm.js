@@ -40,6 +40,9 @@ export default function useAssetForm({
     budgetOwner: asset ? asset.budget_owner || '' : '',
     responsibleDepartment: asset ? asset.responsible_department || '' : '',
     status: asset ? asset.status || 'ใช้งาน' : 'ใช้งาน',
+    model: asset ? asset.model || '' : '',
+    type: asset ? asset.type || '' : '',
+    appearance: asset ? asset.appearance || '' : '',
     
     // LAND_BUILDING specific (Ph.D. 1)
     documentOfTitle: asset ? asset.document_of_title || '' : '',
@@ -164,6 +167,9 @@ export default function useAssetForm({
       budget_owner: formData.budgetOwner,
       responsible_department: formData.responsibleDepartment,
       status: formData.status,
+      model: formData.model,
+      type: formData.type,
+      appearance: formData.appearance,
 
       // Ph.D. 1 specific fields
       document_of_title: formData.assetType === 'LAND_BUILDING' ? formData.documentOfTitle : '',

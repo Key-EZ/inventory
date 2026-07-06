@@ -24,16 +24,16 @@ export default function CenteredLanding({ assets, onNavigate, onAddClick, onEdit
       {/* App Hero Branding */}
       <div className="landing-hero animate-fade-in">
         <div className="landing-badge">{landingBadgeText || 'ระบบดิจิทัลบริหารทรัพย์สิน'}</div>
-        <h1 className="landing-title">ระบบทะเบียนพัสดุ</h1>
+        <h1 className="landing-title">ระบบทะเบียนครุภัณฑ์</h1>
         <p className="landing-subtitle">
-          จัดการบันทึกทะเบียน ควบคุมบัญชี และประเมินค่าเสื่อมราคาทรัพย์สินตามหลักเกณฑ์ราชการ
+          จัดการบันทึกทะเบียน ควบคุมบัญชี และประเมินค่าเสื่อมราคาทรัพย์สิน
         </p>
       </div>
 
       {/* Primary Landing Metrics */}
       <div className="landing-stats-grid">
         <div className="layout-card landing-stat-card">
-          <span className="stat-card-title">พัสดุทั้งหมด</span>
+          <span className="stat-card-title">ครุภัณฑ์ทั้งหมด</span>
           <span className="stat-card-value">{totalCount} รายการ</span>
         </div>
         <div className="layout-card landing-stat-card">
@@ -41,7 +41,7 @@ export default function CenteredLanding({ assets, onNavigate, onAddClick, onEdit
           <span className="stat-card-value value-text">฿{totalCost.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
         </div>
         <div className="layout-card landing-stat-card">
-          <span className="stat-card-title">พัสดุพร้อมใช้งาน</span>
+          <span className="stat-card-title">ครุภัณฑ์พร้อมใช้งาน</span>
           <span className="stat-card-value active-text">{activeCount} รายการ</span>
         </div>
       </div>
@@ -54,7 +54,7 @@ export default function CenteredLanding({ assets, onNavigate, onAddClick, onEdit
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="ค้นหาด่วนด้วย รหัสพัสดุ, ชื่อพัสดุ, ยี่ห้อ, แผนกรับผิดชอบ, หรือสถานที่..."
+            placeholder="ค้นหาด่วนด้วย รหัสครุภัณฑ์, ชื่อครุภัณฑ์, ยี่ห้อ, หรือสถานที่..."
             className="landing-search-input"
           />
           {searchQuery && (
@@ -113,13 +113,13 @@ export default function CenteredLanding({ assets, onNavigate, onAddClick, onEdit
           className="button-primary landing-action-btn"
           onClick={onAddClick}
         >
-          ➕ ลงทะเบียนพัสดุ
+          ➕ ลงทะเบียนครุภัณฑ์
         </button>
         <button
           className="landing-action-btn btn-secondary-outline"
           onClick={() => onNavigate('sidebar')}
         >
-          📂 ทะเบียนคุมพัสดุ
+          📂 ทะเบียนครุภัณฑ์
         </button>
         <button
           className="landing-action-btn btn-secondary-outline"
