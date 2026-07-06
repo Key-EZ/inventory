@@ -2928,7 +2928,7 @@ body.modal-print-open {
   font-family: 'TH Sarabun New', 'TH Sarabun PSK', 'Sarabun', sans-serif;
   line-height: 1.5;
   font-size: 16px;
-  /* 16px for Sarabun represents standard font scale */
+  /* Reverted to 16px standard to match 16pt visually */
 }
 
 /* Memorandum specific typography and elements */
@@ -2941,12 +2941,12 @@ body.modal-print-open {
 .memo-header-table td {
   padding: 4px 0;
   vertical-align: bottom;
-  font-size: 16px;
+  font-size: 1.0em;
 }
 
 .memo-title {
   text-align: center;
-  font-size: 28px;
+  font-size: 38px;
   font-weight: bold;
   margin-top: 15px;
   margin-bottom: 15px;
@@ -2981,7 +2981,7 @@ body.modal-print-open {
 
 .memo-signature-block {
   text-align: center;
-  font-size: 15px;
+  font-size: 1.0em;
   line-height: 1.5;
 }
 
@@ -3037,7 +3037,7 @@ body.modal-print-open {
   body.modal-print-open .a4-Vertical-page {
     border: none !important;
     box-shadow: none !important;
-    padding: 5px !important;
+    padding: 0 !important;
     margin: 0 !important;
     width: 100% !important;
     min-height: auto !important;

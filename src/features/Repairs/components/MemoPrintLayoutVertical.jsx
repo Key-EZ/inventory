@@ -41,26 +41,57 @@ export default function MemoPrintLayoutVertical({
       </div>
 
       {/* Memorandum Meta Table */}
-      <table className="memo-header-table">
-        <tbody>
-          <tr>
-            <td style={{ width: '97%' }}>
-              <strong>ส่วนราชการ</strong> <span style={{ width: '80%' }}>{toThaiDigits(agency)}</span>
-            </td>
-          </tr>
-          <tr>
-            <td style={{ width: '97%' }}>
-              <strong>ที่</strong> <span style={{ width: '47%' }}>{toThaiDigits(docNo)}</span>
-              <strong>วันที่</strong> <span style={{ width: '40%' }}>{formatThaiFullDate(docDate)}</span>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <strong>เรื่อง</strong> <span style={{ width: '90%', fontWeight: 'bold' }}>{toThaiDigits(subject)}</span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div className="memo-header-container" style={{ marginBottom: '15px' }}>
+        {/* Row 1: ส่วนราชการ */}
+        <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '6px' }}>
+          <tbody>
+            <tr>
+              <td style={{ width: '90px', padding: '4px 0', verticalAlign: 'bottom', whiteSpace: 'nowrap', fontSize: '1.0em' }}>
+                <strong>ส่วนราชการ</strong>
+              </td>
+              <td style={{ borderBottom: '1px dotted #000000', padding: '4px 0 2px 8px', verticalAlign: 'bottom', fontSize: '1.0em' }}>
+                {toThaiDigits(agency)}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        {/* Row 2: ที่ & วันที่ */}
+        <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '6px' }}>
+          <tbody>
+            <tr>
+              <td style={{ width: '30px', padding: '4px 0', verticalAlign: 'bottom', whiteSpace: 'nowrap', fontSize: '1.0em' }}>
+                <strong>ที่</strong>
+              </td>
+              <td style={{ borderBottom: '1px dotted #000000', padding: '4px 0 2px 8px', verticalAlign: 'bottom', fontSize: '1.0em' }}>
+                {toThaiDigits(docNo)}
+              </td>
+              <td style={{ width: '30px', padding: '4px 0', verticalAlign: 'bottom' }}>&nbsp;</td>
+              <td style={{ width: '55px', padding: '4px 0', verticalAlign: 'bottom', whiteSpace: 'nowrap', fontSize: '1.0em' }}>
+                <strong>วันที่</strong>
+              </td>
+              <td style={{ width: '280px', borderBottom: '1px dotted #000000', padding: '4px 0 2px 8px', verticalAlign: 'bottom', fontSize: '1.0em' }}>
+                {formatThaiFullDate(docDate)}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        {/* Row 3: เรื่อง */}
+        <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '8px' }}>
+          <tbody>
+            <tr>
+              <td style={{ width: '50px', padding: '4px 0', verticalAlign: 'bottom', whiteSpace: 'nowrap', fontSize: '1.0em' }}>
+                <strong>เรื่อง</strong>
+              </td>
+              <td style={{ borderBottom: '1px dotted #000000', padding: '4px 0 2px 8px', verticalAlign: 'bottom', fontWeight: 'bold', fontSize: '1.0em' }}>
+                {toThaiDigits(subject)}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <hr style={{ border: 'none', borderTop: '2px solid #000000', margin: '2px 0 16px 0' }} />
 
       {/* Memorandum Content Body */}
       <div className="memo-body">

@@ -600,6 +600,8 @@ export default function App() {
           repairRequest={printingRepairRequest}
           asset={assets.find(a => a.id === printingRepairRequest.asset_id)}
           onClose={() => setPrintingRepairRequest(null)}
+          currentUser={currentUser}
+          custodians={custodians}
         />
       )}
 
