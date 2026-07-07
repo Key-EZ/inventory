@@ -50,6 +50,9 @@ router.post('/', async (req, res) => {
 });
 
 router.put('/:id/start', async (req, res) => {
+  if (req.user.role !== 'TECHNICIAN') {
+    return res.status(403).json({ success: false, message: 'Forbidden: Only technicians are allowed to manage repair jobs' });
+  }
   try {
     const repairs = await executeQuery('SELECT * FROM repair_requests WHERE id = ?', [req.params.id]);
     if (repairs.length === 0) {
@@ -75,6 +78,9 @@ router.put('/:id/start', async (req, res) => {
 });
 
 router.put('/:id/reject', async (req, res) => {
+  if (req.user.role !== 'TECHNICIAN') {
+    return res.status(403).json({ success: false, message: 'Forbidden: Only technicians are allowed to manage repair jobs' });
+  }
   try {
     const repairs = await executeQuery('SELECT * FROM repair_requests WHERE id = ?', [req.params.id]);
     if (repairs.length === 0) {
@@ -102,6 +108,9 @@ router.put('/:id/reject', async (req, res) => {
 });
 
 router.put('/:id/complete', async (req, res) => {
+  if (req.user.role !== 'TECHNICIAN') {
+    return res.status(403).json({ success: false, message: 'Forbidden: Only technicians are allowed to manage repair jobs' });
+  }
   const pool = getPool();
   const connection = await pool.getConnection();
   try {

@@ -35,6 +35,7 @@ export default function useInventory() {
   const [ssoError, setSsoError] = useState(null);
   const isAdmin = !!currentUser;
   const isSystemAdmin = currentUser?.role === 'ADMIN';
+  const isTechnician = currentUser?.role === 'TECHNICIAN';
 
   const handleLoginSuccess = (user, token) => {
     sessionStorage.setItem('inventory_user', JSON.stringify(user));
@@ -847,6 +848,7 @@ export default function useInventory() {
     currentUser,
     isAdmin,
     isSystemAdmin,
+    isTechnician,
     token,
     isBackendOnline,
     ssoError,

@@ -107,6 +107,7 @@ export default function App() {
     currentUser,
     isAdmin,
     isSystemAdmin,
+    isTechnician,
     logout,
     handleLoginSuccess,
     ssoError,
@@ -182,24 +183,36 @@ export default function App() {
 
 
   const handleGuardedStartRepairJob = (requestId) => {
-    if (!isAdmin) {
+    if (!currentUser) {
       setIsLoginModalOpen(true);
+      return;
+    }
+    if (!isTechnician) {
+      alert('เฉพาะผู้ใช้งานระดับช่างเทคนิค (Technician) เท่านั้นที่สามารถรับงานซ่อมได้');
       return;
     }
     handleStartRepairJob(requestId);
   };
 
   const handleGuardedRejectRepairJob = (requestId, reason) => {
-    if (!isAdmin) {
+    if (!currentUser) {
       setIsLoginModalOpen(true);
+      return;
+    }
+    if (!isTechnician) {
+      alert('เฉพาะผู้ใช้งานระดับช่างเทคนิค (Technician) เท่านั้นที่สามารถปฏิเสธงานซ่อมได้');
       return;
     }
     handleRejectRepairJob(requestId, reason);
   };
 
   const handleGuardedCompleteRepairJob = (requestId, cost, contractor, approvalDate, documentNumber, notes) => {
-    if (!isAdmin) {
+    if (!currentUser) {
       setIsLoginModalOpen(true);
+      return;
+    }
+    if (!isTechnician) {
+      alert('เฉพาะผู้ใช้งานระดับช่างเทคนิค (Technician) เท่านั้นที่สามารถบันทึกซ่อมเสร็จได้');
       return;
     }
     handleCompleteRepairJob(requestId, cost, contractor, approvalDate, documentNumber, notes);
