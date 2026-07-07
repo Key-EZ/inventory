@@ -146,7 +146,16 @@ export default function useInventory() {
         },
         body: JSON.stringify(updatedFields)
       });
-      if (!res.ok) {
+      if (res.ok) {
+        if (updatedFields.categoryDepreciationYears) {
+          const assetsRes = await fetch(API_BASE_URL + '/assets', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (assetsRes.ok) {
+            setAssets(await assetsRes.json());
+          }
+        }
+      } else {
         const errorText = await res.text();
         console.error('Failed to save settings:', errorText);
       }
@@ -508,40 +517,80 @@ export default function useInventory() {
   };
 
   // --- Category CRUD ---
-  const handleAddLandCategory = (cat) => {
+  const handleAddLandCategory = (cat, years) => {
     const list = [...landBuildingCategories, cat];
     setLandBuildingCategories(list);
-    saveSettingsBackend({ landBuildingCategories: list });
+    const updatedYears = { ...categoryDepreciationYears, [cat]: years !== undefined ? years : 20 };
+    setCategoryDepreciationYears(updatedYears);
+    saveSettingsBackend({ 
+      landBuildingCategories: list,
+      categoryDepreciationYears: updatedYears
+    });
   };
 
-  const handleEditLandCategory = (oldCat, newCat) => {
+  const handleEditLandCategory = (oldCat, newCat, years) => {
     const list = landBuildingCategories.map(c => c === oldCat ? newCat : c);
     setLandBuildingCategories(list);
-    saveSettingsBackend({ landBuildingCategories: list });
+    const updatedYears = { ...categoryDepreciationYears };
+    if (oldCat !== newCat) {
+      delete updatedYears[oldCat];
+    }
+    updatedYears[newCat] = years !== undefined ? years : 20;
+    setCategoryDepreciationYears(updatedYears);
+    saveSettingsBackend({ 
+      landBuildingCategories: list,
+      categoryDepreciationYears: updatedYears
+    });
   };
 
   const handleDeleteLandCategory = (cat) => {
     const list = landBuildingCategories.filter(c => c !== cat);
     setLandBuildingCategories(list);
-    saveSettingsBackend({ landBuildingCategories: list });
+    const updatedYears = { ...categoryDepreciationYears };
+    delete updatedYears[cat];
+    setCategoryDepreciationYears(updatedYears);
+    saveSettingsBackend({ 
+      landBuildingCategories: list,
+      categoryDepreciationYears: updatedYears
+    });
   };
 
-  const handleAddEquipmentCategory = (cat) => {
+  const handleAddEquipmentCategory = (cat, years) => {
     const list = [...equipmentCategories, cat];
     setEquipmentCategories(list);
-    saveSettingsBackend({ equipmentCategories: list });
+    const updatedYears = { ...categoryDepreciationYears, [cat]: years !== undefined ? years : 5 };
+    setCategoryDepreciationYears(updatedYears);
+    saveSettingsBackend({ 
+      equipmentCategories: list,
+      categoryDepreciationYears: updatedYears
+    });
   };
 
-  const handleEditEquipmentCategory = (oldCat, newCat) => {
+  const handleEditEquipmentCategory = (oldCat, newCat, years) => {
     const list = equipmentCategories.map(c => c === oldCat ? newCat : c);
     setEquipmentCategories(list);
-    saveSettingsBackend({ equipmentCategories: list });
+    const updatedYears = { ...categoryDepreciationYears };
+    if (oldCat !== newCat) {
+      delete updatedYears[oldCat];
+    }
+    updatedYears[newCat] = years !== undefined ? years : 5;
+    setCategoryDepreciationYears(updatedYears);
+    saveSettingsBackend({ 
+      equipmentCategories: list,
+      categoryDepreciationYears: updatedYears
+    });
   };
 
   const handleDeleteEquipmentCategory = (cat) => {
     const list = equipmentCategories.filter(c => c !== cat);
     setEquipmentCategories(list);
-    saveSettingsBackend({ equipmentCategories: list });
+    const updatedYears = { ...categoryDepreciationYears };
+    delete updatedYears[cat];
+    setCategoryDepreciationYears(updatedYears);
+    saveSettingsBackend({ 
+      equipmentCategories: list,
+      categoryDepreciationYears: updatedYears
+    });
   };
 
   // --- Agency CRUD ---
