@@ -158,6 +158,11 @@ export default function App() {
     openRepairForm(asset, tab);
   };
 
+  const handleLogout = () => {
+    logout();
+    changeLayout('centered');
+  };
+
   const handleOpenCustodianModal = (item) => {
     if (!isAdmin) {
       setIsLoginModalOpen(true);
@@ -272,7 +277,7 @@ export default function App() {
             <li className="sidebar-menu-item" style={{ cursor: 'default', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
               👤 {currentUser.name} ({currentUser.role === 'ADMIN' ? 'Admin' : currentUser.role === 'TECHNICIAN' ? 'นายช่าง' : 'SSO'})
             </li>
-            <li className="sidebar-menu-item" onClick={logout} style={{ color: 'rgb(220, 38, 38)' }}>
+            <li className="sidebar-menu-item" onClick={handleLogout} style={{ color: 'rgb(220, 38, 38)' }}>
               🔓 ออกจากระบบ
             </li>
           </>
@@ -681,7 +686,7 @@ export default function App() {
                   <li className="sidebar-menu-item" style={{ cursor: 'default', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
                     👤 {currentUser.name}
                   </li>
-                  <li className="sidebar-menu-item" onClick={() => { setIsMobileMenuOpen(false); logout(); }} style={{ color: 'rgb(220, 38, 38)' }}>
+                  <li className="sidebar-menu-item" onClick={() => { setIsMobileMenuOpen(false); handleLogout(); }} style={{ color: 'rgb(220, 38, 38)' }}>
                     🔓 ออกจากระบบ
                   </li>
                 </>
