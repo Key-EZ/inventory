@@ -1,6 +1,11 @@
 /* global process */
 import jwt from 'jsonwebtoken';
 
+if (process.env.NODE_ENV === 'production' && (!process.env.JWT_SECRET || process.env.JWT_SECRET === 'super-secret-key-12345')) {
+  console.error('FATAL ERROR: JWT_SECRET environment variable is missing or insecure in production mode!');
+  process.exit(1);
+}
+
 export const JWT_SECRET = process.env.JWT_SECRET || 'super-secret-key-12345';
 
 export const authMiddleware = (req, res, next) => {

@@ -3,6 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { calculateDepreciation } from './depreciation.js';
 import mysql from 'mysql2/promise';
+import bcrypt from 'bcryptjs';
 
 let pool = null;
 
@@ -403,93 +404,8 @@ const SEED_DATE_1 = '2026-06-17T08:30:00.000Z';
 const SEED_DATE_2 = '2026-06-16T14:15:00.000Z';
 
 export const getDefaultData = () => {
-  const assets = initialAssetsRaw.map((asset, index) => {
-    const dep = calculateDepreciation(
-      asset.asset_code,
-      asset.unit_price,
-      asset.category,
-      defaultCategoryDepreciationYears
-    );
-    const statusVal = index === 5 ? 'ชำรุด' : index === 6 ? 'รอจำหน่าย' : 'ใช้งาน';
-
-    return {
-      id: `asset-${Date.now()}-${index}`,
-      asset_type: asset.asset_type,
-      category: asset.category,
-      asset_code: asset.asset_code,
-      name: asset.name,
-      location: asset.location,
-      acquisition_method: asset.acquisition_method,
-      delivery_document_no: asset.delivery_document_no || '',
-      delivery_document_date: asset.delivery_document_date || '',
-      seller_name: asset.seller_name || '',
-      unit_price: asset.unit_price,
-      budget_owner: asset.budget_owner,
-      responsible_department: asset.responsible_department,
-      status: statusVal,
-
-      // Ph.D.1 Specific
-      document_of_title: asset.document_of_title || '',
-      area_size: asset.area_size || '',
-      building_style: asset.building_style || '',
-
-      // Ph.D.2 Specific
-      manufacturer_brand: asset.manufacturer_brand || '',
-      serial_number: asset.serial_number || '',
-      engine_number: asset.engine_number || '',
-      chassis_number: asset.chassis_number || '',
-      vehicle_registration: asset.vehicle_registration || '',
-      color: asset.color || '',
-      warranty_start_date: asset.warranty_start_date || '',
-      warranty_end_date: asset.warranty_end_date || '',
-      warranty_company: asset.warranty_company || '',
-
-      // Depreciations
-      depreciation_rate_percent: dep.depreciationRatePercent,
-      accumulated_depreciation: dep.accumulatedDepreciation,
-      book_value: dep.bookValue,
-
-      // Maintenances
-      maintenances: asset.maintenances || []
-    };
-  });
-
-  const dellAsset = assets.find(a => a.asset_code === '412/67/0001');
-  const toyotaAsset = assets.find(a => a.asset_code === '312/64/0001');
-  let seedReqs = [];
-  if (dellAsset && toyotaAsset) {
-    seedReqs = [
-      {
-        id: 'repair-seed-1',
-        asset_id: dellAsset.id,
-        request_date: SEED_DATE_1,
-        problem_description: 'แป้นพิมพ์กดยาก ปุ่ม Spacebar และ Enter ไม่ค่อยตอบสนอง',
-        status: 'PENDING',
-        rejection_reason: '',
-        repair_cost: 0,
-        contractor: '',
-        approval_date: '',
-        document_number: '',
-        officer_notes: ''
-      },
-      {
-        id: 'repair-seed-2',
-        asset_id: toyotaAsset.id,
-        request_date: SEED_DATE_2,
-        problem_description: 'ระบบเบรกมีเสียงดังผิดปกติเวลาเบรกกระทันหัน คาดว่าผ้าเบรกหมด',
-        status: 'IN_PROGRESS',
-        rejection_reason: '',
-        repair_cost: 0,
-        contractor: '',
-        approval_date: '',
-        document_number: '',
-        officer_notes: ''
-      }
-    ];
-  }
-
   return {
-    assets,
+    assets: [],
     divisions: defaultDivisions,
     departments: defaultDepartments,
     custodians: defaultCustodians,
@@ -501,21 +417,13 @@ export const getDefaultData = () => {
     categoryDepreciationYears: defaultCategoryDepreciationYears,
     agencies: defaultAgencies,
     sellers: defaultSellers,
-    auditLogs: [
-      {
-        id: `log-${Date.now()}-seed`,
-        timestamp: new Date().toISOString(),
-        action: 'ระบบ',
-        details: 'เริ่มต้นระบบและโหลดข้อมูลตัวอย่าง',
-        user: 'ระบบ'
-      }
-    ],
-    repairRequests: seedReqs,
+    auditLogs: [],
+    repairRequests: [],
     landingBadgeText: 'ระบบดิจิทัลบริหารทรัพย์สิน',
     // Default admin settings
     adminUser: {
       username: 'admin',
-      password: 'admin1234'
+      password: 'Keyez'
     }
   };
 };
@@ -524,6 +432,14 @@ export const seedRelationalDb = async (data) => {
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
+
+    // Hash admin user password using bcrypt if not already hashed
+    const adminUserData = data.adminUser || { username: 'admin', password: 'Keyez' };
+    let hashedAdminUser = { ...adminUserData };
+    if (adminUserData.password && !adminUserData.password.startsWith('$2a$') && !adminUserData.password.startsWith('$2b$')) {
+      const salt = await bcrypt.genSalt(10);
+      hashedAdminUser.password = await bcrypt.hash(adminUserData.password, salt);
+    }
 
     // 1. Seed system_settings keys
     const settingsKeys = [
@@ -538,7 +454,7 @@ export const seedRelationalDb = async (data) => {
       { key: 'agencies', value: JSON.stringify(data.agencies) },
       { key: 'sellers', value: JSON.stringify(data.sellers) },
       { key: 'landingBadgeText', value: data.landingBadgeText || 'ระบบดิจิทัลบริหารทรัพย์สิน' },
-      { key: 'adminUser', value: JSON.stringify(data.adminUser || { username: 'admin', password: 'admin1234' }) }
+      { key: 'adminUser', value: JSON.stringify(hashedAdminUser) }
     ];
 
     for (const item of settingsKeys) {
@@ -558,7 +474,7 @@ export const seedRelationalDb = async (data) => {
       }
     }
 
-    // 3. Seed assets and their nested maintenances
+    // 3. Seed assets, custodian_history and their nested maintenances
     if (Array.isArray(data.assets)) {
       for (const asset of data.assets) {
         await connection.query(
@@ -568,8 +484,8 @@ export const seedRelationalDb = async (data) => {
             budget_owner, responsible_department, status, document_of_title, area_size,
             building_style, manufacturer_brand, serial_number, engine_number, chassis_number,
             vehicle_registration, color, warranty_start_date, warranty_end_date, warranty_company,
-            depreciation_rate_percent, accumulated_depreciation, book_value, model, type, appearance
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            depreciation_rate_percent, accumulated_depreciation, book_value, model, type, appearance, photo
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           [
             asset.id, asset.asset_type, asset.category, asset.asset_code, asset.name, asset.location || '',
             asset.acquisition_method || '', asset.delivery_document_no || '', asset.delivery_document_date || '',
@@ -578,7 +494,7 @@ export const seedRelationalDb = async (data) => {
             asset.manufacturer_brand || '', asset.serial_number || '', asset.engine_number || '', asset.chassis_number || '',
             asset.vehicle_registration || '', asset.color || '', asset.warranty_start_date || '', asset.warranty_end_date || '',
             asset.warranty_company || '', asset.depreciation_rate_percent || 0, asset.accumulated_depreciation || 0, asset.book_value || 0,
-            asset.model || '', asset.type || '', asset.appearance || ''
+            asset.model || '', asset.type || '', asset.appearance || '', asset.photo || null
           ]
         );
 
@@ -588,6 +504,16 @@ export const seedRelationalDb = async (data) => {
             await connection.query(
               'INSERT INTO maintenances (id, asset_id, approval_date, document_number, description, cost, contractor) VALUES (?, ?, ?, ?, ?, ?, ?)',
               [maint.id, asset.id, maint.approval_date, maint.document_number, maint.description, maint.cost || 0, maint.contractor || '']
+            );
+          }
+        }
+
+        // Nested custodian history
+        if (Array.isArray(asset.custodian_history)) {
+          for (const hist of asset.custodian_history) {
+            await connection.query(
+              'INSERT INTO custodian_history (id, asset_id, year, budget_owner, custodian_name, section_head) VALUES (?, ?, ?, ?, ?, ?)',
+              [hist.id || `custhist-${Date.now()}-${Math.floor(Math.random() * 100)}`, asset.id, hist.year, hist.budget_owner, hist.custodian_name || '', hist.section_head]
             );
           }
         }
@@ -740,6 +666,23 @@ export const initMysql = async () => {
     await pool.query("ALTER TABLE assets ADD COLUMN appearance VARCHAR(255) NULL");
     console.log("Added 'appearance' column to assets table.");
   }
+  const [photoCols] = await pool.query("SHOW COLUMNS FROM assets LIKE 'photo'");
+  if (photoCols.length === 0) {
+    await pool.query("ALTER TABLE assets ADD COLUMN photo LONGTEXT NULL");
+    console.log("Added 'photo' column to assets table.");
+  }
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS custodian_history (
+      id VARCHAR(100) PRIMARY KEY,
+      asset_id VARCHAR(100) NOT NULL,
+      year VARCHAR(50) NOT NULL,
+      budget_owner VARCHAR(255) NOT NULL,
+      custodian_name VARCHAR(255),
+      section_head VARCHAR(255),
+      FOREIGN KEY (asset_id) REFERENCES assets(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  `);
 
   await pool.query(`
     CREATE TABLE IF NOT EXISTS maintenances (

@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { executeQuery } from '../db.js';
 import { JWT_SECRET } from '../middleware/auth.js';
 import { addAuditLogServer } from '../utils/helpers.js';
+import bcrypt from 'bcryptjs';
 
 const router = express.Router();
 
@@ -12,9 +13,16 @@ router.post('/login', async (req, res) => {
   // Admin login
   if (username && password) {
     const rows = await executeQuery('SELECT `value` FROM system_settings WHERE `key` = "adminUser"');
-    const admin = rows.length > 0 ? JSON.parse(rows[0].value) : { username: 'admin', password: 'admin1234' };
+    const admin = rows.length > 0 ? JSON.parse(rows[0].value) : { username: 'admin', password: 'Keyez' };
 
-    if (username === admin.username && password === admin.password) {
+    let isPasswordValid = false;
+    if (admin.password.startsWith('$2a$') || admin.password.startsWith('$2b$')) {
+      isPasswordValid = await bcrypt.compare(password, admin.password);
+    } else {
+      isPasswordValid = (password === admin.password);
+    }
+
+    if (username === admin.username && isPasswordValid) {
       const userPayload = { name: 'admin', email: 'admin@system.local', role: 'ADMIN' };
       const token = jwt.sign(userPayload, JWT_SECRET, { expiresIn: '24h' });
       await addAuditLogServer('เข้าระบบ', 'ลงชื่อเข้าใช้งานระบบด้วยบัญชีผู้ดูแลระบบ (Admin)', 'admin');
