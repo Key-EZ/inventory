@@ -82,9 +82,10 @@ router.put('/', async (req, res) => {
     if (req.body.custodians !== undefined) {
       await connection.query('DELETE FROM custodians');
       for (const cust of req.body.custodians) {
+        const cleanEmail = cust.email && cust.email.trim() ? cust.email.trim() : null;
         await connection.query(
           'INSERT INTO custodians (id, name, position, division, department, email, role) VALUES (?, ?, ?, ?, ?, ?, ?)',
-          [cust.id, cust.name, cust.position || '', cust.division || '', cust.department || '', cust.email || '', cust.role || 'CUSTODIAN']
+          [cust.id, cust.name, cust.position || '', cust.division || '', cust.department || '', cleanEmail, cust.role || 'CUSTODIAN']
         );
       }
     }

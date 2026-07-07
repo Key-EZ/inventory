@@ -467,9 +467,10 @@ export const seedRelationalDb = async (data) => {
     // 2. Seed custodians
     if (Array.isArray(data.custodians)) {
       for (const cust of data.custodians) {
+        const cleanEmail = cust.email && cust.email.trim() ? cust.email.trim() : null;
         await connection.query(
           'INSERT INTO custodians (id, name, position, division, department, email) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE name=?',
-          [cust.id, cust.name, cust.position || '', cust.division || '', cust.department || '', cust.email || '', cust.name]
+          [cust.id, cust.name, cust.position || '', cust.division || '', cust.department || '', cleanEmail, cust.name]
         );
       }
     }
