@@ -71,9 +71,41 @@ export default function DataManagementTab({ assets = [], onImportAssets }) {
           assetsList = csvToAssets(text);
         }
 
+        // Normalize assets list fields before validation
+        const normalizedList = assetsList.map(item => {
+          const normalized = { ...item };
+          
+          // Normalize asset_type
+          if (normalized.asset_type) {
+            const typeStr = String(normalized.asset_type).trim().toUpperCase();
+            if (typeStr === 'EQUIPMENT' || typeStr === 'LAND_BUILDING') {
+              normalized.asset_type = typeStr;
+            } else if (String(normalized.asset_type).includes('ครุภัณฑ์') || typeStr.startsWith('EQ')) {
+              normalized.asset_type = 'EQUIPMENT';
+            } else if (String(normalized.asset_type).includes('ที่ดิน') || String(normalized.asset_type).includes('อาคาร') || String(normalized.asset_type).includes('สิ่งปลูกสร้าง') || typeStr.startsWith('LA')) {
+              normalized.asset_type = 'LAND_BUILDING';
+            }
+          }
+
+          // Normalize unit_price
+          if (normalized.unit_price !== undefined && normalized.unit_price !== null) {
+            if (typeof normalized.unit_price === 'string') {
+              const cleanVal = normalized.unit_price.replace(/,/g, '').replace(/฿/g, '').replace(/\s/g, '');
+              const parsed = parseFloat(cleanVal);
+              normalized.unit_price = isNaN(parsed) ? 0 : parsed;
+            } else if (typeof normalized.unit_price !== 'number') {
+              normalized.unit_price = parseFloat(normalized.unit_price) || 0;
+            }
+          } else {
+            normalized.unit_price = 0;
+          }
+
+          return normalized;
+        });
+
         // Validate preview
         const rowErrors = [];
-        const validatedList = assetsList.map((item, idx) => {
+        const validatedList = normalizedList.map((item, idx) => {
           const rowNum = idx + 1;
           const errors = [];
           if (!item.name) errors.push('ไม่มีชื่อพัสดุ');

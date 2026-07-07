@@ -174,7 +174,25 @@ export function csvToAssets(csvText) {
       row.forEach((cell, idx) => {
         const key = headerKeys[idx];
         if (key) {
-          asset[key] = cell.trim();
+          const val = cell.trim();
+          if (key === 'unit_price') {
+            const cleanVal = val.replace(/,/g, '').replace(/฿/g, '').replace(/\s/g, '');
+            const parsed = parseFloat(cleanVal);
+            asset[key] = isNaN(parsed) ? 0 : parsed;
+          } else if (key === 'asset_type') {
+            const cleanVal = val.toUpperCase().trim();
+            if (cleanVal === 'EQUIPMENT' || cleanVal === 'LAND_BUILDING') {
+              asset[key] = cleanVal;
+            } else if (val.includes('ครุภัณฑ์') || cleanVal.startsWith('EQ')) {
+              asset[key] = 'EQUIPMENT';
+            } else if (val.includes('ที่ดิน') || val.includes('อาคาร') || val.includes('สิ่งปลูกสร้าง') || cleanVal.startsWith('LA')) {
+              asset[key] = 'LAND_BUILDING';
+            } else {
+              asset[key] = val; // preserve original for validation error
+            }
+          } else {
+            asset[key] = val;
+          }
         }
       });
       return asset;
