@@ -54,7 +54,7 @@ export default function LoginModal({
           setErrorMsg('ไม่พบอีเมลนี้ในข้อมูลพนักงานผู้ดูแล (โหมดออฟไลน์)');
         }
       } else {
-        if (usernameInput.trim() === 'admin' && passwordInput === 'admin1234') {
+        if (usernameInput.trim() === 'admin' && passwordInput === 'Keyez') {
           onLoginSuccess({
             name: 'admin',
             email: 'admin@system.local',
@@ -178,7 +178,7 @@ export default function LoginModal({
                   required={activeTab === 'admin'}
                 />
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block', marginTop: '6px' }}>
-                  ข้อมูลผู้ดูแลเริ่มต้น: <code>admin</code> / <code>admin1234</code>
+                  ข้อมูลผู้ดูแลเริ่มต้น: <code>admin</code> / <code>Keyez</code>
                 </span>
               </div>
             </div>
