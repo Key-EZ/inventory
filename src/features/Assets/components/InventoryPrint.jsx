@@ -182,7 +182,13 @@ export default function InventoryPrint({ asset, onClose }) {
             budgetSource: asset.budget_owner || "-",
             price: (asset.unit_price || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
             brand: asset.manufacturer_brand || "-",
-            model: asset.building_style || "-",
+            model: (() => {
+                const parts = [];
+                if (asset.model) parts.push(asset.model);
+                if (asset.type) parts.push(asset.type);
+                if (asset.appearance) parts.push(asset.appearance);
+                return parts.length > 0 ? parts.join(' / ') : (asset.building_style || "-");
+            })(),
             carNumber: asset.vehicle_registration || "-",
             engineNumber: asset.engine_number || "-",
             chassisNumber: asset.chassis_number || "-",
