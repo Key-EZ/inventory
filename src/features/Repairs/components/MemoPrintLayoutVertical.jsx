@@ -100,7 +100,7 @@ export default function MemoPrintLayoutVertical({
         </div>
 
         <div className="memo-paragraph">
-          ด้วยกอง {toThaiDigits(asset.responsible_department) || 'งานพัสดุ'} มีความประสงค์จะขออนุมัติ
+          ด้วย {toThaiDigits(asset.responsible_department) || 'งานพัสดุ'} มีความประสงค์จะขออนุมัติ
           ดำเนินการซ่อมแซมทรัพย์สินครุภัณฑ์ประเภท {toThaiDigits(asset.category) || 'ครุภัณฑ์'} ประจำหน่วยงาน
           รหัสครุภัณฑ์ {toThaiDigits(asset.asset_code)} รายการ {toThaiDigits(asset.name)}
           ซึ่งได้เกิดการชำรุดเสียหาย โดยมีอาการชำรุดเสียหายคือ {toThaiDigits(repairRequest.problem_description)}
@@ -120,18 +120,18 @@ export default function MemoPrintLayoutVertical({
       <div className="memo-signatures-grid" style={{ marginBottom: '15px' }}>
         <div>&nbsp;</div>
         <div className="memo-signature-block">
-          <div style={{ marginBottom: '24px' }}>(ลงชื่อ)............................................................ ผู้แจ้ง/รายงาน</div>
+          <div style={{ marginBottom: '24px' }}></div>
           <div>( {toThaiDigits(requesterName)} )</div>
-          <div style={{ fontSize: '14px', color: '#333', marginTop: '2px' }}>ตำแหน่ง {toThaiDigits(requesterPosition)}</div>
+          <div style={{ fontSize: '14px', color: '#333', marginTop: '2px' }}> {toThaiDigits(requesterPosition)}</div>
         </div>
       </div>
 
       <div className="memo-section-divider"></div>
 
       {/* Committee Inspection Section */}
-      <div style={{ fontSize: '15px', fontWeight: 'bold', marginBottom: '8px' }}>📋 ความเห็นของเจ้าหน้าที่พัสดุ / บันทึกผลการตรวจสภาพครุภัณฑ์</div>
+      <div style={{ fontSize: '15px', fontWeight: 'bold', marginBottom: '8px' }}>บันทึกผลการตรวจสภาพครุภัณฑ์</div>
       <div style={{ textIndent: '1.5cm', fontSize: '14.5px', lineHeight: '1.6' }}>
-        ได้ดำเนินการตรวจสอบสภาพความชำรุดเสียหายของครุภัณฑ์ <strong>{toThaiDigits(asset.name)} (รหัส {toThaiDigits(asset.asset_code)})</strong> แล้ว ปรากฏว่าเกิดการชำรุดเสียหายตามสภาพจริงดังกล่าว เห็นควรดำเนินการจัดจ้างซ่อมแซมให้อยู่ในสภาพใช้งานราชการได้ตามปกติ โดยประมาณการค่าซ่อมแซมเบื้องต้นเป็นเงินสุทธิ <span className="dotted-line" style={{ width: '120px', textAlign: 'center', fontWeight: 'bold' }}>{estimatedCost ? toThaiDigits(parseFloat(estimatedCost).toLocaleString()) : '........................'}</span> บาท
+        ได้ดำเนินการตรวจสอบสภาพความชำรุดเสียหายของครุภัณฑ์ {toThaiDigits(asset.name)} (รหัส {toThaiDigits(asset.asset_code)}) แล้ว ปรากฏว่าเกิดการชำรุดเสียหายตามสภาพจริงดังกล่าว เห็นควรดำเนินการจัดจ้างซ่อมแซมให้อยู่ในสภาพใช้งานราชการได้ตามปกติ
       </div>
 
       {/* Committee Table */}
@@ -162,7 +162,7 @@ export default function MemoPrintLayoutVertical({
       <div className="memo-section-divider" style={{ margin: '15px 0' }}></div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', fontSize: '14.5px' }}>
         <div style={{ borderRight: '1px solid #ddd', paddingRight: '15px' }}>
-          <div style={{ fontWeight: 'bold', marginBottom: '6px' }}>💰 การตรวจสอบงบประมาณ</div>
+          <div style={{ fontWeight: 'bold', marginBottom: '6px' }}>การตรวจสอบงบประมาณ</div>
           <div style={{ marginBottom: '8px' }}>[  ] มีงบประมาณเพียงพอเพื่อดำเนินการซ่อมแซม</div>
           <div style={{ marginBottom: '16px' }}>[  ] อื่นๆ ..............................................................</div>
           <div style={{ textAlign: 'center' }}>
@@ -173,7 +173,7 @@ export default function MemoPrintLayoutVertical({
         </div>
 
         <div style={{ paddingLeft: '5px' }}>
-          <div style={{ fontWeight: 'bold', marginBottom: '6px' }}>🏢 ความเห็นของผู้อำนวยการกอง</div>
+          <div style={{ fontWeight: 'bold', marginBottom: '6px' }}>ความเห็นของผู้อำนวยการกอง</div>
           <div style={{ marginBottom: '24px' }}>เห็นควรเสนอผ่านปลัดเทศบาล เพื่อเสนออนุมัติต่อไป</div>
           <div style={{ textAlign: 'center' }}>
             <div style={{ marginBottom: '18px' }}>(ลงชื่อ)............................................................ ผอ.กอง</div>
@@ -187,7 +187,7 @@ export default function MemoPrintLayoutVertical({
       <div className="memo-section-divider" style={{ margin: '15px 0' }}></div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', fontSize: '14.5px' }}>
         <div style={{ borderRight: '1px solid #ddd', paddingRight: '15px', textAlign: 'center' }}>
-          <div style={{ fontWeight: 'bold', marginBottom: '8px', textAlign: 'left' }}>👔 ความเห็นของปลัดเทศบาล</div>
+          <div style={{ fontWeight: 'bold', marginBottom: '8px', textAlign: 'left' }}>ความเห็นของปลัดเทศบาล</div>
           <div style={{ marginBottom: '24px', textAlign: 'left' }}>[  ] เห็นควรอนุมัติเพื่อดำเนินราชการต่อไป</div>
           <div style={{ marginBottom: '18px' }}>(ลงชื่อ)............................................................ ปลัดเทศบาล</div>
           <div>( {toThaiDigits(clerkName)} )</div>
@@ -195,8 +195,8 @@ export default function MemoPrintLayoutVertical({
         </div>
 
         <div style={{ paddingLeft: '5px', textAlign: 'center' }}>
-          <div style={{ fontWeight: 'bold', marginBottom: '8px', textAlign: 'left' }}>👑 คำสั่ง/อนุมัติ นายกเทศมนตรี</div>
-          <div style={{ marginBottom: '24px', textAlign: 'left' }}>[  ] ออนุมัติการแจ้งซ่อมและแต่งตั้งคณะกรรมการ</div>
+          <div style={{ fontWeight: 'bold', marginBottom: '8px', textAlign: 'left' }}>คำสั่ง/อนุมัติ นายกเทศมนตรี</div>
+          <div style={{ marginBottom: '24px', textAlign: 'left' }}>[  ] อนุมัติการแจ้งซ่อมและแต่งตั้งคณะกรรมการ</div>
           <div style={{ marginBottom: '18px' }}>(ลงชื่อ)............................................................ นายกเทศมนตรี</div>
           <div>( {toThaiDigits(mayorName)} )</div>
           <div style={{ fontSize: '13px', marginTop: '2px' }}>{toThaiDigits(mayorPosition)}</div>
