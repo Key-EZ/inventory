@@ -1,12 +1,12 @@
 # เอกสารอธิบายโครงสร้างข้อมูล ชนิดของข้อมูล ความสัมพันธ์ และตัวอย่าง (Data Specification)
 
-เอกสารฉบับนี้อธิบายรายละเอียดเกี่ยวกับโมเดลข้อมูล (Data Model) ชนิดของข้อมูล (Data Types) ความสัมพันธ์ (Relationships) และการคำนวณค่าเสื่อมราคาที่ใช้ในระบบจัดการครุภัณฑ์และสินทรัพย์ (Inventory Management System) ของแอปพลิเคชันนี้ โดยปรับโครงสร้างตามตารางฐานข้อมูลหลัก (Flat Table Structure) ของแบบทะเบียน พ.ด.1 และ พ.ด.2
+เอกสารฉบับนี้อธิบายรายละเอียดเกี่ยวกับโมเดลข้อมูล (Data Model) ชนิดของข้อมูล (Data Types) ความสัมพันธ์ (Relationships) และการคำนวณค่าเสื่อมราคาที่ใช้ในระบบจัดการครุภัณฑ์และสินทรัพย์ (Inventory Management System) ของแอปพลิเคชันนี้ โดยปรับโครงสร้างตามตารางฐานข้อมูลหลัก (Flat Table Structure) ของแบบทะเบียน พ.ด.1 และ พ.ด.2 รวมถึงส่วนของการแจ้งซ่อมและประวัติผู้ดูแลรับผิดชอบ
 
 ---
 
 ## 1. โครงสร้างข้อมูลหลัก (Data Entities & Fields)
 
-ระบบประกอบด้วยโครงสร้างข้อมูลหลัก 3 ส่วน ได้แก่ **ทะเบียนทรัพย์สินและพัสดุ (Assets)**, **ประวัติการซ่อมบำรุงรักษา (Asset Maintenances)** และ **ผู้ดูแลรับผิดชอบ (Custodian)**
+ระบบประกอบด้วยโครงสร้างข้อมูลหลัก 5 ส่วน ได้แก่ **ทะเบียนทรัพย์สินและพัสดุ (Assets)**, **ประวัติการซ่อมบำรุงรักษา (Asset Maintenances)**, **ผู้ดูแลรับผิดชอบ (Custodian)**, **คำขอส่งซ่อม (Repair Requests)** และ **บันทึกกิจกรรมระบบ (Audit Logs)**
 
 ### 1.1 ข้อมูลทรัพย์สิน/พัสดุ (Assets)
 เป็นข้อมูลที่ใช้ควบคุมทะเบียนพัสดุ พ.ด.1 และ พ.ด.2 ในรูปแบบตารางเดียว (Flat Structure):
@@ -16,17 +16,21 @@
 | `id` | `String` | Primary Key | รหัสอ้างอิงภายในระบบ (เช่น `asset-1718528990000-0`) |
 | `asset_type` | `String` (Enum) | `'LAND_BUILDING'` \| `'EQUIPMENT'` | ประเภทสมุดทะเบียนหลัก (`'LAND_BUILDING'` สำหรับ พ.ด.1, `'EQUIPMENT'` สำหรับ พ.ด.2) |
 | `category` | `String` | Required | หมวดหมู่ย่อยของพัสดุ (เช่น "ครุภัณฑ์สำนักงาน", "ครุภัณฑ์คอมพิวเตอร์") |
-| `asset_code` | `String` (9 หลัก) | Unique, Format: `XXX/YY/ZZZZ` | Required| รหัสคุมพัสดุราชการ (กลุ่ม1: รหัสประเภท, กลุ่ม2: ปี พ.ศ. ที่ได้มา, กลุ่ม3: ลำดับพัสดุ) |
+| `asset_code` | `String` (9 หลัก) | Unique, Format: `XXX/YY/ZZZZ` | Required | รหัสคุมพัสดุราชการ (กลุ่ม1: รหัสประเภท, กลุ่ม2: ปี พ.ศ. ที่ได้มา, กลุ่ม3: ลำดับพัสดุ) |
 | `name` | `String` | Required | ชื่อพัสดุ/ทรัพย์สิน (เช่น "เครื่องปรับอากาศ 18000 BTU") |
-| `location` | `String` | สถานที่ตั้งพัสดุ (เช่น "ห้องธุรการทั่วไป") |
+| `location` | `String` | | สถานที่ตั้งพัสดุ (เช่น "ห้องธุรการทั่วไป") |
 | `acquisition_method` | `String` (Enum) | `'ซื้อ'` \| `'จ้าง'` \| `'รับโอน'` \| `'บริจาค'` | ลักษณะการได้กรรมสิทธิ์พัสดุ |
-| `delivery_document_no` | `String` | เลขที่ของใบส่งของหรือหนังสืออนุมัติ/สัญญาจัดหา (เช่น "นบ 0023/154", "PO-670315") |
-| `delivery_document_date` | `String` (Format: `YYYY-MM-DD`) | วันเดือนปีที่ระบุในใบส่งของหรือหนังสืออนุมัติ/สัญญาจัดหา (เช่น "2021-03-12") |
-| `seller_name` | `String` | ชื่อผู้ขายหรือคู่สัญญาจัดหา (เลือกจากที่ตั้งค่าในระบบ เช่น "บจก. เอสเอสพี คอมพิวเตอร์") |
+| `delivery_document_no` | `String` | | เลขที่ของใบส่งของหรือหนังสืออนุมัติ/สัญญาจัดหา (เช่น "นบ 0023/154", "PO-670315") |
+| `delivery_document_date` | `String` (Format: `YYYY-MM-DD`) | | วันเดือนปีที่ระบุในใบส่งของหรือหนังสืออนุมัติ/สัญญาจัดหา (เช่น "2021-03-12") |
+| `seller_name` | `String` | | ชื่อผู้ขายหรือคู่สัญญาจัดหา (เลือกจากที่ตั้งค่าในระบบ เช่น "บจก. เอสเอสพี คอมพิวเตอร์") |
 | `unit_price` | `Number` (Float) | Min: 0 | ราคาทุนต่อหน่วย (บาท) |
 | `budget_owner` | `String` | Optional | ชื่อเจ้าของงบประมาณ (เช่น "เงินงบประมาณประจำปี 2568") |
-| `responsible_department` | `String` | ชื่อส่วนราชการหรือฝ่ายที่ดูแลรับผิดชอบ (เช่น "กองช่าง", "ฝ่ายธุรการทั่วไป") |
+| `responsible_department` | `String` | | ชื่อส่วนราชการหรือฝ่ายที่ดูแลรับผิดชอบ (เช่น "กองช่าง", "ฝ่ายธุรการทั่วไป") |
 | `status` | `String` (Enum) | `'ใช้งาน'` \| `'ชำรุด'` \| `'กำลังซ่อม'` \| `'รอจำหน่าย'` \| `'จำหน่ายแล้ว'` | สถานะทางกายภาพของพัสดุ |
+| `model` | `String` | Optional | แบบ (เช่น "Latitude 5420") |
+| `type` | `String` | Optional | ชนิด (เช่น "Notebook") |
+| `appearance` | `String` | Optional | ลักษณะ (เช่น "ตัวเครื่องสีเทา จอ 14 นิ้ว") |
+| `photo` | `String` (Longtext) | Optional | รูปภาพครุภัณฑ์ (บันทึกในรูปแบบ Base64) |
 
 #### ฟิลด์เฉพาะแบบ พ.ด.1 (ที่ดินและสิ่งก่อสร้าง - `asset_type: 'LAND_BUILDING'`)
 | ชื่อฟิลด์ | ชนิดข้อมูล | คำอธิบาย |
@@ -59,14 +63,16 @@
 | `asset_id` | `String` | Foreign Key | เชื่อมโยงไปยังฟิลด์ `id` ในตาราง `assets` |
 | `approval_date` | `Date` (String) | Required | วันเดือนปีที่ได้รับอนุมัติให้ซ่อมบำรุง (Format: `YYYY-MM-DD`) |
 | `document_number` | `String` | Required | เลขที่หนังสืออนุมัติ (เช่น "นบ 5420X/XXXX") |
-| `description` | `String` | Required | รายการซ่อมแซมหรือเปลี่ยนอะไหล่โดยละเอียด |
+| `description` | `String` | Optional (NULL) | คำอธิบายการดำเนินการซ่อมแซม (ใช้สำหรับความเข้ากันได้ย้อนหลัง) |
+| `list_broken_item` | `String` | Optional | รายการชิ้นส่วนที่ชำรุดเสียหาย (listBrokenitem) เช่น "หน้าจอร้าว, แผงบอร์ดไหม้" |
+| `list_repairs_item` | `String` | Optional | รายการเปลี่ยนอะไหล่โดยละเอียด (listrepairsitem) เช่น "เปลี่ยนจอ LCD, เปลี่ยนตัวต้านทาน R15" |
 | `cost` | `Number` (Float) | Min: 0 | จำนวนเงินค่าซ่อมแซมบำรุงรักษา (บาท) |
 | `contractor` | `String` | Optional | ชื่อบุคคลหรือบริษัทผู้รับจ้างดำเนินการซ่อมแซม |
 
 ---
 
 ### 1.3 ข้อมูลผู้ดูแลรับผิดชอบ (Custodian)
-โครงสร้างข้อมูลบุคลากรผู้ดูแลและรับผิดชอบพัสดุในองค์กร:
+โครงสร้างข้อมูลบุคลากรผู้ดูแลและรับผิดชอบพัสดุในองค์กร รวมถึงผู้ใช้งานระบบ:
 
 | ชื่อฟิลด์ | ชนิดข้อมูล | คำอธิบาย |
 | :--- | :--- | :--- |
@@ -75,22 +81,61 @@
 | `position` | `String` | ตำแหน่งงานทางราชการ (เช่น `นักวิเคราะห์ระบบ`) |
 | `division` | `String` | กอง/สำนัก (เช่น `กองคลัง`) |
 | `department` | `String` | ฝ่าย/งาน (เช่น `ฝ่ายการเงินและบัญชี`) |
-| `email` | `String` | อีเมลในการติดต่อทางระบบ |
+| `email` | `String` | อีเมลในการติดต่อทางระบบ (ใช้ระบุตัวตนในการล็อกอินผ่านระบบกลาง SSO) |
+| `role` | `String` (Enum) | สิทธิ์การใช้งานระบบ (`'CUSTODIAN'` สิทธิ์เจ้าหน้าที่/ผู้ดูแลทั่วไป \| `'TECHNICIAN'` สิทธิ์ช่างเทคนิคซ่อมบำรุง) |
+
+---
+
+### 1.4 ข้อมูลคำขอส่งซ่อม (Repair Requests)
+เก็บประวัติรายการขอแจ้งซ่อมที่พนักงานหรือช่างส่งเข้ามาในระบบ:
+
+| ชื่อฟิลด์ | ชนิดข้อมูล | ข้อกำหนด | คำอธิบาย |
+| :--- | :--- | :--- | :--- |
+| `id` | `String` | Primary Key | รหัสใบคำขอส่งซ่อม (เช่น `repair-1718528990000-123`) |
+| `asset_id` | `String` | Foreign Key | เชื่อมโยงไปยังฟิลด์ `id` ในตาราง `assets` |
+| `request_date` | `String` | Required | วันและเวลาที่ยื่นคำขอส่งซ่อม (ISO String format) |
+| `problem_description` | `String` | Required | อาการชำรุดเสียหายที่ระบุโดยละเอียดเบื้องต้น |
+| `list_broken_item` | `String` | Required | รายการชำรุดเสียหาย/ชิ้นส่วนบกพร่อง (ป้อนตอนแจ้งซ่อมและพิมพ์ในใบอนุมัติซ่อม) |
+| `list_repairs_item` | `String` | Optional | รายละเอียดการเปลี่ยนอะไหล่/ซ่อมจริง (ช่างระบุตอนบันทึกซ่อมเสร็จ) |
+| `status` | `String` (Enum) | `'PENDING'` \| `'IN_PROGRESS'` \| `'COMPLETED'` \| `'REJECTED'` | สถานะของคำขอส่งซ่อม |
+| `rejection_reason` | `String` | Optional | เหตุผลในกรณีที่คำขอส่งซ่อมถูกยกเลิก (Rejected) |
+| `repair_cost` | `Number` (Float) | Min: 0 | ค่าใช้จ่ายการซ่อมแซมจริง (บาท) |
+| `contractor` | `String` | Optional | บริษัทหรือคู่สัญญาผู้จ้างซ่อมบำรุง |
+| `approval_date` | `String` | Optional | วันที่ลงในหนังสือหนังสืออนุมัติซ่อม (Format: `YYYY-MM-DD`) |
+| `document_number` | `String` | Optional | เลขที่หนังสืออนุมัติจัดจ้างซ่อมแซม |
+| `officer_notes` | `String` | Optional | บันทึกช่วยจำหรือหมายเหตุของเจ้าหน้าที่/ช่าง |
+
+---
+
+### 1.5 บันทึกประวัติกิจกรรมระบบ (Audit Logs)
+ประวัติการทำกิจกรรมสำคัญบนระบบเพื่อความโปร่งใสตรวจสอบได้:
+
+| ชื่อฟิลด์ | ชนิดข้อมูล | คำอธิบาย |
+| :--- | :--- | :--- |
+| `id` | `String` | รหัสบันทึก (เช่น `log-1718528990000`) |
+| `timestamp` | `String` | วันและเวลาที่เกิดกิจกรรม (ISO Format) |
+| `action` | `String` | ประเภทกิจกรรม (เช่น `แจ้งซ่อม`, `แก้ไขพัสดุ`, `เปลี่ยนรหัสผ่าน`) |
+| `details` | `String` | รายละเอียดเนื้อหาของกิจกรรมที่เปลี่ยนแปลง |
+| `user` | `String` | ชื่อผู้ใช้ระบบที่เป็นคนสั่งการทำรายการ |
 
 ---
 
 ## 2. ความสัมพันธ์ของข้อมูล (Data Relationships)
 
-ความสัมพันธ์จำลองของโมเดลข้อมูลพัสดุและประวัติการซ่อมบำรุง:
+ความสัมพันธ์จำลองของโมเดลข้อมูลพัสดุ ประวัติการซ่อมบำรุง และสิทธิ์ระบบ:
 
 ```mermaid
 erDiagram
     ASSET ||--o{ ASSET_MAINTENANCE : "has history"
+    ASSET ||--o{ REPAIR_REQUEST : "requested for repair"
     ASSET {
         string id PK
         string asset_type
         string asset_code UK
         string name
+        string model
+        string type
+        string appearance
         float unit_price
         string responsible_department
     }
@@ -100,8 +145,27 @@ erDiagram
         string approval_date
         string document_number
         string description
+        string list_broken_item
+        string list_repairs_item
         float cost
         string contractor
+    }
+    REPAIR_REQUEST {
+        string id PK
+        string asset_id FK "References Asset.id"
+        string request_date
+        string problem_description
+        string list_broken_item
+        string list_repairs_item
+        string status
+        float repair_cost
+        string contractor
+    }
+    CUSTODIAN {
+        string id PK
+        string name
+        string email UK
+        string role
     }
 ```
 
@@ -134,7 +198,7 @@ erDiagram
 
 ## 4. ตัวอย่างข้อมูล (JSON Example)
 
-### ตัวอย่างข้อมูลในตารางคุมพัสดุ (พ.ด.2) ที่มีประวัติซ่อมบำรุง (หน้า 2)
+### ตัวอย่างข้อมูลในตารางคุมพัสดุ (พ.ด.2) ที่มีประวัติซ่อมบำรุง
 ```json
 {
   "id": "asset-1718528990000-0",
@@ -150,6 +214,10 @@ erDiagram
   "budget_owner": "งบลงทุนจัดหายานพาหนะ",
   "responsible_department": "ฝ่ายธุรการทั่วไป",
   "status": "ใช้งาน",
+  "model": "Fortuner 2.4V",
+  "type": "รถยนต์อเนกประสงค์",
+  "appearance": "สีบรอนซ์เงิน ทะเบียน กข-5642",
+  "photo": "data:image/jpeg;base64,...",
   "manufacturer_brand": "Toyota",
   "serial_number": "TOY-SUV-FT-6408",
   "engine_number": "2GD-FTV-124586",
@@ -167,7 +235,9 @@ erDiagram
       "id": "maint-301",
       "approval_date": "2023-10-15",
       "document_number": "45/2566",
-      "description": "เปลี่ยนยางรถยนต์ 4 เส้น และเช็คระยะรอบ 80,000 กม.",
+      "description": null,
+      "list_broken_item": "ยางรถยนต์ชำรุดหมดสภาพ",
+      "list_repairs_item": "เปลี่ยนยางรถยนต์ 4 เส้น และตรวจเช็คระยะรอบ 80,000 กม.",
       "cost": 28000.00,
       "contractor": "ศูนย์บริการโตโยต้านนทบุรี"
     }
