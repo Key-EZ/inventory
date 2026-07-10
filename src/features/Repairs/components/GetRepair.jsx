@@ -13,7 +13,6 @@ export default function GetRepair({
 }) {
   const [activeSubTab, setActiveSubTab] = useState(initialTab); // 'new_request', 'history'
   const [showOnlyPreselectedHistory, setShowOnlyPreselectedHistory] = useState(!!preselectedAsset);
-  const [problemDescription, setProblemDescription] = useState('');
   const [listBrokenItem, setListBrokenItem] = useState('');
 
   // Helper to find latest custodian name from custodian history (sorted by year descending)
@@ -52,13 +51,12 @@ export default function GetRepair({
 
   const handleSubmitRepair = async (e) => {
     e.preventDefault();
-    if (!preselectedAsset || !problemDescription.trim() || !listBrokenItem.trim()) {
-      alert('กรุณากรอกข้อมูลและรายละเอียดชิ้นส่วนที่ชำรุดเสียหายให้ครบถ้วน');
+    if (!preselectedAsset || !listBrokenItem.trim()) {
+      alert('กรุณากรอกรายละเอียดชิ้นส่วนที่ชำรุดเสียหายให้ครบถ้วน');
       return;
     }
-    const success = await onCreateRepairRequest(preselectedAsset.id, problemDescription.trim(), listBrokenItem.trim());
+    const success = await onCreateRepairRequest(preselectedAsset.id, listBrokenItem.trim(), listBrokenItem.trim());
     if (success) {
-      setProblemDescription('');
       setListBrokenItem('');
       if (onClearPreselectedAsset) onClearPreselectedAsset();
       setActiveSubTab('history');
