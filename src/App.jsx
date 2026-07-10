@@ -15,6 +15,10 @@ import LoginModal from './features/Auth/components/LoginModal';
 import AdminLoginPage from './features/Auth/components/AdminLoginPage';
 import ChangePasswordModal from './features/Auth/components/ChangePasswordModal';
 
+import Sidebar from './features/Layout/components/Sidebar';
+import Header from './features/Layout/components/Header';
+import MobileMenu from './features/Layout/components/MobileMenu';
+
 import useAppLayout from './hooks/useAppLayout';
 import useInventory from './store/useInventory';
 
@@ -249,214 +253,35 @@ export default function App() {
 
   // --- Sub-components / Props ---
 
+  // --- Sub-components / Props ---
+
   // 1. Sidebar Content
   const sidebarContent = (
-    <>
-      <div className="sidebar-header">
-        <div className="sidebar-brand">
-          <span>📦</span>
-          <div>
-            <strong>ทะเบียนครุภัณฑ์</strong>
-            <div className="app-brand-subtitle">Asset Management</div>
-          </div>
-        </div>
-      </div>
-
-      <ul className="sidebar-menu">
-        <li
-          className={`sidebar-menu-item ${activeLayout === 'sidebar' ? 'active' : ''}`}
-          onClick={() => handleMenuClick('sidebar')}
-        >
-          📋 ทะเบียนครุภัณฑ์
-        </li>
-        <li
-          className={`sidebar-menu-item ${activeLayout === 'bento' ? 'active' : ''}`}
-          onClick={() => handleMenuClick('bento')}
-        >
-          📊 Dashboard
-        </li>
-        <li
-          className={`sidebar-menu-item ${activeLayout === 'centered' ? 'active' : ''}`}
-          onClick={() => handleMenuClick('centered')}
-        >
-          🔍 ค้นหา
-        </li>
-
-        <li
-          className={`sidebar-menu-item ${activeLayout === 'repair_jobs' ? 'active' : ''}`}
-          onClick={() => handleMenuClick('repair_jobs')}
-        >
-          🛠️ งานซ่อมอุปกรณ์
-        </li>
-        {isSystemAdmin && (
-          <li
-            className={`sidebar-menu-item ${activeLayout === 'settings' ? 'active' : ''}`}
-            onClick={() => handleMenuClick('settings')}
-          >
-            ⚙️ ตั้งค่าระบบ
-          </li>
-        )}
-        <li
-          className={`sidebar-menu-item ${activeLayout === 'audit_log' ? 'active' : ''}`}
-          onClick={() => handleMenuClick('audit_log')}
-        >
-          📜 ประวัติระบบ (Audit Log)
-        </li>
-
-        <div className="sidebar-menu-divider"></div>
-
-        {/* Authentication Menu Item */}
-        {currentUser ? (
-          <>
-            <li className="sidebar-menu-item" style={{ cursor: 'default', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-              👤 {currentUser.name} ({currentUser.role === 'ADMIN' ? 'Admin' : currentUser.role === 'TECHNICIAN' ? 'นายช่าง' : 'SSO'})
-            </li>
-            {currentUser.name === 'admin' && (
-              <li className="sidebar-menu-item" onClick={() => setIsChangePasswordOpen(true)} style={{ color: '#eab308' }}>
-                🔑 เปลี่ยนรหัสผ่าน Admin
-              </li>
-            )}
-            <li className="sidebar-menu-item" onClick={handleLogout} style={{ color: 'rgb(220, 38, 38)' }}>
-              🔓 ออกจากระบบ
-            </li>
-          </>
-        ) : (
-          <li className="sidebar-menu-item" onClick={() => setIsLoginModalOpen(true)} style={{ color: '#4f46e5', fontWeight: 'bold' }}>
-            🔒 เข้าสู่ระบบ Admin/SSO
-          </li>
-        )}
-
-        <div className="sidebar-menu-divider"></div>
-
-        <li className="sidebar-menu-item" onClick={handleOpenAddForm}>
-          ➕ ลงทะเบียนครุภัณฑ์ใหม่
-        </li>
-      </ul>
-
-      <div className="sidebar-footer">
-        <div>v1.0.0 (React JS)</div>
-        <div>ระบบจัดการทรัพย์สิน</div>
-      </div>
-    </>
+    <Sidebar
+      activeLayout={activeLayout}
+      isSystemAdmin={isSystemAdmin}
+      currentUser={currentUser}
+      handleMenuClick={handleMenuClick}
+      setIsChangePasswordOpen={setIsChangePasswordOpen}
+      handleLogout={handleLogout}
+      setIsLoginModalOpen={setIsLoginModalOpen}
+      handleOpenAddForm={handleOpenAddForm}
+    />
   );
 
   // 2. Header Content
-  const layoutTitles = {
-    'sidebar': 'ทะเบียนครุภัณฑ์',
-    'bento': 'Dashboard',
-    'centered': 'ค้นหา',
-    'settings': 'ตั้งค่าระบบครุภัณฑ์',
-    'repair_jobs': 'งานซ่อมอุปกรณ์',
-    'audit_log': 'ประวัติระบบ (Audit Log)'
-  };
-
   const headerContent = (
-    <>
-      <div className="header-title">
-        <button
-          className="mobile-nav-toggle"
-          onClick={() => setIsMobileMenuOpen(true)}
-          title="เปิดเมนู"
-        >
-          ☰
-        </button>
-        <span>🏢</span>
-        <span>{layoutTitles[activeLayout]}</span>
-      </div>
-
-      <div className="header-actions">
-        {/* Layout Selector */}
-        <div className="layout-toggle-group">
-          <button
-            className={`layout-toggle-btn ${activeLayout === 'sidebar' ? 'active' : ''}`}
-            onClick={() => changeLayout('sidebar')}
-            title="Sidebar Table View"
-          >
-            ทะเบียนครุภัณฑ์
-          </button>
-          <button
-            className={`layout-toggle-btn ${activeLayout === 'bento' ? 'active' : ''}`}
-            onClick={() => changeLayout('bento')}
-            title="Bento Analytics Dashboard"
-          >
-            Dashboard
-          </button>
-
-          <button
-            className={`layout-toggle-btn ${activeLayout === 'repair_jobs' ? 'active' : ''}`}
-            onClick={() => changeLayout('repair_jobs')}
-            title="งานซ่อมอุปกรณ์"
-          >
-            งานซ่อม
-          </button>
-          <button
-            className={`layout-toggle-btn ${activeLayout === 'centered' ? 'active' : ''}`}
-            onClick={() => changeLayout('centered')}
-            title="Centered Search Page"
-          >
-            ค้นหา
-          </button>
-          {isSystemAdmin && (
-            <>
-              <button
-                className={`layout-toggle-btn ${activeLayout === 'settings' ? 'active' : ''}`}
-                onClick={() => handleMenuClick('settings')}
-                title="Settings Panel"
-              >
-                ตั้งค่า
-              </button>
-              <button
-                className={`layout-toggle-btn ${activeLayout === 'audit_log' ? 'active' : ''}`}
-                onClick={() => handleMenuClick('audit_log')}
-                title="Audit Log"
-              >
-                ประวัติระบบ
-              </button>
-            </>
-          )}
-        </div>
-
-        {/* Font Scaling Buttons */}
-        <div className="font-scale-group" style={{ display: 'flex', gap: '4px', marginRight: '12px', alignItems: 'center' }}>
-          <button
-            type="button"
-            className={`layout-toggle-btn ${fontScale === 'small' ? 'active' : ''}`}
-            style={{ padding: '4px 10px', fontSize: '0.8rem', minWidth: '32px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-            onClick={() => adjustFontScale('small')}
-            title="ลดขนาดตัวอักษร"
-          >
-            A-
-          </button>
-          <button
-            type="button"
-            className={`layout-toggle-btn ${fontScale === 'normal' ? 'active' : ''}`}
-            style={{ padding: '4px 10px', fontSize: '0.85rem', fontWeight: 'bold', minWidth: '32px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-            onClick={() => adjustFontScale('normal')}
-            title="ขนาดตัวอักษรปกติ"
-          >
-            A
-          </button>
-          <button
-            type="button"
-            className={`layout-toggle-btn ${fontScale === 'large' ? 'active' : ''}`}
-            style={{ padding: '4px 10px', fontSize: '0.95rem', minWidth: '32px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-            onClick={() => adjustFontScale('large')}
-            title="เพิ่มขนาดตัวอักษร"
-          >
-            A+
-          </button>
-        </div>
-
-        {/* Dark Mode Toggle */}
-        <button
-          className="theme-toggle-btn"
-          onClick={toggleTheme}
-          title={isDarkMode ? 'เปิดโหมดกลางวัน (Light Mode)' : 'เปิดโหมดกลางคืน (Dark Mode)'}
-        >
-          {isDarkMode ? '☀️' : '🌙'}
-        </button>
-      </div>
-    </>
+    <Header
+      activeLayout={activeLayout}
+      isSystemAdmin={isSystemAdmin}
+      changeLayout={changeLayout}
+      handleMenuClick={handleMenuClick}
+      setIsMobileMenuOpen={setIsMobileMenuOpen}
+      fontScale={fontScale}
+      adjustFontScale={adjustFontScale}
+      toggleTheme={toggleTheme}
+      isDarkMode={isDarkMode}
+    />
   );
 
   if (isAdminRoute) {
@@ -671,95 +496,18 @@ export default function App() {
       )}
 
       {/* Mobile Drawer Navigation Sidebar */}
-      {isMobileMenuOpen && (
-        <>
-          <div className="mobile-drawer-backdrop" onClick={() => setIsMobileMenuOpen(false)}></div>
-          <div className={`mobile-sidebar-drawer ${isMobileMenuOpen ? 'open' : ''}`}>
-            <div className="mobile-drawer-header">
-              <div className="sidebar-brand">
-                <span>📦</span>
-                <strong>เมนูระบบครุภัณฑ์</strong>
-              </div>
-              <button className="close-btn" onClick={() => setIsMobileMenuOpen(false)}>&times;</button>
-            </div>
-
-            <ul className="sidebar-menu">
-              <li
-                className={`sidebar-menu-item ${activeLayout === 'sidebar' ? 'active' : ''}`}
-                onClick={() => { setIsMobileMenuOpen(false); handleMenuClick('sidebar'); }}
-              >
-                📋 ทะเบียนครุภัณฑ์
-              </li>
-              <li
-                className={`sidebar-menu-item ${activeLayout === 'bento' ? 'active' : ''}`}
-                onClick={() => { setIsMobileMenuOpen(false); handleMenuClick('bento'); }}
-              >
-                📊 Dashboard
-              </li>
-              <li
-                className={`sidebar-menu-item ${activeLayout === 'centered' ? 'active' : ''}`}
-                onClick={() => { setIsMobileMenuOpen(false); handleMenuClick('centered'); }}
-              >
-                🔍 ค้นหา
-              </li>
-
-              <li
-                className={`sidebar-menu-item ${activeLayout === 'repair_jobs' ? 'active' : ''}`}
-                onClick={() => { setIsMobileMenuOpen(false); handleMenuClick('repair_jobs'); }}
-              >
-                🛠️ งานซ่อมอุปกรณ์
-              </li>
-              {isSystemAdmin && (
-                <li
-                  className={`sidebar-menu-item ${activeLayout === 'settings' ? 'active' : ''}`}
-                  onClick={() => { setIsMobileMenuOpen(false); handleMenuClick('settings'); }}
-                >
-                  ⚙️ ตั้งค่าระบบ
-                </li>
-              )}
-              <li
-                className={`sidebar-menu-item ${activeLayout === 'audit_log' ? 'active' : ''}`}
-                onClick={() => { setIsMobileMenuOpen(false); handleMenuClick('audit_log'); }}
-              >
-                📜 ประวัติระบบ (Audit Log)
-              </li>
-
-              <div className="sidebar-menu-divider"></div>
-
-              {/* Mobile Auth */}
-              {currentUser ? (
-                <>
-                  <li className="sidebar-menu-item" style={{ cursor: 'default', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                    👤 {currentUser.name}
-                  </li>
-                   {currentUser.name === 'admin' && (
-                    <li className="sidebar-menu-item" onClick={() => { setIsMobileMenuOpen(false); setIsChangePasswordOpen(true); }} style={{ color: '#eab308' }}>
-                      🔑 เปลี่ยนรหัสผ่าน Admin
-                    </li>
-                  )}
-                  <li className="sidebar-menu-item" onClick={() => { setIsMobileMenuOpen(false); handleLogout(); }} style={{ color: 'rgb(220, 38, 38)' }}>
-                    🔓 ออกจากระบบ
-                  </li>
-                </>
-              ) : (
-                <li className="sidebar-menu-item" onClick={() => { setIsMobileMenuOpen(false); setIsLoginModalOpen(true); }} style={{ color: '#4f46e5', fontWeight: 'bold' }}>
-                  🔒 เข้าสู่ระบบ Admin/SSO
-                </li>
-              )}
-
-              <div className="sidebar-menu-divider"></div>
-
-              <li className="sidebar-menu-item" onClick={() => { setIsMobileMenuOpen(false); handleOpenAddForm(); }}>
-                ➕ ลงทะเบียนครุภัณฑ์ใหม่
-              </li>
-            </ul>
-
-            <div className="sidebar-footer" style={{ marginTop: 'auto' }}>
-              <div>v1.0.0 (React JS)</div>
-            </div>
-          </div>
-        </>
-      )}
+      <MobileMenu
+        isMobileMenuOpen={isMobileMenuOpen}
+        setIsMobileMenuOpen={setIsMobileMenuOpen}
+        activeLayout={activeLayout}
+        isSystemAdmin={isSystemAdmin}
+        handleMenuClick={handleMenuClick}
+        currentUser={currentUser}
+        setIsChangePasswordOpen={setIsChangePasswordOpen}
+        handleLogout={handleLogout}
+        setIsLoginModalOpen={setIsLoginModalOpen}
+        handleOpenAddForm={handleOpenAddForm}
+      />
     </>
   );
 }
