@@ -176,31 +176,17 @@ export default function GetRepair({
               </div>
  
               <form onSubmit={handleSubmitRepair}>
-                <div className="form-group" style={{ marginBottom: '16px' }}>
-                  <label style={{ fontWeight: '600', marginBottom: '6px', display: 'block' }}>
-                    อาการเสีย หรือปัญหาที่พบ *
-                  </label>
-                  <textarea
-                    rows={2}
-                    value={problemDescription}
-                    onChange={(e) => setProblemDescription(e.target.value)}
-                    placeholder="ระบุอาการเสียเบื้องต้น เช่น เปิดเครื่องไม่ติด, ปริ้นท์แล้วกระดาษติด..."
-                    required
-                    style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid var(--border-color)', resize: 'vertical' }}
-                  />
-                </div>
-
                 <div className="form-group" style={{ marginBottom: '20px' }}>
                   <label style={{ fontWeight: '600', marginBottom: '6px', display: 'block' }}>
                     รายการซ่อมแซม (ชิ้นส่วนที่ชำรุดเสียหายที่ต้องการให้ซ่อมแซม) *
                   </label>
                   <textarea
-                    rows={2}
+                    rows={4}
                     value={listBrokenItem}
                     onChange={(e) => setListBrokenItem(e.target.value)}
-                    placeholder="ระบุรายการชิ้นส่วนที่ชำรุด เช่น เมนบอร์ดบกพร่อง, ลูกกลิ้งชำรุด, มอเตอร์ไหม้..."
+                    placeholder="ระบุอาการชำรุดและรายการที่ต้องการให้ซ่อมแซม เช่น เมนบอร์ดชำรุดเปิดเครื่องไม่ติด, ลูกกลิ้งดึงกระดาษสึกกระดาษติดบ่อย..."
                     required
-                    style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid var(--border-color)', resize: 'vertical' }}
+                    style={{ width: '100%', padding: '12px', borderRadius: '6px', border: '1px solid var(--border-color)', resize: 'vertical' }}
                   />
                 </div>
  
