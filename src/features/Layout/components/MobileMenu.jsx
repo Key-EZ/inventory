@@ -87,12 +87,6 @@ export default function MobileMenu({
               🔒 เข้าสู่ระบบ Admin/SSO
             </li>
           )}
-
-          <div className="sidebar-menu-divider"></div>
-
-          <li className="sidebar-menu-item" onClick={() => { setIsMobileMenuOpen(false); handleOpenAddForm(); }}>
-            ➕ ลงทะเบียนครุภัณฑ์ใหม่
-          </li>
         </ul>
 
         <div className="sidebar-footer" style={{ marginTop: 'auto' }}>

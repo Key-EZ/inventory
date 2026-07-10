@@ -83,12 +83,6 @@ export default function Sidebar({
             🔒 เข้าสู่ระบบ Admin/SSO
           </li>
         )}
-
-        <div className="sidebar-menu-divider"></div>
-
-        <li className="sidebar-menu-item" onClick={handleOpenAddForm}>
-          ➕ ลงทะเบียนครุภัณฑ์ใหม่
-        </li>
       </ul>
 
       <div className="sidebar-footer">
