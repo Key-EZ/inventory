@@ -20,7 +20,8 @@ router.get('/', async (req, res) => {
         id: m.id,
         approval_date: m.approval_date,
         document_number: m.document_number,
-        description: m.description,
+        list_broken_item: m.list_broken_item,
+        list_repairs_item: m.list_repairs_item,
         cost: Number(m.cost) || 0,
         contractor: m.contractor
       });
@@ -77,7 +78,8 @@ router.get('/:id', async (req, res) => {
         id: m.id,
         approval_date: m.approval_date,
         document_number: m.document_number,
-        description: m.description,
+        list_broken_item: m.list_broken_item,
+        list_repairs_item: m.list_repairs_item,
         cost: Number(m.cost) || 0,
         contractor: m.contractor
       })),
@@ -244,7 +246,8 @@ router.put('/:id', async (req, res) => {
       id: m.id,
       approval_date: m.approval_date,
       document_number: m.document_number,
-      description: m.description,
+      list_broken_item: m.list_broken_item,
+      list_repairs_item: m.list_repairs_item,
       cost: Number(m.cost) || 0,
       contractor: m.contractor
     }));
@@ -450,7 +453,8 @@ router.post('/import', async (req, res) => {
         id: m.id,
         approval_date: m.approval_date,
         document_number: m.document_number,
-        description: m.description,
+        list_broken_item: m.list_broken_item,
+        list_repairs_item: m.list_repairs_item,
         cost: Number(m.cost) || 0,
         contractor: m.contractor
       });

@@ -810,7 +810,7 @@ export default function InventoryPrint({ asset, onClose }) {
                                         {idx + 1}
                                     </td>
                                     <td className="print-maint-cell-center">
-                                        <AutoFitText text={maint.document_number ? formatThaiDateString(maint.document_number) : '-'} />
+                                        <AutoFitText text={maint.document_number || '-'} />
                                     </td>
                                     <td className="print-maint-cell-common">
                                         <AutoFitText text={maint.approval_date ? formatThaiDateString(maint.approval_date) : '-'} />
