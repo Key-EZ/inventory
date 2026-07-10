@@ -20,7 +20,6 @@ export default function RepairJobs({
     contractor: '',
     approvalDate: '',
     documentNumber: '',
-    officerNotes: '',
     listRepairsItem: ''
   });
 
@@ -92,7 +91,6 @@ export default function RepairJobs({
       contractor: '',
       approvalDate: '',
       documentNumber: '',
-      officerNotes: '',
       listRepairsItem: ''
     });
   };
@@ -113,7 +111,7 @@ export default function RepairJobs({
   const handleSubmitComplete = (e) => {
     e.preventDefault();
     if (!completingRequest) return;
-    const { repairCost, contractor, approvalDate, documentNumber, officerNotes, listRepairsItem } = completionForm;
+    const { repairCost, contractor, approvalDate, documentNumber, listRepairsItem } = completionForm;
     if (!repairCost || !contractor.trim() || !approvalDate.trim() || !documentNumber.trim() || !listRepairsItem.trim()) {
       alert('กรุณากรอกข้อมูลการซ่อมแซมและรายละเอียดการเปลี่ยนอะไหล่ให้ครบถ้วน');
       return;
@@ -124,7 +122,7 @@ export default function RepairJobs({
       contractor.trim(),
       approvalDate.trim(),
       documentNumber.trim(),
-      officerNotes.trim(),
+      '', // notes
       listRepairsItem.trim()
     );
     handleCloseComplete();
@@ -419,17 +417,7 @@ export default function RepairJobs({
                 />
               </div>
 
-              <div className="form-group">
-                <label>บันทึกหรือหมายเหตุเพิ่มเติม (ของเจ้าหน้าที่)</label>
-                <textarea
-                  rows={2}
-                  name="officerNotes"
-                  value={completionForm.officerNotes}
-                  onChange={handleCompletionChange}
-                  placeholder="ระบุบันทึกช่วยจำหรือข้อมูลอื่นๆ (ถ้ามี)..."
-                  style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--border-color)', resize: 'vertical' }}
-                />
-              </div>
+
 
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '12px' }}>
                 <button type="submit" className="button-primary" style={{ padding: '8px 16px', backgroundColor: 'var(--status-active-bar)', borderColor: 'var(--status-active-bar)' }}>
