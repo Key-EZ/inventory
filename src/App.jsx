@@ -13,6 +13,7 @@ import AuditLogPanel from './features/AuditLogs/components/AuditLogPanel';
 import RepairRequestPrint from './features/Repairs/components/RepairRequestPrint';
 import LoginModal from './features/Auth/components/LoginModal';
 import AdminLoginPage from './features/Auth/components/AdminLoginPage';
+import ChangePasswordModal from './features/Auth/components/ChangePasswordModal';
 
 import useAppLayout from './hooks/useAppLayout';
 import useInventory from './store/useInventory';
@@ -21,6 +22,7 @@ export default function App() {
   const [activeCustodianAsset, setActiveCustodianAsset] = useState(null);
   const [isCustodianModalOpen, setIsCustodianModalOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
 
   const {
     activeLayout,
@@ -309,6 +311,11 @@ export default function App() {
             <li className="sidebar-menu-item" style={{ cursor: 'default', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
               👤 {currentUser.name} ({currentUser.role === 'ADMIN' ? 'Admin' : currentUser.role === 'TECHNICIAN' ? 'นายช่าง' : 'SSO'})
             </li>
+            {currentUser.name === 'admin' && (
+              <li className="sidebar-menu-item" onClick={() => setIsChangePasswordOpen(true)} style={{ color: '#eab308' }}>
+                🔑 เปลี่ยนรหัสผ่าน Admin
+              </li>
+            )}
             <li className="sidebar-menu-item" onClick={handleLogout} style={{ color: 'rgb(220, 38, 38)' }}>
               🔓 ออกจากระบบ
             </li>
@@ -615,6 +622,10 @@ export default function App() {
         />
       )}
 
+      {isChangePasswordOpen && (
+        <ChangePasswordModal onClose={() => setIsChangePasswordOpen(false)} />
+      )}
+
       {isRepairFormOpen && (
         <GetRepair
           assets={assets}
@@ -721,6 +732,11 @@ export default function App() {
                   <li className="sidebar-menu-item" style={{ cursor: 'default', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
                     👤 {currentUser.name}
                   </li>
+                   {currentUser.name === 'admin' && (
+                    <li className="sidebar-menu-item" onClick={() => { setIsMobileMenuOpen(false); setIsChangePasswordOpen(true); }} style={{ color: '#eab308' }}>
+                      🔑 เปลี่ยนรหัสผ่าน Admin
+                    </li>
+                  )}
                   <li className="sidebar-menu-item" onClick={() => { setIsMobileMenuOpen(false); handleLogout(); }} style={{ color: 'rgb(220, 38, 38)' }}>
                     🔓 ออกจากระบบ
                   </li>

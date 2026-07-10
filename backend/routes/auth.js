@@ -1,7 +1,7 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import { executeQuery } from '../db.js';
-import { JWT_SECRET } from '../middleware/auth.js';
+import { JWT_SECRET, authMiddleware } from '../middleware/auth.js';
 import { addAuditLogServer } from '../utils/helpers.js';
 import bcrypt from 'bcryptjs';
 
@@ -171,6 +171,55 @@ router.get('/auth/sso/callback', async (req, res) => {
   } catch (err) {
     console.error('Error during SSO processing:', err);
     return res.redirect(`${frontendUrl}/?sso_error=${encodeURIComponent(`เกิดข้อผิดพลาดภายในระบบ: ${err.message}`)}`);
+  }
+});
+
+router.post('/change-password', authMiddleware, async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+
+  if (req.user.role !== 'ADMIN' || req.user.name !== 'admin') {
+    return res.status(403).json({ success: false, message: 'สิทธิ์การเข้าถึงเฉพาะบัญชีผู้ดูแลระบบท้องถิ่น (Local Admin) เท่านั้น' });
+  }
+
+  if (!newPassword || newPassword.trim() === '') {
+    return res.status(400).json({ success: false, message: 'รหัสผ่านใหม่ต้องไม่เป็นค่าว่าง' });
+  }
+
+  try {
+    const rows = await executeQuery('SELECT `value` FROM system_settings WHERE `key` = "adminUser"');
+    if (rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'ไม่พบข้อมูลแอดมินในระบบ' });
+    }
+    const admin = JSON.parse(rows[0].value);
+
+    // Verify current password
+    let isPasswordValid = false;
+    if (admin.password.startsWith('$2a$') || admin.password.startsWith('$2b$')) {
+      isPasswordValid = await bcrypt.compare(currentPassword, admin.password);
+    } else {
+      isPasswordValid = (currentPassword === admin.password);
+    }
+
+    if (!isPasswordValid) {
+      return res.status(400).json({ success: false, message: 'รหัสผ่านปัจจุบันไม่ถูกต้อง' });
+    }
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedNewPassword = await bcrypt.hash(newPassword, salt);
+    const updatedAdmin = { username: admin.username, password: hashedNewPassword };
+
+    await executeQuery(
+      'UPDATE system_settings SET `value` = ? WHERE `key` = "adminUser"',
+      [JSON.stringify(updatedAdmin)]
+    );
+
+    await addAuditLogServer('เปลี่ยนรหัสผ่าน', 'ผู้ดูแลระบบเปลี่ยนรหัสผ่านสำเร็จ', 'admin');
+
+    res.json({ success: true, message: 'เปลี่ยนรหัสผ่านสำเร็จแล้ว' });
+  } catch (error) {
+    console.error('Failed to change admin password:', error);
+    res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการเปลี่ยนรหัสผ่าน' });
   }
 });
 
