@@ -53,8 +53,8 @@ router.post('/', async (req, res) => {
 });
 
 router.put('/:id/start', async (req, res) => {
-  if (req.user.role !== 'TECHNICIAN') {
-    return res.status(403).json({ success: false, message: 'Forbidden: Only technicians are allowed to manage repair jobs' });
+  if (req.user.role !== 'TECHNICIAN' && req.user.role !== 'ADMIN') {
+    return res.status(403).json({ success: false, message: 'Forbidden: Only technicians or admins are allowed to manage repair jobs' });
   }
   try {
     const repairs = await executeQuery('SELECT * FROM repair_requests WHERE id = ?', [req.params.id]);
@@ -81,8 +81,8 @@ router.put('/:id/start', async (req, res) => {
 });
 
 router.put('/:id/reject', async (req, res) => {
-  if (req.user.role !== 'TECHNICIAN') {
-    return res.status(403).json({ success: false, message: 'Forbidden: Only technicians are allowed to manage repair jobs' });
+  if (req.user.role !== 'TECHNICIAN' && req.user.role !== 'ADMIN') {
+    return res.status(403).json({ success: false, message: 'Forbidden: Only technicians or admins are allowed to manage repair jobs' });
   }
   try {
     const repairs = await executeQuery('SELECT * FROM repair_requests WHERE id = ?', [req.params.id]);
@@ -111,8 +111,8 @@ router.put('/:id/reject', async (req, res) => {
 });
 
 router.put('/:id/complete', async (req, res) => {
-  if (req.user.role !== 'TECHNICIAN') {
-    return res.status(403).json({ success: false, message: 'Forbidden: Only technicians are allowed to manage repair jobs' });
+  if (req.user.role !== 'TECHNICIAN' && req.user.role !== 'ADMIN') {
+    return res.status(403).json({ success: false, message: 'Forbidden: Only technicians or admins are allowed to manage repair jobs' });
   }
   const pool = getPool();
   const connection = await pool.getConnection();
@@ -146,8 +146,8 @@ router.put('/:id/complete', async (req, res) => {
 
     const maintId = `maint-${Date.now()}-${Math.floor(Math.random() * 100)}`;
     await connection.query(
-      `INSERT INTO maintenances (id, asset_id, approval_date, document_number, description, list_broken_item, list_repairs_item, cost, contractor)
-      VALUES (?, ?, ?, ?, NULL, ?, ?, ?, ?)`,
+      `INSERT INTO maintenances (id, asset_id, approval_date, document_number, list_broken_item, list_repairs_item, cost, contractor)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [maintId, repair.asset_id, approvalDate, documentNumber, repair.list_broken_item || '', listRepairsItem, cost, contractor]
     );
 

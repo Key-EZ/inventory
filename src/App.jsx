@@ -212,8 +212,8 @@ export default function App() {
       setIsLoginModalOpen(true);
       return;
     }
-    if (!isTechnician) {
-      alert('เฉพาะผู้ใช้งานระดับช่างเทคนิค (Technician) เท่านั้นที่สามารถรับงานซ่อมได้');
+    if (!isTechnician && !isSystemAdmin) {
+      alert('เฉพาะผู้ใช้งานระดับช่างเทคนิค (Technician) หรือผู้ดูแลระบบ (Admin) เท่านั้นที่สามารถรับงานซ่อมได้');
       return;
     }
     handleStartRepairJob(requestId);
@@ -224,8 +224,8 @@ export default function App() {
       setIsLoginModalOpen(true);
       return;
     }
-    if (!isTechnician) {
-      alert('เฉพาะผู้ใช้งานระดับช่างเทคนิค (Technician) เท่านั้นที่สามารถปฏิเสธงานซ่อมได้');
+    if (!isTechnician && !isSystemAdmin) {
+      alert('เฉพาะผู้ใช้งานระดับช่างเทคนิค (Technician) หรือผู้ดูแลระบบ (Admin) เท่านั้นที่สามารถปฏิเสธงานซ่อมได้');
       return;
     }
     handleRejectRepairJob(requestId, reason);
@@ -236,8 +236,8 @@ export default function App() {
       setIsLoginModalOpen(true);
       return;
     }
-    if (!isTechnician) {
-      alert('เฉพาะผู้ใช้งานระดับช่างเทคนิค (Technician) เท่านั้นที่สามารถบันทึกซ่อมเสร็จได้');
+    if (!isTechnician && !isSystemAdmin) {
+      alert('เฉพาะผู้ใช้งานระดับช่างเทคนิค (Technician) หรือผู้ดูแลระบบ (Admin) เท่านั้นที่สามารถบันทึกซ่อมเสร็จได้');
       return;
     }
     handleCompleteRepairJob(requestId, cost, contractor, approvalDate, documentNumber, notes, listRepairsItem);
