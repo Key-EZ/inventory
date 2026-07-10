@@ -458,10 +458,17 @@ export const seedRelationalDb = async (data) => {
     ];
 
     for (const item of settingsKeys) {
-      await connection.query(
-        'INSERT INTO system_settings (`key`, `value`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `value` = ?',
-        [item.key, item.value, item.value]
-      );
+      if (item.key === 'adminUser') {
+        await connection.query(
+          'INSERT INTO system_settings (`key`, `value`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `value` = `value`',
+          [item.key, item.value]
+        );
+      } else {
+        await connection.query(
+          'INSERT INTO system_settings (`key`, `value`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `value` = ?',
+          [item.key, item.value, item.value]
+        );
+      }
     }
 
     // 2. Seed custodians
