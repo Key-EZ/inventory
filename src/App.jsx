@@ -12,6 +12,7 @@ import RepairJobs from './features/Repairs/components/RepairJobs';
 import AuditLogPanel from './features/AuditLogs/components/AuditLogPanel';
 import RepairRequestPrint from './features/Repairs/components/RepairRequestPrint';
 import LoginModal from './features/Auth/components/LoginModal';
+import AdminLoginPage from './features/Auth/components/AdminLoginPage';
 
 import useAppLayout from './hooks/useAppLayout';
 import useInventory from './store/useInventory';
@@ -113,6 +114,24 @@ export default function App() {
     ssoError,
     setSsoError
   } = useInventory();
+
+  const [isAdminRoute, setIsAdminRoute] = useState(() => {
+    return window.location.pathname === '/admin' || window.location.pathname === '/admin/';
+  });
+
+  useEffect(() => {
+    if (isAdminRoute && currentUser?.role === 'ADMIN') {
+      setIsAdminRoute(false);
+      window.history.replaceState({}, document.title, '/');
+      changeLayout('settings');
+    }
+  }, [isAdminRoute, currentUser, changeLayout]);
+
+  const handleAppLoginSuccess = (user, token) => {
+    handleLoginSuccess(user, token);
+    setIsAdminRoute(false);
+  };
+
 
   // --- Auto-open Login Modal if SSO fails ---
   useEffect(() => {
@@ -433,6 +452,10 @@ export default function App() {
     </>
   );
 
+  if (isAdminRoute) {
+    return <AdminLoginPage onLoginSuccess={handleAppLoginSuccess} />;
+  }
+
   return (
     <>
       <BaseLayout
@@ -586,8 +609,7 @@ export default function App() {
             setIsLoginModalOpen(false);
             if (ssoError) setSsoError(null);
           }}
-          onLoginSuccess={handleLoginSuccess}
-          custodians={custodians}
+          onLoginSuccess={handleAppLoginSuccess}
           ssoError={ssoError}
           setSsoError={setSsoError}
         />
