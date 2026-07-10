@@ -50,17 +50,19 @@ export default function GetRepair({
     }
   };
 
-  const handleSubmitRepair = (e) => {
+  const handleSubmitRepair = async (e) => {
     e.preventDefault();
     if (!preselectedAsset || !problemDescription.trim() || !listBrokenItem.trim()) {
       alert('กรุณากรอกข้อมูลและรายละเอียดชิ้นส่วนที่ชำรุดเสียหายให้ครบถ้วน');
       return;
     }
-    onCreateRepairRequest(preselectedAsset.id, problemDescription.trim(), listBrokenItem.trim());
-    setProblemDescription('');
-    setListBrokenItem('');
-    if (onClearPreselectedAsset) onClearPreselectedAsset();
-    setActiveSubTab('history');
+    const success = await onCreateRepairRequest(preselectedAsset.id, problemDescription.trim(), listBrokenItem.trim());
+    if (success) {
+      setProblemDescription('');
+      setListBrokenItem('');
+      if (onClearPreselectedAsset) onClearPreselectedAsset();
+      setActiveSubTab('history');
+    }
   };
 
   const getStatusLabel = (status) => {
