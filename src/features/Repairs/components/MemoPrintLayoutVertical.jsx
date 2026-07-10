@@ -103,7 +103,7 @@ export default function MemoPrintLayoutVertical({
           ด้วย {toThaiDigits(asset.responsible_department) || 'งานพัสดุ'} มีความประสงค์จะขออนุมัติ
           ดำเนินการซ่อมแซมทรัพย์สินครุภัณฑ์ประเภท {toThaiDigits(asset.category) || 'ครุภัณฑ์'} ประจำหน่วยงาน
           รหัสครุภัณฑ์ {toThaiDigits(asset.asset_code)} รายการ {toThaiDigits(asset.name)}
-          ซึ่งได้เกิดการชำรุดเสียหาย โดยมีอาการชำรุดเสียหายคือ {toThaiDigits(repairRequest.problem_description)}
+          ซึ่งได้เกิดการชำรุดเสียหาย โดยมีอาการชำรุดเสียหายคือ {toThaiDigits(repairRequest.list_broken_item || repairRequest.problem_description)}
           ส่งผลให้ไม่สามารถใช้งานราชการเพื่อตอบสนองการปฏิบัติงานได้อย่างสมบูรณ์และปกติ
         </div>
 

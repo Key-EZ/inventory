@@ -20,7 +20,8 @@ export default function RepairJobs({
     contractor: '',
     approvalDate: '',
     documentNumber: '',
-    officerNotes: ''
+    officerNotes: '',
+    listRepairsItem: ''
   });
 
   const handleCompletionChange = (e) => {
@@ -91,7 +92,8 @@ export default function RepairJobs({
       contractor: '',
       approvalDate: '',
       documentNumber: '',
-      officerNotes: ''
+      officerNotes: '',
+      listRepairsItem: ''
     });
   };
 
@@ -111,9 +113,9 @@ export default function RepairJobs({
   const handleSubmitComplete = (e) => {
     e.preventDefault();
     if (!completingRequest) return;
-    const { repairCost, contractor, approvalDate, documentNumber, officerNotes } = completionForm;
-    if (!repairCost || !contractor.trim() || !approvalDate.trim() || !documentNumber.trim()) {
-      alert('กรุณากรอกข้อมูลการซ่อมให้ครบถ้วน');
+    const { repairCost, contractor, approvalDate, documentNumber, officerNotes, listRepairsItem } = completionForm;
+    if (!repairCost || !contractor.trim() || !approvalDate.trim() || !documentNumber.trim() || !listRepairsItem.trim()) {
+      alert('กรุณากรอกข้อมูลการซ่อมแซมและรายละเอียดการเปลี่ยนอะไหล่ให้ครบถ้วน');
       return;
     }
     onCompleteRepairJob(
@@ -122,7 +124,8 @@ export default function RepairJobs({
       contractor.trim(),
       approvalDate.trim(),
       documentNumber.trim(),
-      officerNotes.trim()
+      officerNotes.trim(),
+      listRepairsItem.trim()
     );
     handleCloseComplete();
   };
@@ -254,7 +257,12 @@ export default function RepairJobs({
                           {asset ? getLatestCustodian(asset) : '-'}
                         </td>
                         <td style={{ fontSize: '0.9rem', whiteSpace: 'normal', wordBreak: 'break-word', maxWidth: '250px' }}>
-                          {req.problem_description}
+                          <div><strong>อาการเสีย:</strong> {req.problem_description}</div>
+                          {req.list_broken_item && (
+                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                              <strong>รายการชำรุด:</strong> {req.list_broken_item}
+                            </div>
+                          )}
                         </td>
                         <td style={{ textAlign: 'center' }}>
                           <span className={`ledger-status-badge ${getStatusClass(req.status)}`}>
@@ -399,13 +407,26 @@ export default function RepairJobs({
               </div>
 
               <div className="form-group">
+                <label>รายการเปลี่ยนอะไหล่โดยละเอียด (listrepairsitem) *</label>
+                <textarea
+                  rows={2}
+                  name="listRepairsItem"
+                  value={completionForm.listRepairsItem}
+                  onChange={handleCompletionChange}
+                  placeholder="ตัวอย่าง: เปลี่ยนหน้าจอ LCD ใหม่, เปลี่ยนแผงวงจรควบคุมหลัก, เปลี่ยนลูกกลิ้งยาง..."
+                  required
+                  style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--border-color)', resize: 'vertical' }}
+                />
+              </div>
+
+              <div className="form-group">
                 <label>บันทึกหรือหมายเหตุเพิ่มเติม (ของเจ้าหน้าที่)</label>
                 <textarea
                   rows={2}
                   name="officerNotes"
                   value={completionForm.officerNotes}
                   onChange={handleCompletionChange}
-                  placeholder="รายละเอียดอะไหล่ที่เปลี่ยน หรือหมายเหตุเพิ่มเติม..."
+                  placeholder="ระบุบันทึกช่วยจำหรือข้อมูลอื่นๆ (ถ้ามี)..."
                   style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid var(--border-color)', resize: 'vertical' }}
                 />
               </div>

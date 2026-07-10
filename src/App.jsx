@@ -227,7 +227,7 @@ export default function App() {
     handleRejectRepairJob(requestId, reason);
   };
 
-  const handleGuardedCompleteRepairJob = (requestId, cost, contractor, approvalDate, documentNumber, notes) => {
+  const handleGuardedCompleteRepairJob = (requestId, cost, contractor, approvalDate, documentNumber, notes, listRepairsItem) => {
     if (!currentUser) {
       setIsLoginModalOpen(true);
       return;
@@ -236,7 +236,7 @@ export default function App() {
       alert('เฉพาะผู้ใช้งานระดับช่างเทคนิค (Technician) เท่านั้นที่สามารถบันทึกซ่อมเสร็จได้');
       return;
     }
-    handleCompleteRepairJob(requestId, cost, contractor, approvalDate, documentNumber, notes);
+    handleCompleteRepairJob(requestId, cost, contractor, approvalDate, documentNumber, notes, listRepairsItem);
   };
 
   const handleGuardedClearAuditLogs = () => {

@@ -267,7 +267,7 @@ export default function useInventory() {
   };
 
 
-  const handleCreateRepairRequest = async (assetId, problemDescription) => {
+  const handleCreateRepairRequest = async (assetId, problemDescription, listBrokenItem) => {
     try {
       const res = await fetch(API_BASE_URL + '/repairs', {
         method: 'POST',
@@ -278,7 +278,8 @@ export default function useInventory() {
         body: JSON.stringify({
           asset_id: assetId,
           request_date: new Date().toISOString(),
-          problem_description: problemDescription
+          problem_description: problemDescription,
+          list_broken_item: listBrokenItem
         })
       });
 
@@ -357,7 +358,7 @@ export default function useInventory() {
     }
   };
 
-  const handleCompleteRepairJob = async (requestId, cost, contractor, approvalDate, documentNumber, notes) => {
+  const handleCompleteRepairJob = async (requestId, cost, contractor, approvalDate, documentNumber, notes, listRepairsItem) => {
     try {
       const res = await fetch(`${API_BASE_URL}/repairs/${requestId}/complete`, {
         method: 'PUT',
@@ -365,7 +366,7 @@ export default function useInventory() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ cost, contractor, approvalDate, documentNumber, notes })
+        body: JSON.stringify({ cost, contractor, approvalDate, documentNumber, notes, listRepairsItem })
       });
       if (res.ok) {
         const updatedRequest = await res.json();

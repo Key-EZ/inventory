@@ -698,7 +698,9 @@ export const initMysql = async () => {
       asset_id VARCHAR(100) NOT NULL,
       approval_date VARCHAR(50) NOT NULL,
       document_number VARCHAR(100) NOT NULL,
-      description TEXT NOT NULL,
+      description TEXT NULL,
+      list_broken_item TEXT NULL,
+      list_repairs_item TEXT NULL,
       cost DECIMAL(15, 2) DEFAULT 0,
       contractor VARCHAR(255),
       FOREIGN KEY (asset_id) REFERENCES assets(id) ON DELETE CASCADE
@@ -711,6 +713,8 @@ export const initMysql = async () => {
       asset_id VARCHAR(100) NOT NULL,
       request_date VARCHAR(50) NOT NULL,
       problem_description TEXT NOT NULL,
+      list_broken_item TEXT NULL,
+      list_repairs_item TEXT NULL,
       status VARCHAR(50) DEFAULT 'PENDING',
       rejection_reason TEXT,
       repair_cost DECIMAL(15, 2) DEFAULT 0,
@@ -731,6 +735,31 @@ export const initMysql = async () => {
       user VARCHAR(100) NOT NULL
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   `);
+
+  // Migrations for existing databases
+  await pool.query("ALTER TABLE maintenances MODIFY COLUMN description TEXT NULL");
+
+  const [rrBrokenCols] = await pool.query("SHOW COLUMNS FROM repair_requests LIKE 'list_broken_item'");
+  if (rrBrokenCols.length === 0) {
+    await pool.query("ALTER TABLE repair_requests ADD COLUMN list_broken_item TEXT NULL");
+    console.log("Added 'list_broken_item' column to repair_requests table.");
+  }
+  const [rrRepairsCols] = await pool.query("SHOW COLUMNS FROM repair_requests LIKE 'list_repairs_item'");
+  if (rrRepairsCols.length === 0) {
+    await pool.query("ALTER TABLE repair_requests ADD COLUMN list_repairs_item TEXT NULL");
+    console.log("Added 'list_repairs_item' column to repair_requests table.");
+  }
+
+  const [mBrokenCols] = await pool.query("SHOW COLUMNS FROM maintenances LIKE 'list_broken_item'");
+  if (mBrokenCols.length === 0) {
+    await pool.query("ALTER TABLE maintenances ADD COLUMN list_broken_item TEXT NULL");
+    console.log("Added 'list_broken_item' column to maintenances table.");
+  }
+  const [mRepairsCols] = await pool.query("SHOW COLUMNS FROM maintenances LIKE 'list_repairs_item'");
+  if (mRepairsCols.length === 0) {
+    await pool.query("ALTER TABLE maintenances ADD COLUMN list_repairs_item TEXT NULL");
+    console.log("Added 'list_repairs_item' column to maintenances table.");
+  }
 
   console.log('MySQL initialization completed successfully.');
 

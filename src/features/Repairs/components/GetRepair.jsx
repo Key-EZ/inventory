@@ -14,6 +14,7 @@ export default function GetRepair({
   const [activeSubTab, setActiveSubTab] = useState(initialTab); // 'new_request', 'history'
   const [showOnlyPreselectedHistory, setShowOnlyPreselectedHistory] = useState(!!preselectedAsset);
   const [problemDescription, setProblemDescription] = useState('');
+  const [listBrokenItem, setListBrokenItem] = useState('');
 
   // Helper to find latest custodian name from custodian history (sorted by year descending)
   const getLatestCustodian = (asset) => {
@@ -51,12 +52,13 @@ export default function GetRepair({
 
   const handleSubmitRepair = (e) => {
     e.preventDefault();
-    if (!preselectedAsset || !problemDescription.trim()) {
-      alert('กรุณากรอกรายละเอียดอาการเสีย');
+    if (!preselectedAsset || !problemDescription.trim() || !listBrokenItem.trim()) {
+      alert('กรุณากรอกข้อมูลและรายละเอียดชิ้นส่วนที่ชำรุดเสียหายให้ครบถ้วน');
       return;
     }
-    onCreateRepairRequest(preselectedAsset.id, problemDescription.trim());
+    onCreateRepairRequest(preselectedAsset.id, problemDescription.trim(), listBrokenItem.trim());
     setProblemDescription('');
+    setListBrokenItem('');
     if (onClearPreselectedAsset) onClearPreselectedAsset();
     setActiveSubTab('history');
   };
@@ -171,19 +173,32 @@ export default function GetRepair({
                 </div>
               </div>
  
-              {/* Form */}
               <form onSubmit={handleSubmitRepair}>
-                <div className="form-group" style={{ marginBottom: '20px' }}>
-                  <label style={{ fontWeight: '600', marginBottom: '8px', display: 'block' }}>
-                    ระบุอาการเสีย หรือปัญหาที่พบ *
+                <div className="form-group" style={{ marginBottom: '16px' }}>
+                  <label style={{ fontWeight: '600', marginBottom: '6px', display: 'block' }}>
+                    อาการเสีย หรือปัญหาที่พบ *
                   </label>
                   <textarea
-                    rows={4}
+                    rows={2}
                     value={problemDescription}
                     onChange={(e) => setProblemDescription(e.target.value)}
-                    placeholder="ตัวอย่าง: เครื่องพิมพ์กระดาษติดบ่อย, เครื่องชาร์จไม่เข้า, ระบบจอบิดเบี้ยว หรืออื่นๆ..."
+                    placeholder="ระบุอาการเสียเบื้องต้น เช่น เปิดเครื่องไม่ติด, ปริ้นท์แล้วกระดาษติด..."
                     required
-                    style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--border-color)', resize: 'vertical' }}
+                    style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid var(--border-color)', resize: 'vertical' }}
+                  />
+                </div>
+
+                <div className="form-group" style={{ marginBottom: '20px' }}>
+                  <label style={{ fontWeight: '600', marginBottom: '6px', display: 'block' }}>
+                    รายการซ่อมแซม (ชิ้นส่วนที่ชำรุดเสียหายที่ต้องการให้ซ่อมแซม) *
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={listBrokenItem}
+                    onChange={(e) => setListBrokenItem(e.target.value)}
+                    placeholder="ระบุรายการชิ้นส่วนที่ชำรุด เช่น เมนบอร์ดบกพร่อง, ลูกกลิ้งชำรุด, มอเตอร์ไหม้..."
+                    required
+                    style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid var(--border-color)', resize: 'vertical' }}
                   />
                 </div>
  
@@ -251,7 +266,12 @@ export default function GetRepair({
                             </div>
                           </td>
                           <td style={{ fontSize: '0.9rem', maxWidth: '300px', whiteSpace: 'normal', wordBreak: 'break-word' }}>
-                            {req.problem_description}
+                            <div><strong>อาการเสีย:</strong> {req.problem_description}</div>
+                            {req.list_broken_item && (
+                              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                                <strong>รายการชำรุด:</strong> {req.list_broken_item}
+                              </div>
+                            )}
                           </td>
                           <td style={{ textAlign: 'center' }}>
                             <span className={`ledger-status-badge ${getStatusClass(req.status)}`}>

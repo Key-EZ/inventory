@@ -18,13 +18,14 @@ router.post('/', async (req, res) => {
   try {
     const reqObj = req.body;
     const newRequestId = `repair-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    const listBrokenItem = reqObj.list_broken_item || '';
     
     await executeQuery(
       `INSERT INTO repair_requests (
-        id, asset_id, request_date, problem_description, status, rejection_reason,
+        id, asset_id, request_date, problem_description, list_broken_item, status, rejection_reason,
         repair_cost, contractor, approval_date, document_number, officer_notes
-      ) VALUES (?, ?, ?, ?, 'PENDING', '', 0, '', '', '', '')`,
-      [newRequestId, reqObj.asset_id, reqObj.request_date, reqObj.problem_description]
+      ) VALUES (?, ?, ?, ?, ?, 'PENDING', '', 0, '', '', '', '')`,
+      [newRequestId, reqObj.asset_id, reqObj.request_date, reqObj.problem_description || '', listBrokenItem]
     );
 
     const assets = await executeQuery('SELECT name FROM assets WHERE id = ?', [reqObj.asset_id]);
@@ -36,6 +37,8 @@ router.post('/', async (req, res) => {
       ...reqObj,
       id: newRequestId,
       status: 'PENDING',
+      list_broken_item: listBrokenItem,
+      list_repairs_item: '',
       rejection_reason: '',
       repair_cost: 0,
       contractor: '',
@@ -129,12 +132,13 @@ router.put('/:id/complete', async (req, res) => {
     const approvalDate = req.body.approvalDate || '';
     const documentNumber = req.body.documentNumber || '';
     const notes = req.body.notes || '';
+    const listRepairsItem = req.body.listRepairsItem || '';
 
     await connection.query(
       `UPDATE repair_requests SET
-        status = ?, repair_cost = ?, contractor = ?, approval_date = ?, document_number = ?, officer_notes = ?
+        status = ?, repair_cost = ?, contractor = ?, approval_date = ?, document_number = ?, officer_notes = ?, list_repairs_item = ?
       WHERE id = ?`,
-      [status, cost, contractor, approvalDate, documentNumber, notes, req.params.id]
+      [status, cost, contractor, approvalDate, documentNumber, notes, listRepairsItem, req.params.id]
     );
 
     const [assets] = await connection.query('SELECT name FROM assets WHERE id = ?', [repair.asset_id]);
@@ -142,9 +146,9 @@ router.put('/:id/complete', async (req, res) => {
 
     const maintId = `maint-${Date.now()}-${Math.floor(Math.random() * 100)}`;
     await connection.query(
-      `INSERT INTO maintenances (id, asset_id, approval_date, document_number, description, cost, contractor)
-      VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [maintId, repair.asset_id, approvalDate, documentNumber, repair.problem_description, cost, contractor]
+      `INSERT INTO maintenances (id, asset_id, approval_date, document_number, description, list_broken_item, list_repairs_item, cost, contractor)
+      VALUES (?, ?, ?, ?, NULL, ?, ?, ?, ?)`,
+      [maintId, repair.asset_id, approvalDate, documentNumber, repair.list_broken_item || '', listRepairsItem, cost, contractor]
     );
 
     await connection.commit();
@@ -158,7 +162,9 @@ router.put('/:id/complete', async (req, res) => {
       contractor,
       approval_date: approvalDate,
       document_number: documentNumber,
-      officer_notes: notes
+      officer_notes: notes,
+      list_broken_item: repair.list_broken_item,
+      list_repairs_item: listRepairsItem
     });
   } catch (error) {
     await connection.rollback();

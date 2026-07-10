@@ -816,7 +816,7 @@ export default function InventoryPrint({ asset, onClose }) {
                                         <AutoFitText text={maint.approval_date ? formatThaiDateString(maint.approval_date) : '-'} />
                                     </td>
                                     <td className="print-maint-cell-common">
-                                        <AutoFitText text={maint.description || '-'} />
+                                        <AutoFitText text={maint.list_repairs_item || maint.description || '-'} />
                                     </td>
                                     <td className="print-maint-cell-right">
                                         <AutoFitText text={(maint.cost || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} />
