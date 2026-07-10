@@ -627,7 +627,7 @@ export default function ReportPanel({ assets = [], locations = [] }) {
                                 {maint.approval_date ? ` ลงวันที่ ${formatThaiDateString(maint.approval_date)}` : ''}
                                 {!maint.document_number && !maint.approval_date && (maint.approval_no_date || '-')}
                               </td>
-                              <td>{maint.description}</td>
+                              <td>{maint.list_repairs_item || '-'}</td>
                               <td className="text-right">{(maint.cost || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                               <td>{maint.contractor || '-'}</td>
                             </tr>
@@ -869,7 +869,7 @@ export default function ReportPanel({ assets = [], locations = [] }) {
                                 {maint.approval_date ? ` ลงวันที่ ${formatThaiDateString(maint.approval_date)}` : ''}
                                 {!maint.document_number && !maint.approval_date && (maint.approval_no_date || '-')}
                               </td>
-                              <td>{maint.description}</td>
+                              <td>{maint.list_repairs_item || '-'}</td>
                               <td className="text-right">{(maint.cost || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                               <td>{maint.contractor || '-'}</td>
                             </tr>

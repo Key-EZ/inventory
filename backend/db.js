@@ -213,7 +213,8 @@ const initialAssetsRaw = [
         id: "maint-101",
         approval_date: "2024-05-12",
         document_number: "อนุมัติเลขที่ 145/2567",
-        description: "ปรับปรุงระบบกันซึมดาดฟ้าและทาสีภายนอกอาคารใหม่",
+        list_broken_item: "ระบบกันซึมดาดฟ้ารั่วซึมและสีภายนอกหลุดลอก",
+        list_repairs_item: "ปรับปรุงระบบกันซึมดาดฟ้าและทาสีภายนอกอาคารใหม่",
         cost: 250000.00,
         contractor: "หจก. นนทบุรีการช่าง"
       }
@@ -246,7 +247,8 @@ const initialAssetsRaw = [
         id: "maint-201",
         approval_date: "2025-01-10",
         document_number: "อนุมัติเลขที่ ไอที 12/2568",
-        description: "เปลี่ยนคีย์บอร์ดที่ชำรุดและอัพเกรด RAM เป็น 32GB",
+        list_broken_item: "คีย์บอร์ดปุ่มกดเสียหายและหน่วยความจำไม่เพียงพอ",
+        list_repairs_item: "เปลี่ยนคีย์บอร์ดที่ชำรุดและอัพเกรด RAM เป็น 32GB",
         cost: 4800.00,
         contractor: "ร้านคอมพิวเตอร์เซอร์วิส นนทบุรี"
       }
@@ -303,7 +305,8 @@ const initialAssetsRaw = [
         id: "maint-202",
         approval_date: "2024-06-15",
         document_number: "ล้างและเติมน้ำยาประจำปี",
-        description: "บริการล้างแอร์ เติมน้ำยารั่วซึม และซ่อมบอร์ดมอเตอร์คอยล์เย็น",
+        list_broken_item: "เครื่องปรับอากาศไม่เย็นและพัดลมเสียงดัง",
+        list_repairs_item: "บริการล้างแอร์ เติมน้ำยารั่วซึม และซ่อมบอร์ดมอเตอร์คอยล์เย็น",
         cost: 2500.00,
         contractor: "ร้านแอร์เจริญยนต์นนทบุรี"
       }
@@ -360,7 +363,8 @@ const initialAssetsRaw = [
         id: "maint-301",
         approval_date: "2023-10-15",
         document_number: "อนุมัติซ่อมเลขที่ 45/2566",
-        description: "เปลี่ยนยางรถยนต์ 4 เส้น และเช็คระยะรอบ 80,000 กม.",
+        list_broken_item: "ยางรถยนต์สึกหรอตามอายุการใช้งาน",
+        list_repairs_item: "เปลี่ยนยางรถยนต์ 4 เส้น และเช็คระยะรอบ 80,000 กม.",
         cost: 28000.00,
         contractor: "ศูนย์บริการโตโยต้านนทบุรี"
       },
@@ -368,7 +372,8 @@ const initialAssetsRaw = [
         id: "maint-302",
         approval_date: "2024-03-20",
         document_number: "ใบเสร็จเลขที่ 5894",
-        description: "เปลี่ยนแบตเตอรี่รถยนต์และซ่อมเปลี่ยนไดชาร์จ",
+        list_broken_item: "สตาร์ทเครื่องยนต์ไม่ติดและระบบไฟไม่ชาร์จ",
+        list_repairs_item: "เปลี่ยนแบตเตอรี่รถยนต์และซ่อมเปลี่ยนไดชาร์จ",
         cost: 7500.00,
         contractor: "ร้านบี-ควิก สาขารัตนาธิเบศร์"
       }
@@ -510,8 +515,8 @@ export const seedRelationalDb = async (data) => {
         if (Array.isArray(asset.maintenances)) {
           for (const maint of asset.maintenances) {
             await connection.query(
-              'INSERT INTO maintenances (id, asset_id, approval_date, document_number, description, cost, contractor) VALUES (?, ?, ?, ?, ?, ?, ?)',
-              [maint.id, asset.id, maint.approval_date, maint.document_number, maint.description, maint.cost || 0, maint.contractor || '']
+              'INSERT INTO maintenances (id, asset_id, approval_date, document_number, list_broken_item, list_repairs_item, cost, contractor) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+              [maint.id, asset.id, maint.approval_date, maint.document_number, maint.list_broken_item || '', maint.list_repairs_item || '', maint.cost || 0, maint.contractor || '']
             );
           }
         }
@@ -698,7 +703,6 @@ export const initMysql = async () => {
       asset_id VARCHAR(100) NOT NULL,
       approval_date VARCHAR(50) NOT NULL,
       document_number VARCHAR(100) NOT NULL,
-      description TEXT NULL,
       list_broken_item TEXT NULL,
       list_repairs_item TEXT NULL,
       cost DECIMAL(15, 2) DEFAULT 0,
@@ -737,7 +741,11 @@ export const initMysql = async () => {
   `);
 
   // Migrations for existing databases
-  await pool.query("ALTER TABLE maintenances MODIFY COLUMN description TEXT NULL");
+  const [descCols] = await pool.query("SHOW COLUMNS FROM maintenances LIKE 'description'");
+  if (descCols.length > 0) {
+    await pool.query("ALTER TABLE maintenances DROP COLUMN description");
+    console.log("Dropped 'description' column from maintenances table.");
+  }
 
   const [rrBrokenCols] = await pool.query("SHOW COLUMNS FROM repair_requests LIKE 'list_broken_item'");
   if (rrBrokenCols.length === 0) {

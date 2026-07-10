@@ -353,8 +353,19 @@ router.post('/import', async (req, res) => {
         if (Array.isArray(asset.maintenances)) {
           for (const maint of asset.maintenances) {
             await connection.query(
-              'INSERT INTO maintenances (id, asset_id, approval_date, document_number, description, cost, contractor) VALUES (?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE description = ?',
-              [maint.id || `maint-${Date.now()}-${Math.floor(Math.random() * 100)}`, existingId, maint.approval_date, maint.document_number, maint.description, maint.cost || 0, maint.contractor || '', maint.description]
+              'INSERT INTO maintenances (id, asset_id, approval_date, document_number, list_broken_item, list_repairs_item, cost, contractor) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE list_broken_item = ?, list_repairs_item = ?',
+              [
+                maint.id || `maint-${Date.now()}-${Math.floor(Math.random() * 100)}`,
+                existingId,
+                maint.approval_date,
+                maint.document_number,
+                maint.list_broken_item || '',
+                maint.list_repairs_item || '',
+                maint.cost || 0,
+                maint.contractor || '',
+                maint.list_broken_item || '',
+                maint.list_repairs_item || ''
+              ]
             );
           }
         }
@@ -395,8 +406,17 @@ router.post('/import', async (req, res) => {
         if (Array.isArray(asset.maintenances)) {
           for (const maint of asset.maintenances) {
             await connection.query(
-              'INSERT INTO maintenances (id, asset_id, approval_date, document_number, description, cost, contractor) VALUES (?, ?, ?, ?, ?, ?, ?)',
-              [maint.id || `maint-${Date.now()}-${Math.floor(Math.random() * 100)}`, newAssetId, maint.approval_date, maint.document_number, maint.description, maint.cost || 0, maint.contractor || '']
+              'INSERT INTO maintenances (id, asset_id, approval_date, document_number, list_broken_item, list_repairs_item, cost, contractor) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+              [
+                maint.id || `maint-${Date.now()}-${Math.floor(Math.random() * 100)}`,
+                newAssetId,
+                maint.approval_date,
+                maint.document_number,
+                maint.list_broken_item || '',
+                maint.list_repairs_item || '',
+                maint.cost || 0,
+                maint.contractor || ''
+              ]
             );
           }
         }

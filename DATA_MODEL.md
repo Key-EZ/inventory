@@ -63,7 +63,6 @@
 | `asset_id` | `String` | Foreign Key | เชื่อมโยงไปยังฟิลด์ `id` ในตาราง `assets` |
 | `approval_date` | `Date` (String) | Required | วันเดือนปีที่ได้รับอนุมัติให้ซ่อมบำรุง (Format: `YYYY-MM-DD`) |
 | `document_number` | `String` | Required | เลขที่หนังสืออนุมัติ (เช่น "นบ 5420X/XXXX") |
-| `description` | `String` | Optional (NULL) | คำอธิบายการดำเนินการซ่อมแซม (ใช้สำหรับความเข้ากันได้ย้อนหลัง) |
 | `list_broken_item` | `String` | Optional | รายการชิ้นส่วนที่ชำรุดเสียหาย (listBrokenitem) เช่น "หน้าจอร้าว, แผงบอร์ดไหม้" |
 | `list_repairs_item` | `String` | Optional | รายการเปลี่ยนอะไหล่โดยละเอียด (listrepairsitem) เช่น "เปลี่ยนจอ LCD, เปลี่ยนตัวต้านทาน R15" |
 | `cost` | `Number` (Float) | Min: 0 | จำนวนเงินค่าซ่อมแซมบำรุงรักษา (บาท) |
@@ -144,7 +143,6 @@ erDiagram
         string asset_id FK "References Asset.id"
         string approval_date
         string document_number
-        string description
         string list_broken_item
         string list_repairs_item
         float cost
@@ -235,7 +233,6 @@ erDiagram
       "id": "maint-301",
       "approval_date": "2023-10-15",
       "document_number": "45/2566",
-      "description": null,
       "list_broken_item": "ยางรถยนต์ชำรุดหมดสภาพ",
       "list_repairs_item": "เปลี่ยนยางรถยนต์ 4 เส้น และตรวจเช็คระยะรอบ 80,000 กม.",
       "cost": 28000.00,
