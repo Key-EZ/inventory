@@ -81,6 +81,7 @@ export default function App() {
     handleStartRepairJob,
     handleRejectRepairJob,
     handleCompleteRepairJob,
+    handleManageRepairJob,
     handleAddCustodian,
     handleEditCustodian,
     handleDeleteCustodian,
@@ -245,6 +246,18 @@ export default function App() {
     handleCompleteRepairJob(requestId, cost, contractor, approvalDate, documentNumber, notes, listRepairsItem);
   };
 
+  const handleGuardedManageRepairJob = (requestId, payload) => {
+    if (!currentUser) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+    if (!isTechnician && !isSystemAdmin) {
+      alert('เฉพาะผู้ใช้งานระดับช่างเทคนิค (Technician) หรือผู้ดูแลระบบ (Admin) เท่านั้นที่สามารถจัดการงานซ่อมได้');
+      return;
+    }
+    return handleManageRepairJob(requestId, payload);
+  };
+
   const handleGuardedClearAuditLogs = () => {
     if (!isSystemAdmin) {
       alert('เฉพาะผู้ใช้งานระดับ Admin เท่านั้นที่สามารถล้างประวัติระบบได้');
@@ -405,6 +418,7 @@ export default function App() {
             onStartRepairJob={handleGuardedStartRepairJob}
             onRejectRepairJob={handleGuardedRejectRepairJob}
             onCompleteRepairJob={handleGuardedCompleteRepairJob}
+            onManageRepairJob={handleGuardedManageRepairJob}
           />
         )}
 

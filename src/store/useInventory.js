@@ -421,6 +421,43 @@ export default function useInventory() {
     }
   };
 
+  const handleManageRepairJob = async (requestId, payload) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/repairs/${requestId}/manage`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        const updatedRequest = await res.json();
+        setRepairRequests(prev => prev.map(r => r.id === requestId ? updatedRequest : r));
+
+        // Re-fetch assets to get updated maintenance logs
+        const assetsRes = await fetch(API_BASE_URL + '/assets', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (assetsRes.ok) {
+          const freshAssets = await assetsRes.json();
+          setAssets(freshAssets);
+        }
+
+        // Refresh logs
+        const logsRes = await fetch(API_BASE_URL + '/audit-logs', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (logsRes.ok) setAuditLogs(await logsRes.json());
+        return true;
+      }
+    } catch (err) {
+      console.error('Error managing repair job:', err);
+      alert('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์');
+    }
+    return false;
+  };
+
   const handleCompleteRepairJob = async (requestId, cost, contractor, approvalDate, documentNumber, notes, listRepairsItem) => {
     try {
       const res = await fetch(`${API_BASE_URL}/repairs/${requestId}/complete`, {
@@ -877,6 +914,7 @@ export default function useInventory() {
     handleUpdateRepairRequest,
     handleDeleteRepairRequest,
     handleStartRepairJob,
+    handleManageRepairJob,
     handleRejectRepairJob,
     handleCompleteRepairJob,
     handleAddCustodian,

@@ -5,7 +5,8 @@ export default function RepairJobs({
   repairRequests = [],
   onStartRepairJob,
   onRejectRepairJob,
-  onCompleteRepairJob
+  onCompleteRepairJob,
+  onManageRepairJob
 }) {
   const [filterStatus, setFilterStatus] = useState('ALL');
   const [searchText, setSearchText] = useState('');
@@ -13,6 +14,7 @@ export default function RepairJobs({
   // Modals state
   const [completingRequest, setCompletingRequest] = useState(null);
   const [rejectingRequest, setRejectingRequest] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
 
   // Completion Form States
   const [completionForm, setCompletionForm] = useState({
@@ -86,6 +88,7 @@ export default function RepairJobs({
   // Action Handlers
   const handleOpenComplete = (req) => {
     setCompletingRequest(req);
+    setIsEditing(false);
     setCompletionForm({
       repairCost: '',
       contractor: '',
@@ -95,17 +98,38 @@ export default function RepairJobs({
     });
   };
 
+  const handleOpenEditComplete = (req) => {
+    setCompletingRequest(req);
+    setIsEditing(true);
+    setCompletionForm({
+      repairCost: req.repair_cost || '',
+      contractor: req.contractor || '',
+      approvalDate: req.approval_date || '',
+      documentNumber: req.document_number || '',
+      listRepairsItem: req.list_repairs_item || ''
+    });
+  };
+
   const handleCloseComplete = () => {
     setCompletingRequest(null);
+    setIsEditing(false);
   };
 
   const handleOpenReject = (req) => {
     setRejectingRequest(req);
+    setIsEditing(false);
     setRejectionReason('');
+  };
+
+  const handleOpenEditReject = (req) => {
+    setRejectingRequest(req);
+    setIsEditing(true);
+    setRejectionReason(req.rejection_reason || '');
   };
 
   const handleCloseReject = () => {
     setRejectingRequest(null);
+    setIsEditing(false);
   };
 
   const handleSubmitComplete = (e) => {
@@ -116,15 +140,26 @@ export default function RepairJobs({
       alert('กรุณากรอกข้อมูลการซ่อมแซมและรายละเอียดการเปลี่ยนอะไหล่ให้ครบถ้วน');
       return;
     }
-    onCompleteRepairJob(
-      completingRequest.id,
-      parseFloat(repairCost),
-      contractor.trim(),
-      approvalDate.trim(),
-      documentNumber.trim(),
-      '', // notes
-      listRepairsItem.trim()
-    );
+    if (isEditing) {
+      onManageRepairJob(completingRequest.id, {
+        status: 'COMPLETED',
+        repair_cost: parseFloat(repairCost),
+        contractor: contractor.trim(),
+        approval_date: approvalDate.trim(),
+        document_number: documentNumber.trim(),
+        list_repairs_item: listRepairsItem.trim()
+      });
+    } else {
+      onCompleteRepairJob(
+        completingRequest.id,
+        parseFloat(repairCost),
+        contractor.trim(),
+        approvalDate.trim(),
+        documentNumber.trim(),
+        '', // notes
+        listRepairsItem.trim()
+      );
+    }
     handleCloseComplete();
   };
 
@@ -135,7 +170,14 @@ export default function RepairJobs({
       alert('กรุณากรอกเหตุผลที่ปฏิเสธการแจ้งซ่อม');
       return;
     }
-    onRejectRepairJob(rejectingRequest.id, rejectionReason.trim());
+    if (isEditing) {
+      onManageRepairJob(rejectingRequest.id, {
+        status: 'REJECTED',
+        rejection_reason: rejectionReason.trim()
+      });
+    } else {
+      onRejectRepairJob(rejectingRequest.id, rejectionReason.trim());
+    }
     handleCloseReject();
   };
 
@@ -312,6 +354,13 @@ export default function RepairJobs({
                               <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: '2px' }}>
                                 ค่าซ่อม: {parseFloat(req.repair_cost || 0).toLocaleString()} บาท
                               </div>
+                              <button
+                                className="button-secondary"
+                                style={{ padding: '4px 8px', fontSize: '0.7rem', marginTop: '6px', cursor: 'pointer' }}
+                                onClick={() => handleOpenEditComplete(req)}
+                              >
+                                ✏️ แก้ไขผลซ่อม
+                              </button>
                             </div>
                           )}
 
@@ -321,6 +370,13 @@ export default function RepairJobs({
                               <div style={{ fontSize: '0.75rem', marginTop: '2px', fontStyle: 'italic' }}>
                                 เหตุผล: {req.rejection_reason || '-'}
                               </div>
+                              <button
+                                className="button-secondary"
+                                style={{ padding: '4px 8px', fontSize: '0.7rem', marginTop: '6px', cursor: 'pointer' }}
+                                onClick={() => handleOpenEditReject(req)}
+                              >
+                                ✏️ แก้ไขเหตุผล
+                              </button>
                             </div>
                           )}
                         </td>
@@ -344,7 +400,7 @@ export default function RepairJobs({
         <div className="modal-backdrop">
           <div className="modal-content-card" style={{ maxWidth: '500px' }}>
             <div className="modal-header-section">
-              <h2>🛠️ บันทึกผลการดำเนินการซ่อมแซม</h2>
+              <h2>{isEditing ? '✏️ แก้ไขผลการดำเนินการซ่อมแซม' : '🛠️ บันทึกผลการดำเนินการซ่อมแซม'}</h2>
               <button className="close-btn" onClick={handleCloseComplete}>&times;</button>
             </div>
 
@@ -421,7 +477,7 @@ export default function RepairJobs({
 
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '12px' }}>
                 <button type="submit" className="button-primary" style={{ padding: '8px 16px', backgroundColor: 'var(--status-active-bar)', borderColor: 'var(--status-active-bar)' }}>
-                  บันทึกเสร็จสิ้น
+                  {isEditing ? 'บันทึกการแก้ไข' : 'บันทึกเสร็จสิ้น'}
                 </button>
                 <button type="button" className="button-secondary" style={{ padding: '8px 16px' }} onClick={handleCloseComplete}>
                   ยกเลิก
@@ -437,7 +493,7 @@ export default function RepairJobs({
         <div className="modal-backdrop">
           <div className="modal-content-card" style={{ maxWidth: '500px' }}>
             <div className="modal-header-section">
-              <h2>❌ ปฏิเสธการแจ้งซ่อมพัสดุ</h2>
+              <h2>{isEditing ? '✏️ แก้ไขเหตุผลปฏิเสธการซ่อม' : '❌ ปฏิเสธการแจ้งซ่อมพัสดุ'}</h2>
               <button className="close-btn" onClick={handleCloseReject}>&times;</button>
             </div>
 
@@ -462,7 +518,7 @@ export default function RepairJobs({
 
               <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '12px' }}>
                 <button type="submit" className="button-primary" style={{ padding: '8px 16px', backgroundColor: 'var(--status-pending-bar)', borderColor: 'var(--status-pending-bar)' }}>
-                  ยืนยันการปฏิเสธ
+                  {isEditing ? 'บันทึกการแก้ไข' : 'ยืนยันการปฏิเสธ'}
                 </button>
                 <button type="button" className="button-secondary" style={{ padding: '8px 16px' }} onClick={handleCloseReject}>
                   ยกเลิก

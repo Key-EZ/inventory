@@ -707,6 +707,7 @@ export const initMysql = async () => {
       list_repairs_item TEXT NULL,
       cost DECIMAL(15, 2) DEFAULT 0,
       contractor VARCHAR(255),
+      repair_request_id VARCHAR(100) NULL,
       FOREIGN KEY (asset_id) REFERENCES assets(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   `);
@@ -767,6 +768,12 @@ export const initMysql = async () => {
   if (mRepairsCols.length === 0) {
     await pool.query("ALTER TABLE maintenances ADD COLUMN list_repairs_item TEXT NULL");
     console.log("Added 'list_repairs_item' column to maintenances table.");
+  }
+
+  const [mRequestCols] = await pool.query("SHOW COLUMNS FROM maintenances LIKE 'repair_request_id'");
+  if (mRequestCols.length === 0) {
+    await pool.query("ALTER TABLE maintenances ADD COLUMN repair_request_id VARCHAR(100) NULL");
+    console.log("Added 'repair_request_id' column to maintenances table.");
   }
 
   console.log('MySQL initialization completed successfully.');

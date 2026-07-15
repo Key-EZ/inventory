@@ -146,9 +146,9 @@ router.put('/:id/complete', async (req, res) => {
 
     const maintId = `maint-${Date.now()}-${Math.floor(Math.random() * 100)}`;
     await connection.query(
-      `INSERT INTO maintenances (id, asset_id, approval_date, document_number, list_broken_item, list_repairs_item, cost, contractor)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [maintId, repair.asset_id, approvalDate, documentNumber, repair.list_broken_item || '', listRepairsItem, cost, contractor]
+      `INSERT INTO maintenances (id, asset_id, approval_date, document_number, list_broken_item, list_repairs_item, cost, contractor, repair_request_id)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [maintId, repair.asset_id, approvalDate, documentNumber, repair.list_broken_item || '', listRepairsItem, cost, contractor, repair.id]
     );
 
     await connection.commit();
@@ -235,6 +235,141 @@ router.delete('/:id', async (req, res) => {
   } catch (error) {
     console.error('Failed to delete repair request:', error);
     res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการลบคำขอส่งซ่อม' });
+  }
+});
+
+router.put('/:id/manage', async (req, res) => {
+  if (req.user.role !== 'TECHNICIAN' && req.user.role !== 'ADMIN') {
+    return res.status(403).json({ success: false, message: 'Forbidden: Only technicians or admins are allowed to manage repair jobs' });
+  }
+  const pool = getPool();
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    const [repairs] = await connection.query('SELECT * FROM repair_requests WHERE id = ?', [req.params.id]);
+    if (repairs.length === 0) {
+      connection.release();
+      return res.status(404).json({ success: false, message: 'ไม่พบข้อมูลคำขอส่งซ่อม' });
+    }
+    const repair = repairs[0];
+
+    const {
+      status,
+      rejection_reason,
+      repair_cost,
+      contractor,
+      approval_date,
+      document_number,
+      list_repairs_item,
+      list_broken_item,
+      problem_description
+    } = req.body;
+
+    const newStatus = status || repair.status;
+    const listBroken = list_broken_item || repair.list_broken_item || '';
+    const probDesc = problem_description || listBroken;
+
+    await connection.query(
+      `UPDATE repair_requests SET 
+        status = ?, 
+        rejection_reason = ?, 
+        repair_cost = ?, 
+        contractor = ?, 
+        approval_date = ?, 
+        document_number = ?, 
+        list_repairs_item = ?, 
+        list_broken_item = ?, 
+        problem_description = ? 
+      WHERE id = ?`,
+      [
+        newStatus,
+        newStatus === 'REJECTED' ? (rejection_reason || '') : '',
+        newStatus === 'COMPLETED' ? (parseFloat(repair_cost) || 0) : 0,
+        newStatus === 'COMPLETED' ? (contractor || '') : '',
+        newStatus === 'COMPLETED' ? (approval_date || '') : '',
+        newStatus === 'COMPLETED' ? (document_number || '') : '',
+        newStatus === 'COMPLETED' ? (list_repairs_item || '') : '',
+        listBroken,
+        probDesc,
+        req.params.id
+      ]
+    );
+
+    // Sync maintenance record
+    const [maints] = await connection.query('SELECT id FROM maintenances WHERE repair_request_id = ?', [req.params.id]);
+    const exists = maints.length > 0;
+
+    if (newStatus === 'COMPLETED') {
+      const cost = parseFloat(repair_cost) || 0;
+      const appDate = approval_date || '';
+      const docNum = document_number || '';
+      const listRep = list_repairs_item || '';
+      const cont = contractor || '';
+
+      if (exists) {
+        await connection.query(
+          `UPDATE maintenances SET 
+            approval_date = ?, 
+            document_number = ?, 
+            list_broken_item = ?, 
+            list_repairs_item = ?, 
+            cost = ?, 
+            contractor = ? 
+          WHERE repair_request_id = ?`,
+          [appDate, docNum, listBroken, listRep, cost, cont, req.params.id]
+        );
+      } else {
+        const maintId = `maint-${Date.now()}-${Math.floor(Math.random() * 100)}`;
+        await connection.query(
+          `INSERT INTO maintenances (id, asset_id, approval_date, document_number, list_broken_item, list_repairs_item, cost, contractor, repair_request_id) 
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [maintId, repair.asset_id, appDate, docNum, listBroken, listRep, cost, cont, req.params.id]
+        );
+      }
+    } else {
+      if (exists) {
+        await connection.query('DELETE FROM maintenances WHERE repair_request_id = ?', [req.params.id]);
+      }
+    }
+
+    // Sync asset status
+    let assetStatus = 'ใช้งาน';
+    if (newStatus === 'PENDING' || newStatus === 'IN_PROGRESS') {
+      assetStatus = 'กำลังซ่อม';
+    } else {
+      const [remaining] = await connection.query(
+        'SELECT id FROM repair_requests WHERE asset_id = ? AND id != ? AND (status = "PENDING" || status = "IN_PROGRESS")',
+        [repair.asset_id, req.params.id]
+      );
+      if (remaining.length > 0) {
+        assetStatus = 'กำลังซ่อม';
+      }
+    }
+    await connection.query('UPDATE assets SET status = ? WHERE id = ?', [assetStatus, repair.asset_id]);
+
+    await connection.commit();
+
+    const [updatedRepairs] = await connection.query('SELECT * FROM repair_requests WHERE id = ?', [req.params.id]);
+    const updatedRepair = updatedRepairs[0];
+    
+    connection.release();
+
+    const [assets] = await executeQuery('SELECT name FROM assets WHERE id = ?', [repair.asset_id]);
+    const assetName = assets.length > 0 ? assets[0].name : 'ไม่ระบุชื่อครุภัณฑ์';
+
+    await addAuditLogServer(
+      'จัดการใบซ่อม',
+      `แก้ไขรายละเอียดงานซ่อมสำหรับครุภัณฑ์: ${assetName} (สถานะ: ${newStatus})`,
+      req.user.name
+    );
+
+    res.json(updatedRepair);
+  } catch (error) {
+    await connection.rollback();
+    connection.release();
+    console.error('Failed to manage repair job:', error);
+    res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการจัดการงานซ่อม' });
   }
 });
 
