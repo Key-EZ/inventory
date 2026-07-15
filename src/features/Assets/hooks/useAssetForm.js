@@ -143,10 +143,10 @@ export default function useAssetForm({
       return;
     }
 
-    // Basic regex check for 3-part code format
-    const codeFormat = /^\d{3}\/\d{2}\/\d{4}$/;
+    // Basic regex check for 3-part or 4-part code format (e.g. 026/62/0002 or 026/62/0002/1)
+    const codeFormat = /^\d{3}\/\d{2}\/\d{3,4}(\/\d+)?$/;
     if (!codeFormat.test(formData.assetCode)) {
-      if (!window.confirm('คำเตือน: รหัสพัสดุไม่ได้อยู่ในรูปแบบแนะนำ (เช่น 001/10/0001) คุณต้องการใช้รหัสนี้ต่อหรือไม่?')) {
+      if (!window.confirm('คำเตือน: รหัสพัสดุไม่ได้อยู่ในรูปแบบแนะนำ (เช่น 001/10/0001 หรือ 026/62/0002/1) คุณต้องการใช้รหัสนี้ต่อหรือไม่?')) {
         return;
       }
     }
