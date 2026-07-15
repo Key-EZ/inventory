@@ -5,6 +5,8 @@ export default function GetRepair({
   assets = [],
   repairRequests = [],
   onCreateRepairRequest,
+  onUpdateRepairRequest,
+  onDeleteRepairRequest,
   preselectedAsset = null,
   onClearPreselectedAsset,
   onClose,
@@ -14,6 +16,8 @@ export default function GetRepair({
   const [activeSubTab, setActiveSubTab] = useState(initialTab); // 'new_request', 'history'
   const [showOnlyPreselectedHistory, setShowOnlyPreselectedHistory] = useState(!!preselectedAsset);
   const [listBrokenItem, setListBrokenItem] = useState('');
+  const [editingRequest, setEditingRequest] = useState(null);
+  const [editBrokenItem, setEditBrokenItem] = useState('');
 
   // Helper to find latest custodian name from custodian history (sorted by year descending)
   const getLatestCustodian = (asset) => {
@@ -60,6 +64,22 @@ export default function GetRepair({
       setListBrokenItem('');
       if (onClearPreselectedAsset) onClearPreselectedAsset();
       setActiveSubTab('history');
+    }
+  };
+
+  const handleConfirmEdit = async (e) => {
+    e.preventDefault();
+    if (!editBrokenItem.trim() || !editingRequest) return;
+    const success = await onUpdateRepairRequest(editingRequest.id, editBrokenItem.trim());
+    if (success) {
+      setEditingRequest(null);
+      setEditBrokenItem('');
+    }
+  };
+
+  const handleDeleteClick = async (reqId) => {
+    if (window.confirm('คุณแน่ใจหรือไม่ว่าต้องการยกเลิกและลบใบแจ้งซ่อมนี้?')) {
+      await onDeleteRepairRequest(reqId);
     }
   };
 
@@ -229,7 +249,7 @@ export default function GetRepair({
                   <th>รายละเอียดอาการเสีย</th>
                   <th style={{ width: '140px', textAlign: 'center' }}>สถานะ</th>
                   <th>ข้อมูลซ่อมแซม (ถ้าเสร็จสิ้น)</th>
-                  <th style={{ width: '90px', textAlign: 'center' }}>พิมพ์เอกสาร</th>
+                  <th style={{ width: '160px', textAlign: 'center' }}>การจัดการ</th>
                 </tr>
               </thead>
               <tbody>
@@ -291,15 +311,42 @@ export default function GetRepair({
                             )}
                           </td>
                           <td style={{ textAlign: 'center' }}>
-                            <button
-                              type="button"
-                              className="btn-table-print"
-                              onClick={() => onPrintRepairRequest(req)}
-                              title="พิมพ์ใบแจ้งซ่อม"
-                              style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 8px', fontSize: '0.75rem' }}
-                            >
-                              🖨️ พิมพ์
-                            </button>
+                            <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
+                              <button
+                                type="button"
+                                className="btn-table-print"
+                                onClick={() => onPrintRepairRequest(req)}
+                                title="พิมพ์ใบแจ้งซ่อม"
+                                style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 8px', fontSize: '0.75rem' }}
+                              >
+                                🖨️ พิมพ์
+                              </button>
+                              {req.status === 'PENDING' && (
+                                <>
+                                  <button
+                                    type="button"
+                                    className="btn-table-edit"
+                                    onClick={() => {
+                                      setEditingRequest(req);
+                                      setEditBrokenItem(req.list_broken_item || req.problem_description || '');
+                                    }}
+                                    title="แก้ไขข้อมูลแจ้งซ่อม"
+                                    style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 8px', fontSize: '0.75rem', backgroundColor: 'var(--primary-color)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                                  >
+                                    ✏️ แก้ไข
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="btn-table-delete"
+                                    onClick={() => handleDeleteClick(req.id)}
+                                    title="ยกเลิกการแจ้งซ่อม"
+                                    style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '4px 8px', fontSize: '0.75rem', backgroundColor: 'rgb(220, 38, 38)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                                  >
+                                    🗑️ ลบ
+                                  </button>
+                                </>
+                              )}
+                            </div>
                           </td>
                         </tr>
                       );
@@ -318,6 +365,39 @@ export default function GetRepair({
       )}
         </div>
       </div>
+
+      {editingRequest && (
+        <div className="modal-backdrop" style={{ zIndex: 1100 }}>
+          <div className="modal-content-card" style={{ maxWidth: '500px' }}>
+            <div className="modal-header-section" style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '12px', marginBottom: '16px' }}>
+              <h3 style={{ margin: 0 }}>✏️ แก้ไขข้อมูลการแจ้งซ่อม</h3>
+              <button className="close-btn" onClick={() => setEditingRequest(null)} type="button" style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer' }}>&times;</button>
+            </div>
+            <form onSubmit={handleConfirmEdit}>
+              <div className="form-group" style={{ marginBottom: '20px' }}>
+                <label style={{ fontWeight: '600', marginBottom: '6px', display: 'block' }}>
+                  รายการซ่อมแซม (ชิ้นส่วนที่ชำรุดเสียหายที่ต้องการให้ซ่อมแซม) *
+                </label>
+                <textarea
+                  rows={4}
+                  value={editBrokenItem}
+                  onChange={(e) => setEditBrokenItem(e.target.value)}
+                  required
+                  style={{ width: '100%', padding: '12px', borderRadius: '6px', border: '1px solid var(--border-color)', resize: 'vertical' }}
+                />
+              </div>
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                <button type="submit" className="button-primary" style={{ padding: '8px 16px' }}>
+                  บันทึกการแก้ไข
+                </button>
+                <button type="button" className="button-secondary" style={{ padding: '8px 16px' }} onClick={() => setEditingRequest(null)}>
+                  ยกเลิก
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

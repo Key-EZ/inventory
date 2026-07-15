@@ -175,4 +175,67 @@ router.put('/:id/complete', async (req, res) => {
   }
 });
 
+router.put('/:id', async (req, res) => {
+  try {
+    const repairs = await executeQuery('SELECT * FROM repair_requests WHERE id = ?', [req.params.id]);
+    if (repairs.length === 0) {
+      return res.status(404).json({ success: false, message: 'ไม่พบข้อมูลคำขอส่งซ่อม' });
+    }
+    const repair = repairs[0];
+
+    if (repair.status !== 'PENDING' && req.user.role !== 'ADMIN') {
+      return res.status(400).json({ success: false, message: 'ไม่สามารถแก้ไขคำขอส่งซ่อมที่ถูกดำเนินการไปแล้วได้' });
+    }
+
+    const { problem_description, list_broken_item } = req.body;
+    const listBrokenItem = list_broken_item || '';
+    const problemDesc = problem_description || listBrokenItem;
+
+    await executeQuery(
+      'UPDATE repair_requests SET problem_description = ?, list_broken_item = ? WHERE id = ?',
+      [problemDesc, listBrokenItem, req.params.id]
+    );
+
+    const assets = await executeQuery('SELECT name FROM assets WHERE id = ?', [repair.asset_id]);
+    const assetName = assets.length > 0 ? assets[0].name : 'ไม่ระบุชื่อครุภัณฑ์';
+
+    await addAuditLogServer('แก้ไขใบแจ้งซ่อม', `แก้ไขคำขอแจ้งซ่อมสำหรับครุภัณฑ์: ${assetName}`, req.user.name);
+
+    res.json({
+      ...repair,
+      problem_description: problemDesc,
+      list_broken_item: listBrokenItem
+    });
+  } catch (error) {
+    console.error('Failed to update repair request:', error);
+    res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการแก้ไขคำขอส่งซ่อม' });
+  }
+});
+
+router.delete('/:id', async (req, res) => {
+  try {
+    const repairs = await executeQuery('SELECT * FROM repair_requests WHERE id = ?', [req.params.id]);
+    if (repairs.length === 0) {
+      return res.status(404).json({ success: false, message: 'ไม่พบข้อมูลคำขอส่งซ่อม' });
+    }
+    const repair = repairs[0];
+
+    if (repair.status !== 'PENDING' && req.user.role !== 'ADMIN') {
+      return res.status(400).json({ success: false, message: 'ไม่สามารถยกเลิกคำขอส่งซ่อมที่ถูกดำเนินการไปแล้วได้' });
+    }
+
+    await executeQuery('DELETE FROM repair_requests WHERE id = ?', [req.params.id]);
+
+    const assets = await executeQuery('SELECT name FROM assets WHERE id = ?', [repair.asset_id]);
+    const assetName = assets.length > 0 ? assets[0].name : 'ไม่ระบุชื่อครุภัณฑ์';
+
+    await addAuditLogServer('ลบใบแจ้งซ่อม', `ลบคำขอแจ้งซ่อมสำหรับครุภัณฑ์: ${assetName}`, req.user.name);
+
+    res.json({ success: true, message: 'ลบคำขอส่งซ่อมสำเร็จ' });
+  } catch (error) {
+    console.error('Failed to delete repair request:', error);
+    res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการลบคำขอส่งซ่อม' });
+  }
+});
+
 export default router;

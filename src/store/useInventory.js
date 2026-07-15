@@ -304,6 +304,69 @@ export default function useInventory() {
     return false;
   };
 
+  const handleUpdateRepairRequest = async (requestId, listBrokenItem) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/repairs/${requestId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          problem_description: listBrokenItem,
+          list_broken_item: listBrokenItem
+        })
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setRepairRequests(prev => prev.map(r => r.id === requestId ? updated : r));
+
+        // Refresh logs
+        const logsRes = await fetch(API_BASE_URL + '/audit-logs', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (logsRes.ok) setAuditLogs(await logsRes.json());
+        return true;
+      }
+    } catch (err) {
+      console.error('Error updating repair request:', err);
+      alert('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์');
+    }
+    return false;
+  };
+
+  const handleDeleteRepairRequest = async (requestId) => {
+    try {
+      const reqObj = repairRequests.find(r => r.id === requestId);
+      const res = await fetch(`${API_BASE_URL}/repairs/${requestId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        setRepairRequests(prev => prev.filter(r => r.id !== requestId));
+
+        if (reqObj) {
+          const assetId = reqObj.asset_id;
+          const remainingRepairs = repairRequests.filter(r => r.asset_id === assetId && r.id !== requestId && (r.status === 'PENDING' || r.status === 'IN_PROGRESS'));
+          if (remainingRepairs.length === 0) {
+            setAssets(prev => prev.map(a => a.id === assetId ? { ...a, status: 'ใช้งาน' } : a));
+          }
+        }
+
+        // Refresh logs
+        const logsRes = await fetch(API_BASE_URL + '/audit-logs', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (logsRes.ok) setAuditLogs(await logsRes.json());
+        return true;
+      }
+    } catch (err) {
+      console.error('Error deleting repair request:', err);
+      alert('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์');
+    }
+    return false;
+  };
+
   const handleStartRepairJob = async (requestId) => {
     try {
       const res = await fetch(`${API_BASE_URL}/repairs/${requestId}/start`, {
@@ -811,6 +874,8 @@ export default function useInventory() {
     handleSubmitForm,
     handleDeleteAsset,
     handleCreateRepairRequest,
+    handleUpdateRepairRequest,
+    handleDeleteRepairRequest,
     handleStartRepairJob,
     handleRejectRepairJob,
     handleCompleteRepairJob,

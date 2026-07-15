@@ -76,6 +76,8 @@ export default function App() {
     handleSubmitForm,
     handleDeleteAsset,
     handleCreateRepairRequest,
+    handleUpdateRepairRequest,
+    handleDeleteRepairRequest,
     handleStartRepairJob,
     handleRejectRepairJob,
     handleCompleteRepairJob,
@@ -456,6 +458,8 @@ export default function App() {
           assets={assets}
           repairRequests={repairRequests}
           onCreateRepairRequest={handleCreateRepairRequest}
+          onUpdateRepairRequest={handleUpdateRepairRequest}
+          onDeleteRepairRequest={handleDeleteRepairRequest}
           preselectedAsset={selectedAssetForRepair}
           onClearPreselectedAsset={() => openRepairForm(null)}
           onClose={closeRepairForm}
