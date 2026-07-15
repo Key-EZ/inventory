@@ -5,13 +5,14 @@ const generateNewAssetId = () => `asset-${Date.now()}`;
 
 const formatAssetCode = (value) => {
   const clean = value.replace(/\D/g, '');
-  const truncated = clean.slice(0, 9);
-  if (truncated.length > 5) {
-    return `${truncated.slice(0, 3)}/${truncated.slice(3, 5)}/${truncated.slice(5)}`;
-  } else if (truncated.length > 3) {
-    return `${truncated.slice(0, 3)}/${truncated.slice(3)}`;
+  if (clean.length > 9) {
+    return `${clean.slice(0, 3)}/${clean.slice(3, 5)}/${clean.slice(5, 9)}/${clean.slice(9)}`;
+  } else if (clean.length > 5) {
+    return `${clean.slice(0, 3)}/${clean.slice(3, 5)}/${clean.slice(5)}`;
+  } else if (clean.length > 3) {
+    return `${clean.slice(0, 3)}/${clean.slice(3)}`;
   }
-  return truncated;
+  return clean;
 };
 
 export default function useAssetForm({
