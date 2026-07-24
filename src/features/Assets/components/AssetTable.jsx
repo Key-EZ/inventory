@@ -1,6 +1,30 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import useAssetTable from '../hooks/useAssetTable';
 import useInventory from '../../../store/useInventory';
+import AssetActionMenu from './AssetActionMenu';
+
+const getCategoryIcon = (category) => {
+  const cat = (category || '').toLowerCase();
+  if (cat.includes('คอมพิวเตอร์') || cat.includes('computer')) return '💻';
+  if (cat.includes('ยานพาหนะ') || cat.includes('รถ') || cat.includes('vehicle') || cat.includes('car')) return '🚗';
+  if (cat.includes('สำนักงาน') || cat.includes('office')) return '📁';
+  if (cat.includes('ที่ดิน') || cat.includes('อาคาร') || cat.includes('สิ่งก่อสร้าง') || cat.includes('land') || cat.includes('building')) return '🏢';
+  if (cat.includes('ไฟฟ้า') || cat.includes('วิทยุ') || cat.includes('electric')) return '⚡';
+  if (cat.includes('การเกษตร') || cat.includes('agri')) return '🚜';
+  if (cat.includes('โฆษณา') || cat.includes('เผยแพร่')) return '📢';
+  if (cat.includes('วิทยาศาสตร์') || cat.includes('แพทย์') || cat.includes('sci')) return '🔬';
+  if (cat.includes('งานบ้าน') || cat.includes('ครัว')) return '🍳';
+  if (cat.includes('ดนตรี') || cat.includes('กีฬา')) return '🎵';
+  return '📦';
+};
+
+const statusBadges = {
+  'ใช้งาน': 'status-badge-active',
+  'ชำรุด': 'status-badge-damaged',
+  'กำลังซ่อม': 'status-badge-repair',
+  'รอจำหน่าย': 'status-badge-pending',
+  'จำหน่ายแล้ว': 'status-badge-disposed'
+};
 
 export default function AssetTable({
   assets,
@@ -86,41 +110,18 @@ export default function AssetTable({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const statusBadges = {
-    'ใช้งาน': 'status-badge-active',
-    'ชำรุด': 'status-badge-damaged',
-    'กำลังซ่อม': 'status-badge-repair',
-    'รอจำหน่าย': 'status-badge-pending',
-    'จำหน่ายแล้ว': 'status-badge-disposed'
-  };
-
-  const getCategoryIcon = (category) => {
-    const cat = (category || '').toLowerCase();
-    if (cat.includes('คอมพิวเตอร์') || cat.includes('computer')) return '💻';
-    if (cat.includes('ยานพาหนะ') || cat.includes('รถ') || cat.includes('vehicle') || cat.includes('car')) return '🚗';
-    if (cat.includes('สำนักงาน') || cat.includes('office')) return '📁';
-    if (cat.includes('ที่ดิน') || cat.includes('อาคาร') || cat.includes('สิ่งก่อสร้าง') || cat.includes('land') || cat.includes('building')) return '🏢';
-    if (cat.includes('ไฟฟ้า') || cat.includes('วิทยุ') || cat.includes('electric')) return '⚡';
-    if (cat.includes('การเกษตร') || cat.includes('agri')) return '🚜';
-    if (cat.includes('โฆษณา') || cat.includes('เผยแพร่')) return '📢';
-    if (cat.includes('วิทยาศาสตร์') || cat.includes('แพทย์') || cat.includes('sci')) return '🔬';
-    if (cat.includes('งานบ้าน') || cat.includes('ครัว')) return '🍳';
-    if (cat.includes('ดนตรี') || cat.includes('กีฬา')) return '🎵';
-    return '📦';
-  };
-
-  const handleCopyCode = (e, code) => {
+  const handleCopyCode = useCallback((e, code) => {
     e.stopPropagation();
     navigator.clipboard.writeText(code);
     setCopiedCodeId(code);
     setTimeout(() => setCopiedCodeId(null), 1500);
-  };
+  }, []);
 
-  const toggleColumn = (col) => {
+  const toggleColumn = useCallback((col) => {
     setVisibleColumns(prev => 
       prev.includes(col) ? prev.filter(c => c !== col) : [...prev, col]
     );
-  };
+  }, []);
 
   return (
     <div className="table-view-container">
@@ -442,147 +443,19 @@ export default function AssetTable({
                       </span>
                       
                       {/* Action Menu inside Card */}
-                      <div className="table-actions" style={{ overflow: 'visible' }}>
-                        {actionMenuType === 'dropdown' ? (
-                          <div className="floating-action-menu-container">
-                            <button
-                              className="btn-action-trigger"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                toggleMenu(item.id);
-                              }}
-                            >
-                              ⚙️
-                            </button>
-                            {isMenuOpen && (
-                              <>
-                                <div className="floating-menu-overlay" onClick={(e) => {
-                                  e.stopPropagation();
-                                  closeMenu();
-                                }} />
-                                <div className="floating-action-menu">
-                                  <button className="floating-menu-item" onClick={(e) => {
-                                    e.stopPropagation();
-                                    onEditAsset(item);
-                                    closeMenu();
-                                  }}>
-                                    ✏️ แก้ไข
-                                  </button>
-                                  <button className="floating-menu-item" onClick={(e) => {
-                                    e.stopPropagation();
-                                    onRepairAsset(item);
-                                    closeMenu();
-                                  }}>
-                                    🔧 แจ้งซ่อม
-                                  </button>
-                                  <button className="floating-menu-item" onClick={(e) => {
-                                    e.stopPropagation();
-                                    onManageCustodian(item);
-                                    closeMenu();
-                                  }}>
-                                    👤 ผู้รับผิดชอบ
-                                  </button>
-                                  <button className="floating-menu-item" onClick={(e) => {
-                                    e.stopPropagation();
-                                    onPrintAsset(item);
-                                    closeMenu();
-                                  }}>
-                                    🖨️ พิมพ์
-                                  </button>
-                                  <button className="floating-menu-item delete" onClick={(e) => {
-                                    e.stopPropagation();
-                                    onDeleteAsset(item.id);
-                                    closeMenu();
-                                  }}>
-                                    🗑️ ลบ
-                                  </button>
-                                </div>
-                              </>
-                            )}
-                          </div>
-                        ) : (
-                          <div className={`radial-menu-container ${isMenuOpen ? 'active' : ''}`} style={{ transform: 'scale(0.85)' }}>
-                            <button
-                              className={`btn-radial-trigger ${isMenuOpen ? 'active' : ''}`}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                toggleMenu(item.id);
-                              }}
-                              title="จัดการครุภัณฑ์"
-                            >
-                              ⚙️
-                            </button>
-
-                            {isMenuOpen && (
-                              <div
-                                className="radial-menu-overlay"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  closeMenu();
-                                }}
-                              />
-                            )}
-
-                            <div className={`radial-menu-options ${isMenuOpen ? 'open' : ''}`}>
-                              <button
-                                className="radial-btn btn-top"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  onEditAsset(item);
-                                  closeMenu();
-                                }}
-                              >
-                                ✏️
-                                <span className="radial-tooltip">แก้ไข</span>
-                              </button>
-                              <button
-                                className="radial-btn btn-right"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  onDeleteAsset(item.id);
-                                  closeMenu();
-                                }}
-                              >
-                                🗑️
-                                <span className="radial-tooltip">ลบ</span>
-                              </button>
-                              <button
-                                className="radial-btn btn-bottom-right"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  onPrintAsset(item);
-                                  closeMenu();
-                                }}
-                              >
-                                🖨️
-                                <span className="radial-tooltip">พิมพ์</span>
-                              </button>
-                              <button
-                                className="radial-btn btn-bottom-left"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  onRepairAsset(item);
-                                  closeMenu();
-                                }}
-                              >
-                                🔧
-                                <span className="radial-tooltip">แจ้งซ่อม</span>
-                              </button>
-                              <button
-                                className="radial-btn btn-left"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  onManageCustodian(item);
-                                  closeMenu();
-                                }}
-                              >
-                                👤
-                                <span className="radial-tooltip">ผู้รับผิดชอบ</span>
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
+                      <AssetActionMenu
+                        item={item}
+                        isMenuOpen={isMenuOpen}
+                        actionMenuType={actionMenuType}
+                        toggleMenu={toggleMenu}
+                        closeMenu={closeMenu}
+                        onEditAsset={onEditAsset}
+                        onDeleteAsset={onDeleteAsset}
+                        onRepairAsset={onRepairAsset}
+                        onPrintAsset={onPrintAsset}
+                        onManageCustodian={onManageCustodian}
+                        radialStyle={{ transform: 'scale(0.85)' }}
+                      />
                     </div>
                   </div>
                 );
@@ -684,156 +557,18 @@ export default function AssetTable({
                             transition: 'padding 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                           }}
                         >
-                          <div className="table-actions" style={{ overflow: 'visible' }}>
-                            {actionMenuType === 'dropdown' ? (
-                              <div className="floating-action-menu-container">
-                                <button
-                                  className="btn-action-trigger"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    toggleMenu(item.id);
-                                  }}
-                                >
-                                  ⚙️
-                                </button>
-                                {isMenuOpen && (
-                                  <>
-                                    <div className="floating-menu-overlay" onClick={(e) => {
-                                      e.stopPropagation();
-                                      closeMenu();
-                                    }} />
-                                    <div className="floating-action-menu">
-                                      <button className="floating-menu-item" onClick={(e) => {
-                                        e.stopPropagation();
-                                        onEditAsset(item);
-                                        closeMenu();
-                                      }}>
-                                        ✏️ แก้ไข
-                                      </button>
-                                      <button className="floating-menu-item" onClick={(e) => {
-                                        e.stopPropagation();
-                                        onRepairAsset(item);
-                                        closeMenu();
-                                      }}>
-                                        🔧 แจ้งซ่อม
-                                      </button>
-                                      <button className="floating-menu-item" onClick={(e) => {
-                                        e.stopPropagation();
-                                        onManageCustodian(item);
-                                        closeMenu();
-                                      }}>
-                                        👤 ผู้รับผิดชอบ
-                                      </button>
-                                      <button className="floating-menu-item" onClick={(e) => {
-                                        e.stopPropagation();
-                                        onPrintAsset(item);
-                                        closeMenu();
-                                      }}>
-                                        🖨️ พิมพ์
-                                      </button>
-                                      <button className="floating-menu-item delete" onClick={(e) => {
-                                        e.stopPropagation();
-                                        onDeleteAsset(item.id);
-                                        closeMenu();
-                                      }}>
-                                        🗑️ ลบ
-                                      </button>
-                                    </div>
-                                  </>
-                                )}
-                              </div>
-                            ) : (
-                              <div className={`radial-menu-container ${isMenuOpen ? 'active' : ''}`}>
-                                <button
-                                  className={`btn-radial-trigger ${isMenuOpen ? 'active' : ''}`}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    toggleMenu(item.id);
-                                  }}
-                                  title="จัดการครุภัณฑ์"
-                                >
-                                  ⚙️
-                                </button>
-
-                                {isMenuOpen && (
-                                  <div
-                                    className="radial-menu-overlay"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      closeMenu();
-                                    }}
-                                  />
-                                )}
-
-                                <div className={`radial-menu-options ${isMenuOpen ? 'open' : ''}`}>
-                                  {/* บน (สีฟ้า): แก้ไข */}
-                                  <button
-                                    className="radial-btn btn-top"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      onEditAsset(item);
-                                      closeMenu();
-                                    }}
-                                  >
-                                    ✏️
-                                    <span className="radial-tooltip">แก้ไข</span>
-                                  </button>
-
-                                  {/* ขวา (สีแดง): ลบ */}
-                                  <button
-                                    className="radial-btn btn-right"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      onDeleteAsset(item.id);
-                                      closeMenu();
-                                    }}
-                                  >
-                                    🗑️
-                                    <span className="radial-tooltip">ลบ</span>
-                                  </button>
-
-                                  {/* ล่างขวา: พิมพ์ */}
-                                  <button
-                                    className="radial-btn btn-bottom-right"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      onPrintAsset(item);
-                                      closeMenu();
-                                    }}
-                                  >
-                                    🖨️
-                                    <span className="radial-tooltip">พิมพ์</span>
-                                  </button>
-
-                                  {/* ล่างซ้าย: แจ้งซ่อม */}
-                                  <button
-                                    className="radial-btn btn-bottom-left"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      onRepairAsset(item);
-                                      closeMenu();
-                                    }}
-                                  >
-                                    🔧
-                                    <span className="radial-tooltip">แจ้งซ่อม</span>
-                                  </button>
-
-                                  {/* ซ้าย: ผู้รับผิดชอบ */}
-                                  <button
-                                    className="radial-btn btn-left"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      onManageCustodian(item);
-                                      closeMenu();
-                                    }}
-                                  >
-                                    👤
-                                    <span className="radial-tooltip">ผู้รับผิดชอบ</span>
-                                  </button>
-                                </div>
-                              </div>
-                            )}
-                          </div>
+                          <AssetActionMenu
+                            item={item}
+                            isMenuOpen={isMenuOpen}
+                            actionMenuType={actionMenuType}
+                            toggleMenu={toggleMenu}
+                            closeMenu={closeMenu}
+                            onEditAsset={onEditAsset}
+                            onDeleteAsset={onDeleteAsset}
+                            onRepairAsset={onRepairAsset}
+                            onPrintAsset={onPrintAsset}
+                            onManageCustodian={onManageCustodian}
+                          />
                         </td>
                       </tr>
                     );

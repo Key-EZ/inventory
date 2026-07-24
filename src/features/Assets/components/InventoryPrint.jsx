@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { formatThaiDateString } from '../../../utils/dateUtils';
 import './InventoryPrint.css';
 
@@ -70,6 +70,36 @@ function AutoFitText({ text, maxFontSize = 13.5, minFontSize = 8, className = ''
     );
 }
 
+const getYearsDepreciation = (price, ratePercent, startYearBE) => {
+    const priceVal = parseFloat(price) || 0;
+    const rate = parseFloat(ratePercent) || 10;
+    const startYear = parseInt(startYearBE) || 2567;
+    if (rate <= 0) {
+        return Array.from({ length: 5 }, (_, i) => ({
+            year: `พ.ศ. ${startYear + i}`,
+            rate: "0.00",
+            balance: priceVal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+        }));
+    }
+
+    const years = Math.ceil(100 / rate);
+    const annualDep = priceVal * (rate / 100);
+
+    return Array.from({ length: Math.max(5, years) }, (_, i) => {
+        const yearNum = i + 1;
+        let accumDep = annualDep * yearNum;
+        if (accumDep > priceVal - 1) {
+            accumDep = priceVal - 1;
+        }
+        const balance = Math.max(1, priceVal - accumDep);
+        return {
+            year: `พ.ศ. ${startYear + i}`,
+            rate: rate.toFixed(2),
+            balance: balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+        };
+    });
+};
+
 export default function InventoryPrint({ asset, onClose }) {
     useEffect(() => {
         document.body.classList.add('modal-print-open');
@@ -78,41 +108,8 @@ export default function InventoryPrint({ asset, onClose }) {
         };
     }, []);
 
-    if (!asset) return null;
-
-    const getYearsDepreciation = (price, ratePercent, startYearBE) => {
-        const priceVal = parseFloat(price) || 0;
-        const rate = parseFloat(ratePercent) || 10;
-        const startYear = parseInt(startYearBE) || 2567;
-        if (rate <= 0) {
-            return Array.from({ length: 5 }, (_, i) => ({
-                year: `พ.ศ. ${startYear + i}`,
-                rate: "0.00",
-                balance: priceVal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-            }));
-        }
-
-        const years = Math.ceil(100 / rate);
-        const annualDep = priceVal * (rate / 100);
-
-        return Array.from({ length: Math.max(5, years) }, (_, i) => {
-            const yearNum = i + 1;
-            let accumDep = annualDep * yearNum;
-            if (accumDep > priceVal - 1) {
-                accumDep = priceVal - 1;
-            }
-            const balance = Math.max(1, priceVal - accumDep);
-            return {
-                year: `พ.ศ. ${startYear + i}`,
-                rate: rate.toFixed(2),
-                balance: balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-            };
-        });
-    };
-
-
-
-    const getDisplayData = () => {
+    const data = useMemo(() => {
+        if (!asset) return null;
 
         const code = asset.asset_code || '';
         const parts = code.split('/');
@@ -207,9 +204,9 @@ export default function InventoryPrint({ asset, onClose }) {
             profit: "-",
             benefits: []
         };
-    };
+    }, [asset]);
 
-    const data = getDisplayData();
+    if (!asset) return null;
 
     const handlePrint = () => {
         window.print();
